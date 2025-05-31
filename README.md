@@ -109,7 +109,7 @@
       "type": "SensorDevice",
       "temperature": {"value": 23.5, "type": "Number"},
       "humidity": {"value": 60, "type": "Number"},
-      "NivelAgua": {"value": 45, "type": "Number"},
+      "waterLevel": {"value": 45, "type": "Number"},
       "timestamp": {"value": "2024-06-10T12:00:00Z"}
     }
   ]
@@ -136,3 +136,71 @@
 3. Commit suas alterações (`git commit -am 'feat: nova feature'`)
 4. Push para o branch (`git push origin feature/sua-feature`)
 5. Abra um Pull Request
+
+## 🛰️ Como Adicionar e Configurar Dispositivos ESP32
+
+Você pode cadastrar e configurar dispositivos ESP32 (sensores) de duas formas:
+
+### 1. Via Django Admin
+
+1. Acesse o painel de administração: `http://localhost:8000/admin/`
+2. Clique em **Dispositivos**.
+3. Clique em **Adicionar Dispositivo** ou edite um existente.
+4. Preencha os campos:
+   - **Nome do Dispositivo:** Ex: ESP32 Parque do Carmo
+   - **ID Fiware:** Ex: esp32_parque_carmo
+   - **Latitude:** Ex: `-23.5695` (Parque do Carmo)
+   - **Longitude:** Ex: `-46.4847` (Parque do Carmo)
+   - **Descrição:** (opcional)
+   - **Ativo:** Marque para ativar
+5. Salve.
+
+Exemplos de coordenadas:
+- **Parque do Carmo:** Latitude `-23.5695`, Longitude `-46.4847`
+- **Pinheiros:** Latitude `-23.5614`, Longitude `-46.6794`
+- **Morumbi:** Latitude `-23.6010`, Longitude `-46.7156`
+
+### 2. Via Django Shell
+
+Abra o shell:
+```bash
+python gs_fiap_monitor/manage.py shell
+```
+Cole e execute o seguinte código para criar/atualizar dispositivos de teste:
+```python
+from sensores.models import Dispositivo
+
+# Atualiza ou cria dispositivos de teste
+Dispositivo.objects.update_or_create(
+    id_dispositivo_fiware='esp32_parque_carmo',
+    defaults={
+        'nome_dispositivo': 'ESP32 Parque do Carmo',
+        'localizacao_latitude': -23.5695,
+        'localizacao_longitude': -46.4847,
+        'descricao': 'Sensor próximo ao Parque do Carmo',
+        'ativo': True
+    }
+)
+Dispositivo.objects.update_or_create(
+    id_dispositivo_fiware='esp32_pinheiros',
+    defaults={
+        'nome_dispositivo': 'ESP32 Pinheiros',
+        'localizacao_latitude': -23.5614,
+        'localizacao_longitude': -46.6794,
+        'descricao': 'Sensor no bairro de Pinheiros',
+        'ativo': True
+    }
+)
+Dispositivo.objects.update_or_create(
+    id_dispositivo_fiware='esp32_morumbi',
+    defaults={
+        'nome_dispositivo': 'ESP32 Morumbi',
+        'localizacao_latitude': -23.6010,
+        'localizacao_longitude': -46.7156,
+        'descricao': 'Sensor no bairro do Morumbi',
+        'ativo': True
+    }
+)
+```
+
+Depois, envie dados para esses dispositivos normalmente pelo endpoint Fiware.

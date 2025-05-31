@@ -4,8 +4,6 @@
 {% block title %}Início - Sistema de Monitoramento de Desastres Naturais{% endblock %}
 
 {% block content %}
-    {# A navbar é herdada do base.html, não é mais definida aqui #}
-
     <!-- Hero Section -->
     <section id="home" class="relative pt-24 pb-32 md:pt-32 md:pb-48 overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-primary to-blue-300 opacity-30 z-0"></div>
@@ -144,12 +142,12 @@
                         <h3 class="text-2xl font-bold mb-4">Vantagem Competitiva</h3>
                         <div class="flex items-center justify-between">
                             <div class="text-center">
-                                <div class="text-4xl font-bold">R$300</div>
+                                <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="300">R$300</div>
                                 <div>Nossa solução</div>
                             </div>
-                            <i class="fas fa-arrow-right text-2xl"></i>
+                            <i class="fas fa-arrow-right text-2xl vantagem-competitiva-seta"></i>
                             <div class="text-center">
-                                <div class="text-4xl font-bold">R$15.000</div>
+                                <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="15000">R$15.000</div>
                                 <div>Solução USP</div>
                             </div>
                         </div>
@@ -178,31 +176,55 @@
                 </p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
                         <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
                             <span class="text-white text-4xl">JV</span>
                         </div>
                         <h4 class="text-xl font-bold text-secondary">João Vitor de Matos Araujo</h4>
                         <p class="text-primary mb-3">RM559246</p>
                         <p class="text-gray-700">Product Owner & Dev IoT</p>
+                        <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
+                            <a href="https://www.linkedin.com/in/joaomatosq/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-linkedin mr-2"></i> /joaomatosq
+                            </a>
+                            <a href="https://github.com/joaomatosq" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-github mr-2"></i> /joaomatosq
+                            </a>
+                        </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
                         <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
                             <span class="text-white text-4xl">GK</span>
                         </div>
                         <h4 class="text-xl font-bold text-secondary">Gabriel Kato Peres</h4>
                         <p class="text-primary mb-3">RM560000</p>
                         <p class="text-gray-700">Dev Back-End & Integração MQTT</p>
+                        <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
+                            <a href="https://www.linkedin.com/in/gabrikato/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-linkedin mr-2"></i> /gabrikato
+                            </a>
+                            <a href="https://github.com/kato8088" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-github mr-2"></i> /kato8088
+                            </a>
+                        </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
                         <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
                             <span class="text-white text-4xl">GC</span>
                         </div>
                         <h4 class="text-xl font-bold text-secondary">Gabriel Couto Ribeiro</h4>
                         <p class="text-primary mb-3">RM559579</p>
                         <p class="text-gray-700">Dev Full Stack & Database</p>
+                        <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
+                            <a href="https://www.linkedin.com/in/gabricouto/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-linkedin mr-2"></i> /gabricouto
+                            </a>
+                            <a href="https://github.com/rouri404" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                                <i class="fab fa-github mr-2"></i> /rouri404
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -214,25 +236,25 @@
                 </p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
                         <i class="fas fa-city text-4xl mb-4"></i>
                         <h4 class="text-xl font-bold mb-2">Prefeituras Municipais</h4>
                         <p>Responsáveis pela infraestrutura urbana e gestão de crises</p>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
                         <i class="fas fa-shield-alt text-4xl mb-4"></i>
                         <h4 class="text-xl font-bold mb-2">Defesa Civil</h4>
                         <p>Atuam em situações de risco e coordenam ações emergenciais</p>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
                         <i class="fas fa-house-user text-4xl mb-4"></i>
                         <h4 class="text-xl font-bold mb-2">Moradores de Áreas de Risco</h4>
                         <p>Recebem alertas preventivos para proteger vidas e propriedades</p>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
                         <i class="fas fa-laptop-code text-4xl mb-4"></i>
                         <h4 class="text-xl font-bold mb-2">Equipe Técnica</h4>
                         <p>Responsável pela implementação, integração e manutenção</p>
@@ -348,11 +370,78 @@
                 waterLevelElement.style.height = level + '%';
             }, 2000);
         }
-        
+
+        // Efeito 3D interativo para cards da equipe e stakeholders
+        function setup3DCards() {
+            function add3DEffect(selector, maxRotate) {
+                document.querySelectorAll(selector).forEach(card => {
+                    card.style.transition = 'transform 0.12s cubic-bezier(0.4,0.7,0.4,1), box-shadow 0.12s cubic-bezier(0.4,0.7,0.4,1)';
+                    card.addEventListener('mousemove', (e) => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const rotateX = ((y - centerY) / centerY) * maxRotate;
+                        const rotateY = ((x - centerX) / centerX) * -maxRotate;
+                        card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.04,1.04,1.04)`;
+                        card.style.boxShadow = `${-rotateY*2}px ${rotateX*2}px 40px 0 rgba(0,0,0,0.18)`;
+                    });
+                    card.addEventListener('mouseleave', () => {
+                        card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+                        card.style.boxShadow = '';
+                    });
+                });
+            }
+            add3DEffect('.team-3d-card', 18);
+            add3DEffect('.stakeholder-3d-card', 32);
+        }
+
+        // Overlay social da equipe
+        function setupTeamSocialOverlay() {
+            document.querySelectorAll('.team-card-hover').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    const overlay = card.querySelector('.team-social-overlay');
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                    overlay.classList.add('opacity-100');
+                });
+                card.addEventListener('mouseleave', () => {
+                    const overlay = card.querySelector('.team-social-overlay');
+                    overlay.classList.add('opacity-0');
+                    overlay.classList.remove('opacity-100');
+                    setTimeout(() => overlay.classList.add('pointer-events-none'), 300);
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             animateWaterLevel();
+            setup3DCards();
+            setupTeamSocialOverlay();
             
             if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined'){
+                // Efeito de entrada mais moderno para cards principais
+                gsap.utils.toArray('.animate-on-scroll').forEach((el, i) => {
+                    gsap.fromTo(el, {
+                        opacity: 0,
+                        y: 60,
+                        rotateX: 18,
+                        scale: 0.95
+                    }, {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        scale: 1,
+                        duration: 1.1,
+                        delay: i * 0.12,
+                        ease: 'expo.out',
+                        scrollTrigger: {
+                            trigger: el,
+                            start: 'top 90%',
+                            toggleActions: 'play none none none'
+                        }
+                    });
+                });
                 gsap.from('.hero-parallax', {
                     scrollTrigger: {
                         trigger: '#home',
@@ -363,7 +452,6 @@
                     y: 50,
                     opacity: 0.7
                 });
-                
                 gsap.to('.sensor-animate', { 
                     scale: 1.2,
                     repeat: -1,
@@ -371,6 +459,44 @@
                     duration: 1,
                     ease: "power1.inOut"
                 });
+                // Animação de contagem e seta na Vantagem Competitiva
+                if (document.querySelector('.vantagem-competitiva-valor')) {
+                    gsap.fromTo('.vantagem-competitiva-valor[data-final]',
+                        { innerText: 0 },
+                        {
+                            innerText: (i, el) => el.getAttribute('data-final'),
+                            duration: 3.2,
+                            ease: 'power1.out',
+                            snap: { innerText: 1 },
+                            scrollTrigger: {
+                                trigger: '.vantagem-competitiva-valor',
+                                start: 'top 90%',
+                                once: true
+                            },
+                            onUpdate: function() {
+                                document.querySelectorAll('.vantagem-competitiva-valor[data-final]').forEach(el => {
+                                    let val = parseInt(el.innerText.replace(/\D/g, ''));
+                                    if (el.getAttribute('data-final').includes('15')) {
+                                        el.innerText = 'R$' + val.toLocaleString('pt-BR');
+                                    } else {
+                                        el.innerText = 'R$' + val;
+                                    }
+                                });
+                            }
+                        }
+                    );
+                    gsap.to('.vantagem-competitiva-seta', {
+                        x: 18,
+                        repeat: -1,
+                        yoyo: true,
+                        duration: 1.2,
+                        ease: 'sine.inOut',
+                        scrollTrigger: {
+                            trigger: '.vantagem-competitiva-seta',
+                            start: 'top 95%'
+                        }
+                    });
+                }
             } else {
                 console.warn("GSAP ou ScrollTrigger não carregados (home.html).")
             }

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.db import transaction # Para garantir atomicidade nas operações de banco
+from django.db import transaction
 import json
 from datetime import datetime
 from collections import defaultdict
@@ -21,7 +21,6 @@ def parse_timestamp(timestamp_str):
         return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
     except ValueError:
         try:
-            # Tenta outros formatos comuns se necessário, ou apenas retorna o padrão
             # Exemplo: datetime.strptime(timestamp_str, '%Y-%m-%dT%H:%M:%S.%f')
             print(f"Alerta: Não foi possível parsear o timestamp '{timestamp_str}'. Usando hora atual.")
             return timezone.now()
@@ -37,13 +36,12 @@ def fiware_notification_receiver(request):
             print("Payload recebido do Fiware:")
             print(json.dumps(payload, indent=4))
 
-            # O Fiware geralmente envia um objeto com uma chave 'data' que é uma lista de entidades
             entities_data = payload.get('data')
             if not isinstance(entities_data, list):
                 print("Erro: Formato de payload inesperado. Esperava uma lista de entidades em 'data'.")
                 return HttpResponse("Erro: Payload malformado, 'data' não é uma lista.", status=400)
 
-            with transaction.atomic(): # Garante que todas as leituras de uma notificação são salvas ou nenhuma é.
+            with transaction.atomic():
                 for entity in entities_data:
                     device_fiware_id = entity.get('id')
                     entity_type = entity.get('type') # Pode ser útil para filtrar ou nomear dispositivos
@@ -63,7 +61,6 @@ def fiware_notification_receiver(request):
 
                     # Extrai o timestamp da leitura da entidade. FIWARE pode ter um atributo de metadados.
                     # Procurando por um atributo comum como 'timestamp' ou 'TimeInstant' em metadados
-                    # Este é um ponto que pode precisar de ajuste fino baseado no formato exato do seu payload NGSI
                     timestamp_leitura_str = None
                     if 'timestamp' in entity and isinstance(entity['timestamp'], dict) and 'value' in entity['timestamp']:
                         timestamp_leitura_str = entity['timestamp']['value']
@@ -128,13 +125,13 @@ def fiware_notification_receiver(request):
 def listar_dispositivos(request):
     dispositivos_list = Dispositivo.objects.all().order_by('nome_dispositivo')
     
-    nome_sensor_nivel_agua = 'NivelAgua' # ATENÇÃO: Ajuste este nome se necessário
+    nome_sensor_nivel_agua = 'waterLevel' # ATENÇÃO: Ajuste este nome se necessário
 
     SENSOR_NOME_TRADUZIDO = {
         'humidity': 'Umidade',
         'temperature': 'Temperatura',
         'waterLevel': 'Nível de água',
-        'NivelAgua': 'Nível de água',
+        'waterLevel': 'Nível de água',
     }
 
     for dispositivo in dispositivos_list:
@@ -189,7 +186,7 @@ def mapa_interativo_view(request):
     dispositivos_ativos = Dispositivo.objects.filter(ativo=True).order_by('nome_dispositivo')
     
     dispositivos_map_data = []
-    nome_sensor_nivel_agua = 'NivelAgua' # ATENÇÃO: Ajuste este nome se necessário
+    nome_sensor_nivel_agua = 'waterLevel' # ATENÇÃO: Ajuste este nome se necessário
 
     for disp in dispositivos_ativos:
         ultimas_leituras_dict = {}
@@ -240,8 +237,8 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     dispositivo = get_object_or_404(Dispositivo, id_dispositivo_fiware=id_dispositivo_fiware)
     leituras = LeituraSensor.objects.filter(dispositivo=dispositivo).order_by('tipo_sensor__nome', 'timestamp_leitura')
 
-    # Lógica para determinar o status do dispositivo (baseado em NivelAgua)
-    nome_sensor_nivel_agua = 'NivelAgua' # Ajuste se necessário
+    # Lógica para determinar o status do dispositivo (baseado em waterLevel)
+    nome_sensor_nivel_agua = 'waterLevel' # Ajuste se necessário
     ultima_leitura_nivel_agua_obj = LeituraSensor.objects.filter(
         dispositivo=dispositivo, 
         tipo_sensor__nome=nome_sensor_nivel_agua
@@ -263,7 +260,7 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
         'humidity': 'Umidade',
         'temperature': 'Temperatura',
         'waterLevel': 'Nível de água',
-        'NivelAgua': 'Nível de água',
+        'waterLevel': 'Nível de água',
     }
 
     leituras_por_sensor = defaultdict(lambda: {'timestamps': [], 'valores': [], 'unidade': ''})
@@ -320,3 +317,39 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
         'pagina_atual': 'detalhes_dispositivo' 
     }
     return render(request, 'sensores/detalhes_dispositivo.html', context)
+
+# ---
+# Script de exemplo para criar/atualizar dispositivos ESP32 de teste via shell Django:
+#
+# from sensores.models import Dispositivo
+# Dispositivo.objects.update_or_create(
+#     id_dispositivo_fiware='esp32_parque_carmo',
+#     defaults={
+#         'nome_dispositivo': 'ESP32 Parque do Carmo',
+#         'localizacao_latitude': -23.5695,
+#         'localizacao_longitude': -46.4847,
+#         'descricao': 'Sensor próximo ao Parque do Carmo',
+#         'ativo': True
+#     }
+# )
+# Dispositivo.objects.update_or_create(
+#     id_dispositivo_fiware='esp32_pinheiros',
+#     defaults={
+#         'nome_dispositivo': 'ESP32 Pinheiros',
+#         'localizacao_latitude': -23.5614,
+#         'localizacao_longitude': -46.6794,
+#         'descricao': 'Sensor no bairro de Pinheiros',
+#         'ativo': True
+#     }
+# )
+# Dispositivo.objects.update_or_create(
+#     id_dispositivo_fiware='esp32_morumbi',
+#     defaults={
+#         'nome_dispositivo': 'ESP32 Morumbi',
+#         'localizacao_latitude': -23.6010,
+#         'localizacao_longitude': -46.7156,
+#         'descricao': 'Sensor no bairro do Morumbi',
+#         'ativo': True
+#     }
+# )
+# ---

@@ -14,7 +14,7 @@ class Dispositivo(models.Model):
         return self.nome_dispositivo
 
 class TipoSensor(models.Model):
-    nome = models.CharField(max_length=50, unique=True, help_text="Ex: UmidadeSolo, TemperaturaAr, NivelAgua")
+    nome = models.CharField(max_length=50, unique=True, help_text="Ex: UmidadeSolo, TemperaturaAr, waterLevel")
     unidade_medida = models.CharField(max_length=20, help_text="Ex: %, °C, cm")
     descricao = models.TextField(blank=True)
 
@@ -32,4 +32,4 @@ class LeituraSensor(models.Model):
         return f"{self.dispositivo.nome_dispositivo} - {self.tipo_sensor.nome}: {self.valor} {self.tipo_sensor.unidade_medida} @ {self.timestamp_leitura}"
 
     class Meta:
-        ordering = ['-timestamp_leitura'] # Ordenar as leituras pela mais recente primeiro
+        ordering = ['-timestamp_leitura']

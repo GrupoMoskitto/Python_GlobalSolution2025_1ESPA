@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             name='TipoSensor',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nome', models.CharField(help_text='Ex: UmidadeSolo, TemperaturaAr, NivelAgua', max_length=50, unique=True)),
+                ('nome', models.CharField(help_text='Ex: UmidadeSolo, TemperaturaAr, waterLevel', max_length=50, unique=True)),
                 ('unidade_medida', models.CharField(help_text='Ex: %, °C, cm', max_length=20)),
                 ('descricao', models.TextField(blank=True)),
             ],
