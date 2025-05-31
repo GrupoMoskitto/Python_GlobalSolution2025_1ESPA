@@ -260,7 +260,7 @@
     </style>
     {% block extra_head %}{% endblock %} <!-- Bloco para CSS ou JS específico da página no head -->
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50 flex flex-col min-h-screen {% block body_class %}{% endblock %}">
 
     <nav class="navbar fixed top-4 left-1/2 transform -translate-x-1/2 w-[96%] z-50 py-3 px-6 bg-white/80 backdrop-blur-2xl shadow-xl rounded-2xl flex items-center justify-between transition-all duration-300">
         <div class="flex items-center space-x-3">
@@ -388,30 +388,13 @@
         
         function setupNavbarScroll() {
             const navbar = document.querySelector('.navbar');
-            const logoText = document.getElementById('logo-text');
-            if (!navbar || !logoText) return;
-
+            if (!navbar) return;
+            // Esta função agora APENAS controla a classe 'scrolled' do navbar.
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 100) {
-                    if (!navbar.classList.contains('scrolled')) {
-                        navbar.classList.add('scrolled');
-                        gsap.to(logoText, {
-                            x: -15,
-                            opacity: 0,
-                            duration: 0.4,
-                            ease: 'power2.in'
-                        });
-                    }
+                if (window.scrollY > 100) { // Usaremos 100px para o efeito visual do navbar
+                    navbar.classList.add('scrolled');
                 } else {
-                    if (navbar.classList.contains('scrolled')) {
-                        navbar.classList.remove('scrolled');
-                        gsap.to(logoText, {
-                            x: 0,
-                            opacity: 1,
-                            duration: 0.4,
-                            ease: 'power2.out'
-                        });
-                    }
+                    navbar.classList.remove('scrolled');
                 }
             });
         }
@@ -427,7 +410,7 @@
 
             setupScrollAnimations();
             setupMobileMenu();
-            setupNavbarScroll();
+            setupNavbarScroll(); // Mantida, mas só para estilo do navbar
         });
 
         // ROLAGEM SUAVE PARA ÂNCORAS MESMO APÓS REDIRECIONAMENTO

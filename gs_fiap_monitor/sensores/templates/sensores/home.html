@@ -3,6 +3,8 @@
 
 {% block title %}Início - Sistema de Monitoramento de Desastres Naturais{% endblock %}
 
+{% block body_class %}page-home{% endblock %}
+
 {% block main_padding %}{% endblock %}
 
 {% block content %}
@@ -529,6 +531,30 @@
                 }
             } else {
                 console.warn("GSAP ou ScrollTrigger não carregados (home.html).")
+            }
+
+            // Animação específica para o logoText na home page
+            const logoTextHome = document.getElementById('logo-text');
+            const sobreSection = document.getElementById('sobre');
+
+            if (logoTextHome && sobreSection && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                // Garante que o logo comece visível na home
+                gsap.set(logoTextHome, {opacity: 1, x: 0}); 
+
+                gsap.timeline({
+                    scrollTrigger: {
+                        trigger: sobreSection,
+                        start: "top center",
+                        end: "bottom top",
+                        toggleActions: "play none none reverse"
+                    }
+                })
+                .to(logoTextHome, {
+                    x: -15,
+                    opacity: 0,
+                    duration: 0.4,
+                    ease: 'power2.in'
+                });
             }
         });
     </script>
