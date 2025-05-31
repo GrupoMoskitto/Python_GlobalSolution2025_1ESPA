@@ -384,7 +384,7 @@
             });
             
             // Fechar menu ao clicar em um link (se o link for para a mesma página com #)
-            mobileMenu.querySelectorAll('a[href^="#"], a[href^="{% url 'home_page' %}#"]').forEach(link => {
+            mobileMenu.querySelectorAll("a[href^='#'], a[href^='{% url 'home_page' %}#']").forEach(link => {
                 link.addEventListener('click', () => {
                     mobileMenu.classList.add('hidden');
                 });
