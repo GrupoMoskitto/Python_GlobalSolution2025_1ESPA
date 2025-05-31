@@ -285,7 +285,7 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="bg-white rounded-3xl shadow-xl p-8 animate-on-scroll">
+                <div class="bg-white rounded-3xl shadow-xl p-8 contact-form-block">
                     <h3 class="text-2xl font-bold text-secondary mb-6">Envie uma Mensagem</h3>
                     
                     <form class="space-y-6">
@@ -310,7 +310,7 @@
                     </form>
                 </div>
                 
-                <div class="animate-on-scroll">
+                <div class="contact-info-block">
                     <div class="bg-gradient-to-br from-primary to-blue-500 rounded-3xl shadow-xl p-8 text-white h-full">
                         <h3 class="text-2xl font-bold mb-6">Informações de Contato</h3>
                         
@@ -427,17 +427,15 @@
                 gsap.utils.toArray('.animate-on-scroll').forEach((el, i) => {
                     gsap.fromTo(el, {
                         opacity: 0,
-                        y: 60,
-                        rotateX: 18,
-                        scale: 0.95
+                        y: 50,
+                        scale: 0.98
                     }, {
                         opacity: 1,
                         y: 0,
-                        rotateX: 0,
                         scale: 1,
-                        duration: 1.1,
-                        delay: i * 0.12,
-                        ease: 'expo.out',
+                        duration: 1.2,
+                        delay: i * 0.15,
+                        ease: 'power3.out',
                         scrollTrigger: {
                             trigger: el,
                             start: 'top 90%',
@@ -497,6 +495,33 @@
                         scrollTrigger: {
                             trigger: '.vantagem-competitiva-seta',
                             start: 'top 95%'
+                        }
+                    });
+                }
+
+                // Animação específica para a seção de contato
+                if (document.querySelector('.contact-form-block') && document.querySelector('.contact-info-block')) {
+                    gsap.from('.contact-form-block', {
+                        opacity: 0,
+                        y: 50,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: '.contact-form-block',
+                            start: 'top 90%',
+                            toggleActions: 'play none none none'
+                        }
+                    });
+                    gsap.from('.contact-info-block', {
+                        opacity: 0,
+                        y: 50,
+                        duration: 1,
+                        delay: 0.2, // Pequeno atraso para o segundo bloco
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: '.contact-info-block',
+                            start: 'top 90%',
+                            toggleActions: 'play none none none'
                         }
                     });
                 }
