@@ -110,7 +110,7 @@
       "temperature": {"value": 23.5, "type": "Number"},
       "humidity": {"value": 60, "type": "Number"},
       "waterLevel": {"value": 45, "type": "Number"},
-      "timestamp": {"value": "2024-06-10T12:00:00Z"}
+      "timestamp": {"value": "2025-06-01T12:00:00Z"}
     }
   ]
 }
