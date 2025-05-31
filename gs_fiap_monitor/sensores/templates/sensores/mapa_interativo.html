@@ -36,19 +36,6 @@
                     </div>
                 </div>
                 
-                <div class="mb-8">
-                    <h4 class="font-bold text-gray-700 mb-3">Regiões (Exemplo)</h4>
-                    <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                        <option>Todas as Regiões</option>
-                        <option>Centro</option>
-                        <option>Zona Norte</option>
-                        <option>Zona Sul</option>
-                        <option>Zona Leste</option>
-                        <option>Zona Oeste</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Funcionalidade de filtro por região a ser implementada.</p>
-                </div>
-                
                 <div>
                     <h4 class="font-bold text-gray-700 mb-3">Legenda dos Marcadores</h4>
                     <div class="space-y-3">
@@ -110,9 +97,10 @@
         }
 
         map = L.map('map').setView([initialLat, initialLng], initialZoom);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+        tileLayer.addTo(map);
 
         renderMarkers(dispositivos); // Chama a função para renderizar marcadores
 
@@ -243,6 +231,19 @@
         0% { box-shadow: 0 0 0 0 rgba(255,77,77,0.7); }
         70% { box-shadow: 0 0 0 10px rgba(255,77,77,0); }
         100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); }
+    }
+    /* Tema dark via CSS para o mapa (DEV.to) */
+    .leaflet-tile {
+        filter: invert(90%) hue-rotate(180deg);
+    }
+    .leaflet-container {
+        background: #111;
+    }
+    /* Remove filtro dos controles, marcadores e overlays */
+    .leaflet-control,
+    .leaflet-marker-icon,
+    .leaflet-pane > *:not(.leaflet-tile) {
+        filter: none !important;
     }
 </style>
 {% endblock %} 

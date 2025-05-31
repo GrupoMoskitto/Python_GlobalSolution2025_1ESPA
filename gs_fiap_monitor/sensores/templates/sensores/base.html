@@ -262,41 +262,38 @@
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <nav class="navbar fixed top-0 w-full z-50 py-4 px-6 bg-white bg-opacity-80 shadow-md">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="{% url 'home_page' %}" class="text-2xl font-bold text-secondary flex items-center">
-                <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2" />
-                <span>Moskitto</span>
+    <nav class="navbar fixed top-4 left-1/2 transform -translate-x-1/2 w-[96%] z-50 py-3 px-6 bg-white/80 backdrop-blur-2xl shadow-xl rounded-2xl flex items-center justify-between transition-all duration-300">
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'home_page' %}" class="flex items-center group">
+                <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2 drop-shadow-lg transition-transform duration-300 group-hover:scale-105" />
+                <span class="text-2xl font-extrabold text-secondary tracking-tight" style="font-family: 'Montserrat', sans-serif;">Moskitto</span>
             </a>
-            
-            <div class="hidden md:flex space-x-8">
-                <a href="{% url 'home_page' %}#home" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Início</a>
-                <a href="{% url 'sensores:mapa_interativo' %}" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Mapa</a>
-                <a href="{% url 'sensores:listar_dispositivos' %}" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Dispositivos</a>
-                <a href="{% url 'home_page' %}#sobre" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Sobre</a>
-                <a href="{% url 'admin:index' %}" class="px-4 py-2 bg-black text-white text-base font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200">Admin</a>
-            </div>
-            
-            <div class="md:hidden">
-                <button id="mobile-menu-button" class="text-secondary">
-                    <i class="fas fa-bars text-2xl"></i>
-                </button>
-            </div>
         </div>
-        
-        <div id="mobile-menu" class="hidden md:hidden bg-white absolute top-full left-0 w-full shadow-lg py-4">
-            <div class="flex flex-col space-y-4 px-6">
-                <a href="{% url 'home_page' %}#home" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Início</a>
-                <a href="{% url 'sensores:mapa_interativo' %}" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Mapa Interativo</a>
-                <a href="{% url 'sensores:listar_dispositivos' %}" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Dispositivos</a>
-                <a href="{% url 'home_page' %}#sobre" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Sobre</a>
-                <a href="#contato" class="block text-secondary hover:text-primary font-medium py-2 px-4 rounded-md {% if pagina_atual == 'contato' %}bg-primary bg-opacity-10 text-primary{% endif %}">Contato</a> 
-                <a href="{% url 'admin:index' %}" class="block w-full text-center mt-2 px-4 py-2 bg-black text-white text-base font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200">Admin</a>
+        <div class="hidden md:flex items-center space-x-6">
+            <a href="{% url 'home_page' %}#home" class="px-4 py-1.5 rounded-xl text-base font-medium text-secondary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Início</a>
+            <a href="{% url 'sensores:mapa_interativo' %}" class="px-4 py-1.5 rounded-xl text-base font-medium text-secondary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Mapa</a>
+            <a href="{% url 'sensores:listar_dispositivos' %}" class="px-4 py-1.5 rounded-xl text-base font-medium text-secondary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Dispositivos</a>
+            <a href="{% url 'home_page' %}#sobre" class="px-4 py-1.5 rounded-xl text-base font-medium text-secondary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Sobre</a>
+            <a href="{% url 'admin:index' %}" class="ml-3 px-5 py-1.5 rounded-2xl bg-black text-white text-base font-semibold shadow-lg hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200">Admin</a>
+        </div>
+        <div class="md:hidden flex items-center">
+            <button id="mobile-menu-button" class="text-secondary focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 rounded-2xl shadow-2xl absolute top-full right-0 mt-4 w-11/12 max-w-xs py-5 px-5 transition-all duration-300">
+            <div class="flex flex-col space-y-3">
+                <a href="{% url 'home_page' %}#home" class="block w-full text-center text-secondary font-medium py-2 px-3 rounded-xl text-base hover:bg-primary hover:text-white transition-all duration-200">Início</a>
+                <a href="{% url 'sensores:mapa_interativo' %}" class="block w-full text-center text-secondary font-medium py-2 px-3 rounded-xl text-base hover:bg-primary hover:text-white transition-all duration-200">Mapa Interativo</a>
+                <a href="{% url 'sensores:listar_dispositivos' %}" class="block w-full text-center text-secondary font-medium py-2 px-3 rounded-xl text-base hover:bg-primary hover:text-white transition-all duration-200">Dispositivos</a>
+                <a href="{% url 'home_page' %}#sobre" class="block w-full text-center text-secondary font-medium py-2 px-3 rounded-xl text-base hover:bg-primary hover:text-white transition-all duration-200">Sobre</a>
+                <a href="#contato" class="block text-secondary hover:text-primary font-medium py-2 px-3 rounded-xl text-base">Contato</a>
+                <a href="{% url 'admin:index' %}" class="block w-full text-center mt-2 px-3 py-2 rounded-2xl bg-black text-white text-base font-semibold shadow-lg hover:bg-gray-900 transition-all duration-200">Admin</a>
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow pt-20 pb-8"> {# pt-20 para compensar navbar mais alta, pb-8 para espaço antes do footer #}
+    <main class="flex-grow"> {# pb-8 removido para eliminar gap antes do footer #}
         {% block content %}
         {% endblock %}
     </main>
@@ -337,10 +334,8 @@
                 <div>
                     <h4 class="text-lg font-bold text-white mb-4">Siga-nos</h4>
                     <div class="flex space-x-3">
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="https://www.youtube.com/@moskitto-e6c" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-youtube fa-lg"></i></a>
                         <a href="https://github.com/GrupoMoskitto" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-github fa-lg"></i></a>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram fa-lg"></i></a>
                     </div>
                 </div>
             </div>
@@ -428,6 +423,11 @@
                 }
             }
         });
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            maxZoom: 16
+        }).addTo(map);
     </script>
 </body>
 </html> 
