@@ -266,7 +266,7 @@
         <div class="flex items-center space-x-3">
             <a href="{% url 'home_page' %}" class="flex items-center group">
                 <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2 drop-shadow-lg transition-transform duration-300 group-hover:scale-105" />
-                <span class="text-2xl font-extrabold text-secondary tracking-tight" style="font-family: 'Montserrat', sans-serif;">Moskitto</span>
+                <span id="logo-text" class="text-2xl font-extrabold text-secondary tracking-tight" style="font-family: 'Montserrat', sans-serif;">Moskitto</span>
             </a>
         </div>
         <div class="hidden md:flex items-center space-x-6">
@@ -293,7 +293,7 @@
         </div>
     </nav>
 
-    <main class="flex-grow"> {# pb-8 removido para eliminar gap antes do footer #}
+    <main class="flex-grow {% block main_padding %}pt-28{% endblock %}"> {# Envolvido pt-28 em um bloco #}
         {% block content %}
         {% endblock %}
     </main>
@@ -388,12 +388,30 @@
         
         function setupNavbarScroll() {
             const navbar = document.querySelector('.navbar');
-            if (!navbar) return;
+            const logoText = document.getElementById('logo-text');
+            if (!navbar || !logoText) return;
+
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
+                if (window.scrollY > 100) {
+                    if (!navbar.classList.contains('scrolled')) {
+                        navbar.classList.add('scrolled');
+                        gsap.to(logoText, {
+                            x: -15,
+                            opacity: 0,
+                            duration: 0.4,
+                            ease: 'power2.in'
+                        });
+                    }
                 } else {
-                    navbar.classList.remove('scrolled');
+                    if (navbar.classList.contains('scrolled')) {
+                        navbar.classList.remove('scrolled');
+                        gsap.to(logoText, {
+                            x: 0,
+                            opacity: 1,
+                            duration: 0.4,
+                            ease: 'power2.out'
+                        });
+                    }
                 }
             });
         }
