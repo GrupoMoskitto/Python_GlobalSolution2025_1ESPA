@@ -1,0 +1,433 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Moskitto - Monitoramento{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'sensores/img/favicon.png' %}" />
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Configuração do Tailwind (do seu index.html original) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#b0dcfc',
+                        secondary: '#333333',
+                        alert: '#ff4d4d',
+                    },
+                    fontFamily: {
+                        heading: ['Montserrat', 'sans-serif'],
+                        body: ['Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Estilos customizados (do seu index.html original, mesclados/substituindo os anteriores) -->
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif; /* Definido no tailwind.config mas bom ter fallback */
+            color: #333; /* Cor base, Tailwind usa text-gray-XXX */
+            overflow-x: hidden;
+            /* background-color: #f4f4f4; Removido para usar o bg-gray-50 do body da home */
+            margin: 0; /* Removido margin do body para full-width */
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Montserrat', sans-serif; /* Definido no tailwind.config mas bom ter fallback */
+        }
+
+        /* Estilos da navbar (do seu index.html original) */
+        .navbar {
+            backdrop-filter: blur(10px);
+            transition: background 0.3s;
+        }
+        
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95); /* Ajustado para ser mais visível */
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Outros estilos customizados do seu index.html original */
+        .hero-parallax {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        .sensor {
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        
+        .sensor-animate {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(176, 220, 252, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(176, 220, 252, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(176, 220, 252, 0); }
+        }
+        
+        .mqtt-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #b0dcfc, transparent);
+            animation: mqtt-transmission 3s infinite linear;
+        }
+        
+        @keyframes mqtt-transmission {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .flip-card {
+            perspective: 1000px;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .contact-input:focus {
+            box-shadow: 0 0 0 2px #b0dcfc;
+            border-color: #b0dcfc;
+        }
+        
+        .social-icon:hover {
+            color: #b0dcfc;
+            transform: translateY(-3px);
+        }
+        
+        .map-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .critical {
+            background-color: #ff4d4d;
+            animation: critical-pulse 1.5s infinite;
+        }
+        
+        .moderate {
+            background-color: #facc15; /* Amarelo do Tailwind: yellow-400 */
+        }
+        
+        .normal {
+            background-color: #22c55e; /* Verde do Tailwind: green-500 */
+        }
+        
+        @keyframes critical-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .use-case-diagram {
+            position: relative;
+            height: 400px;
+        }
+        
+        .use-case-step {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 230px;
+            transition: all 0.5s;
+        }
+        
+        .water-level-animation {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+        
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #1e88e5, #64b5f6);
+            height: 30%; /* Exemplo */
+            transition: height 3s ease-in-out;
+        }
+        
+        .scroll-animation-trigger {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .perspective-container {
+            perspective: 1500px;
+        }
+
+        .tilt-card {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .perspective-container:hover .tilt-card {
+            transform: rotateY(5deg) rotateX(3deg) rotateZ(-1deg) scale(1.03);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Estilos do base.html anterior para .container e header/nav, se quiser mantê-los para páginas não-Tailwind */
+        /* Se a home page e outras usarem full Tailwind, podem não ser necessários */
+        /* 
+        header.django-default-header { background-color: #333; color: #fff; padding: 10px 0; text-align: center; }
+        header.django-default-header nav a { margin: 0 10px; color: #fff; text-decoration: none; }
+        .django-default-container { background-color: #fff; padding: 20px; margin-top: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-left: 20px; margin-right: 20px; }
+        */
+    </style>
+    {% block extra_head %}{% endblock %} <!-- Bloco para CSS ou JS específico da página no head -->
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <nav class="navbar fixed top-0 w-full z-50 py-4 px-6 bg-white bg-opacity-80 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="{% url 'home_page' %}" class="text-2xl font-bold text-secondary flex items-center">
+                <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2" />
+                <span>Moskitto</span>
+            </a>
+            
+            <div class="hidden md:flex space-x-8">
+                <a href="{% url 'home_page' %}#home" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Início</a>
+                <a href="{% url 'sensores:mapa_interativo' %}" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Mapa</a>
+                <a href="{% url 'sensores:listar_dispositivos' %}" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Dispositivos</a>
+                <a href="{% url 'home_page' %}#sobre" class="px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-secondary hover:bg-primary hover:text-white font-medium">Sobre</a>
+                <a href="{% url 'admin:index' %}" class="px-4 py-2 bg-black text-white text-base font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200">Admin</a>
+            </div>
+            
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-secondary">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden bg-white absolute top-full left-0 w-full shadow-lg py-4">
+            <div class="flex flex-col space-y-4 px-6">
+                <a href="{% url 'home_page' %}#home" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Início</a>
+                <a href="{% url 'sensores:mapa_interativo' %}" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Mapa Interativo</a>
+                <a href="{% url 'sensores:listar_dispositivos' %}" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Dispositivos</a>
+                <a href="{% url 'home_page' %}#sobre" class="block w-full text-center text-secondary font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:bg-primary hover:text-white">Sobre</a>
+                <a href="#contato" class="block text-secondary hover:text-primary font-medium py-2 px-4 rounded-md {% if pagina_atual == 'contato' %}bg-primary bg-opacity-10 text-primary{% endif %}">Contato</a> 
+                <a href="{% url 'admin:index' %}" class="block w-full text-center mt-2 px-4 py-2 bg-black text-white text-base font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-20 pb-8"> {# pt-20 para compensar navbar mais alta, pb-8 para espaço antes do footer #}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-secondary py-12 w-full">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <a href="{% url 'home_page' %}" class="text-2xl font-bold text-white flex items-center mb-4">
+                        <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2" />
+                        <span>Moskitto</span>
+                    </a>
+                    <p class="text-gray-400">
+                        Tecnologia inovadora para prevenção de desastres naturais com foco em enchentes urbanas.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Links Rápidos</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home_page' %}#home" class="text-gray-400 hover:text-primary transition">Início</a></li>
+                        <li><a href="{% url 'sensores:mapa_interativo' %}" class="text-gray-400 hover:text-primary transition">Mapa Interativo</a></li>
+                        <li><a href="{% url 'home_page' %}#sobre" class="text-gray-400 hover:text-primary transition">Sobre a Solução</a></li>
+                        <li><a href="{% url 'home_page' %}#equipe-stakeholders" class="text-gray-400 hover:text-primary transition">Equipe</a></li>
+                        <li><a href="{% url 'home_page' %}#contato" class="text-gray-400 hover:text-primary transition">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Recursos</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'sensores:listar_dispositivos' %}" class="text-gray-400 hover:text-primary transition">Dispositivos</a></li>
+                        <li><a href="{% url 'admin:index' %}" class="text-gray-400 hover:text-primary transition">Admin</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Coluna para Siga-nos ou links adicionais, se necessário -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Siga-nos</h4>
+                    <div class="flex space-x-3">
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="https://github.com/GrupoMoskitto" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-github fa-lg"></i></a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                <p class="text-gray-400 text-sm">
+                    &copy; {% now "Y" %} Moskitto. Todos os direitos reservados. Desenvolvido pela equipe de Engenharia de Software da <a href="#" class="text-primary hover:underline">1ESPA - FIAP</a>.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}
+    {% endblock %}
+
+    <script>
+        // Funções Globais
+        function setupScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        function setupMobileMenu() {
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!menuButton || !mobileMenu) return;
+            
+            menuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Fechar menu ao clicar em um link (se o link for para a mesma página com #)
+            mobileMenu.querySelectorAll('a[href^="#"], a[href^="{% url 'home_page' %}#"]').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
+        
+        function setupNavbarScroll() {
+            const navbar = document.querySelector('.navbar');
+            if (!navbar) return;
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // Inicialização Global
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined'){
+                gsap.registerPlugin(ScrollTrigger);
+                console.log("GSAP e ScrollTrigger registrados globalmente.");
+            } else {
+                console.warn("GSAP ou ScrollTrigger não carregados (base.html).")
+            }
+
+            setupScrollAnimations();
+            setupMobileMenu();
+            setupNavbarScroll();
+        });
+
+        // ROLAGEM SUAVE PARA ÂNCORAS MESMO APÓS REDIRECIONAMENTO
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash) {
+                const el = document.querySelector(window.location.hash);
+                if (el) {
+                    setTimeout(() => {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100); // Pequeno delay para garantir renderização
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

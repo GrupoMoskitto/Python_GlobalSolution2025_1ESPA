@@ -1,0 +1,97 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Lista de Dispositivos - Moskitto{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-12 text-center">
+        <h1 class="text-4xl font-bold text-secondary mb-3">Nossos Dispositivos em Campo</h1>
+        <p class="text-xl text-gray-600 mt-1 max-w-3xl mx-auto">Acompanhe o status e as últimas informações de cada unidade de monitoramento.</p>
+    </header>
+
+    {% if dispositivos %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for dispositivo in dispositivos %}
+            {% with status_real=dispositivo.status %}
+                {# Define as classes base do card e do badge de acordo com o status #}
+                {% if status_real == 'critical' %}
+                    {% with status_card_bg="bg-red-50" status_border="border-red-500" text_color="text-red-700" badge_bg="bg-red-500" status_text_strong="text-red-600" %}
+                    {{ block.super }}
+                    {% endwith %}
+                {% elif status_real == 'moderate' %}
+                    {% with status_card_bg="bg-yellow-50" status_border="border-yellow-500" text_color="text-yellow-700" badge_bg="bg-yellow-500" status_text_strong="text-yellow-600" %}
+                    {{ block.super }}
+                    {% endwith %}
+                {% else %} {# normal ou default #}
+                    {% with status_card_bg="bg-green-50" status_border="border-green-500" text_color="text-green-700" badge_bg="bg-green-500" status_text_strong="text-green-600" %}
+                    {{ block.super }}
+                    {% endwith %}
+                {% endif %}
+
+                <a href="{% url 'sensores:detalhes_dispositivo' id_dispositivo_fiware=dispositivo.id_dispositivo_fiware %}" class="block rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out {{ status_card_bg }} border-l-4 {{ status_border }} overflow-hidden group">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold {{ status_text_strong }} group-hover:text-primary transition-colors duration-300">
+                                    {{ dispositivo.nome_dispositivo }}
+                                </h2>
+                                <span class="mt-1 inline-block px-3 py-1 text-xs font-semibold text-white {{ badge_bg }} rounded-full capitalize">
+                                    Status: {{ status_real }}
+                                </span>
+                            </div>
+                            <div class="text-sm font-medium {{ text_color }}">
+                                {% if dispositivo.ativo %}
+                                    <span class="flex items-center"><i class="fas fa-power-off text-green-500 mr-1.5"></i>Ativo</span>
+                                {% else %}
+                                    <span class="flex items-center"><i class="fas fa-power-off text-gray-400 mr-1.5"></i>Inativo</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm mb-5 {{ text_color }}">
+                            <p class="flex items-center"><i class="fas fa-tag fa-fw mr-2 opacity-70"></i><strong>ID Fiware:</strong><span class="ml-1">{{ dispositivo.id_dispositivo_fiware }}</span></p>
+                            <p class="flex items-start"><i class="fas fa-info-circle fa-fw mr-2 mt-0.5 opacity-70"></i><strong>Descrição:</strong><span class="ml-1">{{ dispositivo.descricao|default:"Nenhuma descrição fornecida." }}</span></p>
+                            <p class="flex items-center"><i class="fas fa-map-marker-alt fa-fw mr-2 opacity-70"></i><strong>Local:</strong><span class="ml-1">Lat: {{ dispositivo.localizacao_latitude|default_if_none:"N/A" }}, Lon: {{ dispositivo.localizacao_longitude|default_if_none:"N/A" }}</span></p>
+                        </div>
+                        
+                        <h4 class="font-semibold text-md {{ status_text_strong }} mb-2">Últimas Leituras Registradas:</h4>
+                        {% if dispositivo.ultimas_leituras_dict %}
+                            <div class="space-y-2 text-sm">
+                            {% for sensor_nome, leitura_info in dispositivo.ultimas_leituras_dict.items %}
+                                <div class="p-3 bg-white bg-opacity-70 rounded-md shadow-sm border {{ status_border }}">
+                                    <strong class="{{ text_color }}">{{ sensor_nome }}:</strong> 
+                                    <span class="{{ status_text_strong }} font-medium">{{ leitura_info.valor }}</span>
+                                    <span class="text-gray-600 text-xs">{{ leitura_info.unidade_medida }}</span>
+                                    <em class="block text-xs text-gray-500 mt-0.5">(@ {{ leitura_info.timestamp_leitura|date:"d/m/y H:i" }})</em>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="italic {{ text_color }} opacity-80">Nenhuma leitura recente encontrada.</p>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endwith %}{# Fecha o with das classes de status #}
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-6 rounded-lg shadow-md flex items-center space-x-4 max-w-2xl mx-auto">
+            <i class="fas fa-info-circle fa-2x"></i>
+            <div>
+                <p class="font-bold text-lg">Nenhum Dispositivo Encontrado</p>
+                <p>Parece que ainda não há dispositivos cadastrados no sistema. Você pode adicioná-los através da <a href="{% url 'admin:index' %}" class="inline-block px-4 py-2 bg-primary text-white text-sm font-semibold rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 shadow-sm hover:shadow-md">interface de administração</a>.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="mt-12 text-center space-x-4">
+        <a href="{% url 'home_page' %}" class="inline-block px-6 py-3 bg-primary text-white font-bold rounded-full hover:bg-blue-400 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+            <i class="fas fa-home mr-2"></i>Voltar para a Home Page
+        </a>
+        <a href="{% url 'admin:index' %}" class="inline-block px-6 py-3 bg-secondary text-white font-bold rounded-full hover:bg-gray-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+            <i class="fas fa-cog mr-2"></i>Ir para o Admin
+        </a>
+    </div>
+</div>
+{% endblock %} 

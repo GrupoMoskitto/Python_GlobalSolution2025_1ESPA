@@ -1,0 +1,202 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Mapa Interativo de Monitoramento - Moskitto{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-12 text-center">
+        <h1 class="text-4xl font-bold text-secondary">Mapa de Monitoramento em Tempo Real</h1>
+        <p class="text-xl text-gray-600 mt-2">Visualize o status dos sensores e áreas de risco na cidade.</p>
+    </header>
+
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-4">
+            <aside class="lg:col-span-1 p-6 border-r border-gray-200 bg-gray-50">
+                <h3 class="text-2xl font-bold text-secondary mb-6">Filtros e Controles</h3>
+                
+                <div class="mb-8">
+                    <h4 class="font-bold text-gray-700 mb-3">Status do Dispositivo</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-darker filter-status" value="critical" checked>
+                            <span class="ml-2 text-gray-700">Crítico</span>
+                            <span class="ml-auto w-4 h-4 rounded-full bg-alert"></span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-darker filter-status" value="moderate" checked>
+                            <span class="ml-2 text-gray-700">Moderado</span>
+                            <span class="ml-auto w-4 h-4 rounded-full bg-yellow-400"></span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-darker filter-status" value="normal" checked>
+                            <span class="ml-2 text-gray-700">Normal</span>
+                            <span class="ml-auto w-4 h-4 rounded-full bg-green-500"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-8">
+                    <h4 class="font-bold text-gray-700 mb-3">Regiões (Exemplo)</h4>
+                    <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <option>Todas as Regiões</option>
+                        <option>Centro</option>
+                        <option>Zona Norte</option>
+                        <option>Zona Sul</option>
+                        <option>Zona Leste</option>
+                        <option>Zona Oeste</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Funcionalidade de filtro por região a ser implementada.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-3">Legenda dos Marcadores</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="map-marker critical">!</div>
+                            <span class="ml-3 text-gray-700">Nível Crítico (&gt; 80%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="map-marker moderate"></div>
+                            <span class="ml-3 text-gray-700">Nível Moderado (51-80%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="map-marker normal"></div>
+                            <span class="ml-3 text-gray-700">Nível Normal (&le; 50%)</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="lg:col-span-3 h-[600px] md:h-[700px] relative">
+                <div id="map" class="h-full w-full rounded-r-3xl"></div>
+            </main>
+        </div>
+    </div>
+
+    <div class="mt-12 text-center">
+        <a href="{% url 'home_page' %}" class="text-primary hover:text-blue-700 font-medium px-4 py-2 rounded border border-primary hover:bg-primary hover:text-white transition-colors">&larr; Voltar para a Home Page</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ dispositivos_map_data|json_script:"dispositivos-map-data-json" }}
+
+<script>
+    let map;
+    let allMapMarkers = []; // Para guardar referência a todos os marcadores
+
+    function initMap() {
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error("Elemento do mapa não encontrado!");
+            return;
+        }
+
+        let initialLat = -23.550520;
+        let initialLng = -46.633308;
+        let initialZoom = 10;
+
+        const dispositivosDataElement = document.getElementById('dispositivos-map-data-json');
+        let dispositivos = [];
+        if (dispositivosDataElement) {
+            try {
+                dispositivos = JSON.parse(dispositivosDataElement.textContent);
+            } catch (e) {
+                console.error("Erro ao parsear dados dos dispositivos:", e);
+            }
+        }
+
+        if (dispositivos.length > 0) {
+            const validCoords = dispositivos.filter(d => typeof d.latitude === 'number' && typeof d.longitude === 'number');
+            if (validCoords.length > 0) {
+                initialLat = validCoords[0].latitude;
+                initialLng = validCoords[0].longitude;
+                initialZoom = 12;
+            }
+        }
+
+        map = L.map('map').setView([initialLat, initialLng], initialZoom);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        renderMarkers(dispositivos); // Chama a função para renderizar marcadores
+
+        // Adiciona listeners para os checkboxes de filtro
+        document.querySelectorAll('.filter-status').forEach(checkbox => {
+            checkbox.addEventListener('change', filterMarkersByStatus);
+        });
+    }
+
+    function renderMarkers(dispositivosList) {
+        // Limpa marcadores existentes
+        allMapMarkers.forEach(marker => map.removeLayer(marker));
+        allMapMarkers = [];
+
+        dispositivosList.forEach(disp => {
+            if (typeof disp.latitude !== 'number' || typeof disp.longitude !== 'number') {
+                console.warn(`Dispositivo '${disp.nome}' (ID: ${disp.id}) sem coordenadas válidas.`);
+                return;
+            }
+
+            // A lógica de status já vem da view agora em disp.status
+            const status = disp.status || 'normal';
+
+            const iconClasses = `map-marker ${status}`; // As classes CSS já devem estar no base.html ou aqui
+            const markerElement = L.divIcon({
+                className: iconClasses,
+                html: `${status === 'critical' ? '!' : ''}`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+            
+            let popupContent = `<b>${disp.nome}</b> (ID: ${disp.id})<br>${disp.descricao || ''}`;
+            if (disp.leituras) {
+                for (const sensorNome in disp.leituras) {
+                    const leitura = disp.leituras[sensorNome];
+                    popupContent += `<br>${sensorNome}: ${leitura.valor} ${leitura.unidade} (${leitura.timestamp})`;
+                }
+            }
+            popupContent += `<br><b>Status:</b> <span class="status-popup-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+
+            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: status}) // Adiciona status ao marcador
+                .addTo(map)
+                .bindPopup(popupContent);
+            allMapMarkers.push(leafletMarker);
+        });
+    }
+
+    function filterMarkersByStatus() {
+        const activeStatuses = [];
+        document.querySelectorAll('.filter-status:checked').forEach(checkbox => {
+            activeStatuses.push(checkbox.value);
+        });
+
+        allMapMarkers.forEach(marker => {
+            if (activeStatuses.includes(marker.options.deviceStatus)) {
+                if (!map.hasLayer(marker)) {
+                    map.addLayer(marker);
+                }
+            } else {
+                if (map.hasLayer(marker)) {
+                    map.removeLayer(marker);
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        // Outros scripts específicos para esta página podem ir aqui
+    });
+</script>
+<style>
+    /* Adicionando estilos para os popups de status para garantir visibilidade */
+    .status-popup-critical { color: red; font-weight: bold; }
+    .status-popup-moderate { color: orange; font-weight: bold; }
+    .status-popup-normal { color: green; font-weight: bold; }
+</style>
+{% endblock %} 

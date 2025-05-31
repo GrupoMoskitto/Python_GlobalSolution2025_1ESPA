@@ -1,0 +1,379 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Início - Sistema de Monitoramento de Desastres Naturais{% endblock %}
+
+{% block content %}
+    {# A navbar é herdada do base.html, não é mais definida aqui #}
+
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-24 pb-32 md:pt-32 md:pb-48 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary to-blue-300 opacity-30 z-0"></div>
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/4 left-1/4 w-48 h-48 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            <div class="absolute top-1/3 right-1/4 w-32 h-32 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            <div class="absolute bottom-1/4 left-1/3 w-40 h-40 rounded-full bg-primary opacity-20 animate-pulse"></div>
+        </div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-4xl md:text-6xl font-bold text-secondary mb-6 leading-tight">
+                        Tecnologia <span class="text-primary">Inteligente</span> contra Enchentes
+                    </h1>
+                    <p class="text-xl text-gray-700 mb-8 max-w-2xl mx-auto lg:mx-0">
+                        Monitoramento em tempo real de bueiros e áreas de risco com alertas preventivos para reduzir danos causados por enchentes.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="{% url 'sensores:mapa_interativo' %}" 
+                           class="px-8 py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
+                                  hover:bg-blue-400 hover:shadow-xl hover:-translate-y-1 
+                                  focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50">
+                            Ver Mapa ao Vivo
+                        </a>
+                        <a href="{% url 'home_page' %}#sobre" 
+                           class="px-8 py-4 bg-white text-secondary border-2 border-primary font-bold rounded-full transition-all duration-300 shadow-lg 
+                                  hover:bg-gray-100 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 
+                                  focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-50">
+                            Conheça a Solução
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="relative perspective-container group">
+                    <div class="tilt-card bg-white rounded-3xl shadow-2xl p-6 transform rotate-3 group-hover:shadow-custom-hover-hero">
+                        <div class="relative h-64 bg-gray-200 border-2 border-dashed rounded-xl overflow-hidden">
+                            <div class="water-level-animation">
+                                <div class="water-level" id="water-level"></div>
+                                <div class="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-gray-800 to-gray-700"></div>
+                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-gray-900 rounded-full flex items-center justify-center">
+                                    <div class="sensor sensor-animate w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-water text-white text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flip-card absolute -bottom-8 -left-8 w-40 h-40 md:-bottom-10 md:-left-10 md:w-48 md:h-48 group">
+                        <div class="flip-card-inner rounded-2xl shadow-xl group-hover:shadow-2xl">
+                            <div class="flip-card-front bg-secondary text-white flex flex-col items-center justify-center p-4 rounded-2xl">
+                                <i class="fas fa-microchip text-4xl md:text-5xl mb-2"></i>
+                                <p class="font-bold text-lg md:text-xl">ESP32</p>
+                            </div>
+                            <div class="flip-card-back bg-blue-400 text-white flex flex-col items-center justify-center p-4 rounded-2xl">
+                                <h5 class="font-bold text-md mb-1">Microcontrolador</h5>
+                                <p class="text-xs text-center">Processamento inteligente e conectividade para os sensores.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flip-card absolute -top-8 -right-8 w-40 h-40 md:-top-10 md:-right-10 md:w-48 md:h-48 group">
+                        <div class="flip-card-inner rounded-2xl shadow-xl group-hover:shadow-2xl">
+                            <div class="flip-card-front bg-white text-primary flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-primary">
+                                <i class="fas fa-sun text-4xl md:text-5xl mb-2"></i>
+                                <p class="font-bold text-lg md:text-xl text-secondary">Painel Solar</p>
+                            </div>
+                            <div class="flip-card-back bg-yellow-100 text-secondary flex flex-col items-center justify-center p-4 rounded-2xl">
+                                <h5 class="font-bold text-md mb-1">Energia Sustentável</h5>
+                                <p class="text-xs text-center">Garante autonomia energética para monitoramento contínuo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mqtt-line" style="top: 50%; left: 0; right: 0; width: 100%;"></div>
+    </section>
+
+    <!-- Sobre a Solução -->
+    <section class="py-24 bg-white" id="sobre">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl font-bold text-secondary mb-4">Solução Tecnológica Acessível</h2>
+                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+                    Nosso sistema inovador combina hardware acessível e software avançado para monitorar enchentes em tempo real
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="animate-on-scroll">
+                    <div class="bg-gray-100 rounded-3xl p-8">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            <span class="font-bold text-primary">Nosso sistema</span>, desenvolvido pela equipe de Engenharia de Software da 1ESPA, utiliza microcontroladores ESP32 com sensores de nível de água analógico (R$10, instalado na parte superior do bueiro voltado para baixo) e umidade DHT22 (R$40, próximo à base do bueiro para detectar acúmulo antecipado de água), alojados em caixas IP67 (R$50) com bateria Li-ion e painel solar ou alimentação elétrica municipal, custando menos de R$300 por unidade (ESP32 entre R$28-50).
+                        </p>
+                        <p class="text-gray-700 text-lg leading-relaxed mt-6">
+                            Os dispositivos monitoram em tempo real o nível da água em bueiros espalhados pela cidade e transmitem dados via MQTT para um broker Fiware ou Mosquitto, exibidos em um dashboard interativo desenvolvido em Python e Django, que dispara alertas automáticos via HTTP ou SMS quando níveis atingem limites críticos, permitindo que prefeituras e a Defesa Civil ajam rapidamente para reduzir danos materiais, riscos à saúde pública e impactos na mobilidade urbana.
+                        </p>
+                        <p class="text-gray-700 text-lg leading-relaxed mt-6">
+                            Nossa solução é escalável para cidades pequenas com orçamento limitado, superando alternativas como o dispositivo da USP de São Carlos (R$15 mil por unidade), viabilizando instalação em dezenas de bueiros críticos.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="animate-on-scroll">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
+                            <i class="fas fa-dollar-sign text-primary text-4xl mb-4"></i>
+                            <h3 class="text-xl font-bold text-secondary mb-2">Custo Acessível</h3>
+                            <p class="text-gray-700">Menos de R$300 por unidade contra R$15 mil das alternativas</p>
+                        </div>
+                        
+                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
+                            <i class="fas fa-bolt text-primary text-4xl mb-4"></i>
+                            <h3 class="text-xl font-bold text-secondary mb-2">Autonomia Energética</h3>
+                            <p class="text-gray-700">Bateria Li-ion com painel solar ou alimentação municipal</p>
+                        </div>
+                        
+                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
+                            <i class="fas fa-shield-alt text-primary text-4xl mb-4"></i>
+                            <h3 class="text-xl font-bold text-secondary mb-2">Proteção IP67</h3>
+                            <p class="text-gray-700">Caixas resistentes à água e poeira para ambientes hostis</p>
+                        </div>
+                        
+                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
+                            <i class="fas fa-chart-line text-primary text-4xl mb-4"></i>
+                            <h3 class="text-xl font-bold text-secondary mb-2">Monitoramento em Tempo Real</h3>
+                            <p class="text-gray-700">Dados atualizados constantemente via MQTT</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 bg-gradient-to-r from-blue-600 to-primary rounded-2xl p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-4">Vantagem Competitiva</h3>
+                        <div class="flex items-center justify-between">
+                            <div class="text-center">
+                                <div class="text-4xl font-bold">R$300</div>
+                                <div>Nossa solução</div>
+                            </div>
+                            <i class="fas fa-arrow-right text-2xl"></i>
+                            <div class="text-center">
+                                <div class="text-4xl font-bold">R$15.000</div>
+                                <div>Solução USP</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">Economia de <span class="font-bold">98%</span> por unidade instalada</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre -->
+    <section id="equipe-stakeholders" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl font-bold text-secondary mb-4">Sobre</h2>
+                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+                    Conheça a equipe por trás da solução inovadora de monitoramento de enchentes
+                </p>
+            </div>
+            
+            <div class="mb-20">
+                <h3 class="text-3xl font-bold text-secondary mb-3 text-center">Nossa Equipe</h3>
+                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto">
+                    Juntos, desenvolvemos uma solução que combina tecnologia acessível com impacto social significativo para prevenir desastres causados por enchentes.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                        <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span class="text-white text-4xl">JV</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-secondary">João Vitor de Matos Araujo</h4>
+                        <p class="text-primary mb-3">RM559246</p>
+                        <p class="text-gray-700">Product Owner & Dev IoT</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                        <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span class="text-white text-4xl">GK</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-secondary">Gabriel Kato Peres</h4>
+                        <p class="text-primary mb-3">RM560000</p>
+                        <p class="text-gray-700">Dev Back-End & Integração MQTT</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-2xl p-8 text-center animate-on-scroll">
+                        <div class="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span class="text-white text-4xl">GC</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-secondary">Gabriel Couto Ribeiro</h4>
+                        <p class="text-primary mb-3">RM559579</p>
+                        <p class="text-gray-700">Dev Full Stack & Database</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-3xl font-bold text-secondary mb-3 text-center">Stakeholders</h3>
+                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto">
+                    Nossa solução beneficia diversos atores envolvidos na prevenção e resposta a enchentes urbanas.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                        <i class="fas fa-city text-4xl mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">Prefeituras Municipais</h4>
+                        <p>Responsáveis pela infraestrutura urbana e gestão de crises</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                        <i class="fas fa-shield-alt text-4xl mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">Defesa Civil</h4>
+                        <p>Atuam em situações de risco e coordenam ações emergenciais</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                        <i class="fas fa-house-user text-4xl mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">Moradores de Áreas de Risco</h4>
+                        <p>Recebem alertas preventivos para proteger vidas e propriedades</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll">
+                        <i class="fas fa-laptop-code text-4xl mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">Equipe Técnica</h4>
+                        <p>Responsável pela implementação, integração e manutenção</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contato -->
+    <section id="contato" class="py-24 bg-gradient-to-br from-gray-50 to-primary bg-opacity-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl font-bold text-secondary mb-4">Contato</h2>
+                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+                    Entre em contato conosco para mais informações sobre nossa solução
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-on-scroll">
+                    <h3 class="text-2xl font-bold text-secondary mb-6">Envie uma Mensagem</h3>
+                    
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Nome</label>
+                            <input type="text" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">Email</label>
+                            <input type="email" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">Mensagem</label>
+                            <textarea rows="5" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-blue-400 transition duration-300">
+                            Enviar Mensagem
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="animate-on-scroll">
+                    <div class="bg-gradient-to-br from-primary to-blue-500 rounded-3xl shadow-xl p-8 text-white h-full">
+                        <h3 class="text-2xl font-bold mb-6">Informações de Contato</h3>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <i class="fas fa-envelope text-2xl mt-1 mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg">Email</h4>
+                                    <p>contato@monitoramentodesastres.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-phone-alt text-2xl mt-1 mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg">Telefone</h4>
+                                    <p>+55 11 1234-5678</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-map-marker-alt text-2xl mt-1 mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg">Endereço</h4>
+                                    <p>Av. Paulista, 1000, São Paulo - SP</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-10">
+                                <h4 class="font-bold text-lg mb-4">Siga-nos</h4>
+                                <div class="flex space-x-4">
+                                    <a href="#" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </a>
+                                    <a href="#" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // Funções específicas da Home Page
+        function animateWaterLevel() {
+            const waterLevelElement = document.getElementById('water-level');
+            if (!waterLevelElement) return;
+            let level = 30;
+            let direction = 1;
+            
+            setInterval(() => {
+                level += direction * 10;
+                if (level >= 70 || level <= 20) direction *= -1;
+                waterLevelElement.style.height = level + '%';
+            }, 2000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            animateWaterLevel();
+            
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined'){
+                gsap.from('.hero-parallax', {
+                    scrollTrigger: {
+                        trigger: '#home',
+                        start: 'top top',
+                        end: 'bottom top',
+                        scrub: true
+                    },
+                    y: 50,
+                    opacity: 0.7
+                });
+                
+                gsap.to('.sensor-animate', { 
+                    scale: 1.2,
+                    repeat: -1,
+                    yoyo: true,
+                    duration: 1,
+                    ease: "power1.inOut"
+                });
+            } else {
+                console.warn("GSAP ou ScrollTrigger não carregados (home.html).")
+            }
+        });
+    </script>
+{% endblock %} 
