@@ -136,6 +136,3 @@
 3. Commit suas alterações (`git commit -am 'feat: nova feature'`)
 4. Push para o branch (`git push origin feature/sua-feature`)
 5. Abra um Pull Request
-
-
-> _Envie prints das telas para deixar este README ainda mais visual!_ 
