@@ -1,8 +1,10 @@
-# 🌱 GS FIAP Monitor
+<p align="center">
+  <img src="https://img.shields.io/badge/Django-5.2.1-green?logo=django" alt="Django"/>
+  <img src="https://img.shields.io/badge/REST%20API-DRF-blue?logo=django" alt="REST"/>
+  <img src="https://img.shields.io/badge/Plotly-Graphs-orange?logo=plotly" alt="Plotly"/>
+</p>
 
-![Django](https://img.shields.io/badge/Django-5.2.1-green?logo=django)
-![REST](https://img.shields.io/badge/REST%20API-DRF-blue?logo=django)
-![Plotly](https://img.shields.io/badge/Plotly-Graphs-orange?logo=plotly)
+<h1 align="center">🌱 GS FIAP Monitor</h1>
 
 > **Sistema web para monitoramento de sensores (umidade, temperatura, nível de água) integrados via ESP32 e Fiware Orion Context Broker. Visual moderno, responsivo e com gráficos interativos.**
 
