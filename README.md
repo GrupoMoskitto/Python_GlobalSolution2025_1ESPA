@@ -62,7 +62,7 @@
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/rouri404/seu-repo.git
+   git clone https://github.com/rouri404/site-gs-fiap.git
    cd site-gs-fiap
    ```
 2. **Crie e ative um ambiente virtual**
