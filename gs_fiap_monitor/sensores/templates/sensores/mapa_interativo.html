@@ -103,27 +103,29 @@
         if (dispositivosDataElement) {
             try {
                 dispositivos = JSON.parse(dispositivosDataElement.textContent);
+                console.log('[DEBUG] Dispositivos recebidos para o mapa:', dispositivos);
             } catch (e) {
                 console.error("Erro ao parsear dados dos dispositivos:", e);
             }
         }
 
-        if (dispositivos.length > 0) {
-            const validCoords = dispositivos.filter(d => typeof d.latitude === 'number' && typeof d.longitude === 'number');
-            if (validCoords.length > 0) {
-                initialLat = validCoords[0].latitude;
-                initialLng = validCoords[0].longitude;
-                initialZoom = 12;
-            }
-        }
-
         map = L.map('map').setView([initialLat, initialLng], initialZoom);
-        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        
+
         renderMarkers(dispositivos); // Chama a função para renderizar marcadores
+
+        // Ajusta o mapa para mostrar todos os dispositivos
+        const bounds = [];
+        dispositivos.forEach(d => {
+            if (typeof d.latitude === 'number' && typeof d.longitude === 'number') {
+                bounds.push([d.latitude, d.longitude]);
+            }
+        });
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, {padding: [40, 40]});
+        }
 
         // Adiciona listeners para os checkboxes de filtro
         document.querySelectorAll('.filter-status').forEach(checkbox => {
@@ -138,9 +140,10 @@
 
         dispositivosList.forEach(disp => {
             if (typeof disp.latitude !== 'number' || typeof disp.longitude !== 'number') {
-                console.warn(`Dispositivo '${disp.nome}' (ID: ${disp.id}) sem coordenadas válidas.`);
+                console.warn(`[DEBUG] Dispositivo '${disp.nome}' (ID: ${disp.id}) sem coordenadas válidas.`, disp);
                 return;
             }
+            console.log(`[DEBUG] Renderizando marcador: ${disp.nome} | Status: ${disp.status} | Lat: ${disp.latitude} | Lng: ${disp.longitude}`);
 
             // A lógica de status já vem da view agora em disp.status
             const status = disp.status || 'normal';
@@ -148,11 +151,12 @@
             const iconClasses = `map-marker ${status}`; // As classes CSS já devem estar no base.html ou aqui
             const markerElement = L.divIcon({
                 className: iconClasses,
-                html: `${status === 'critical' ? '!' : ''}`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                html: `<span class='pulse-inner'>${status === 'critical' ? '!' : ''}</span>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16] // Centraliza o círculo do marcador
             });
             
+            let statusLabel = status === 'critical' ? 'Crítico' : status === 'moderate' ? 'Moderado' : 'Normal';
             let popupContent = `<b>${disp.nome}</b> (ID: ${disp.id})<br>${disp.descricao || ''}`;
             if (disp.leituras) {
                 for (const sensorNome in disp.leituras) {
@@ -160,7 +164,7 @@
                     popupContent += `<br>${sensorNome}: ${leitura.valor} ${leitura.unidade} (${leitura.timestamp})`;
                 }
             }
-            popupContent += `<br><b>Status:</b> <span class="status-popup-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+            popupContent += `<br><b>Status:</b> <span class="status-popup-${status}">${statusLabel}</span>`;
 
             const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: status}) // Adiciona status ao marcador
                 .addTo(map)
@@ -198,5 +202,47 @@
     .status-popup-critical { color: red; font-weight: bold; }
     .status-popup-moderate { color: orange; font-weight: bold; }
     .status-popup-normal { color: green; font-weight: bold; }
+    .map-marker {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 2px solid #fff;
+        position: relative;
+        z-index: 10;
+        box-sizing: border-box;
+        display: block;
+        text-align: center;
+        line-height: 32px;
+        padding: 0;
+        margin: 0;
+        /* Remover qualquer transition/transform daqui! */
+    }
+    .pulse-inner {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        line-height: 32px;
+        text-align: center;
+    }
+    .critical .pulse-inner {
+        background-color: #ff4d4d;
+        animation: critical-pulse 1.5s infinite;
+    }
+    .moderate .pulse-inner {
+        background-color: #facc15;
+    }
+    .normal .pulse-inner {
+        background-color: #22c55e;
+    }
+    @keyframes critical-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255,77,77,0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255,77,77,0); }
+        100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); }
+    }
 </style>
 {% endblock %} 

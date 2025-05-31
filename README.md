@@ -204,3 +204,24 @@ Dispositivo.objects.update_or_create(
 ```
 
 Depois, envie dados para esses dispositivos normalmente pelo endpoint Fiware.
+
+## 🧪 Populando o Banco com Leituras Fictícias (Ambiente de Teste)
+
+Para demonstrar o sistema, você pode criar leituras fictícias para os dispositivos cadastrados usando os comandos abaixo. Execute cada comando separadamente no terminal, dentro do diretório do projeto:
+
+**Temperatura:**
+```bash
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; ids=['esp32_parque_carmo','esp32_pinheiros','esp32_morumbi']; valores=[22,25,28]; tipo,_=TipoSensor.objects.get_or_create(nome='temperature',defaults={'unidade_medida':'°C','descricao':'Sensor de temperatura'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=valores[i],timestamp_leitura=timezone.now()) for i, disp in enumerate(Dispositivo.objects.filter(id_dispositivo_fiware__in=ids))]"
+```
+
+**Umidade:**
+```bash
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; ids=['esp32_parque_carmo','esp32_pinheiros','esp32_morumbi']; valores=[55,60,70]; tipo,_=TipoSensor.objects.get_or_create(nome='humidity',defaults={'unidade_medida':'%','descricao':'Sensor de umidade'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=valores[i],timestamp_leitura=timezone.now()) for i, disp in enumerate(Dispositivo.objects.filter(id_dispositivo_fiware__in=ids))]"
+```
+
+**Nível de água:**
+```bash
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; ids=['esp32_parque_carmo','esp32_pinheiros','esp32_morumbi']; valores=[30,65,85]; tipo,_=TipoSensor.objects.get_or_create(nome='waterLevel',defaults={'unidade_medida':'%','descricao':'Sensor de nível de água'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=valores[i],timestamp_leitura=timezone.now()) for i, disp in enumerate(Dispositivo.objects.filter(id_dispositivo_fiware__in=ids))]"
+```
+
+Esses comandos criam leituras para cada dispositivo de teste, facilitando a demonstração do sistema em ambientes de desenvolvimento.
