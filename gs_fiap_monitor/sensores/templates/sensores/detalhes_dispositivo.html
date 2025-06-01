@@ -1,5 +1,7 @@
 {% extends 'sensores/base.html' %}
 {% load static %}
+{% load timezone_filters %}
+{% load tz %}
 
 {% block title %}{{ dispositivo.nome_dispositivo }} - Detalhes - Moskitto{% endblock %}
 
@@ -34,7 +36,7 @@
                         <i class="fas fa-edit mr-1"></i>Editar Localização
                     </a>
                 </div>
-                <p><strong class="font-medium text-secondary"><i class="far fa-calendar-alt fa-fw mr-2 text-gray-500"></i>Data de Criação:</strong> {{ dispositivo.data_criacao|date:"d/m/Y H:i" }}</p>
+                <p><strong class="font-medium text-secondary"><i class="far fa-calendar-alt fa-fw mr-2 text-gray-500"></i>Data de Criação:</strong> {% timezone "America/Sao_Paulo" %}{{ dispositivo.data_criacao|to_brasilia_time|date:"d/m/Y H:i" }}{% endtimezone %}</p>
                 <p><strong class="font-medium text-secondary"><i class="fas fa-cog fa-fw mr-2 text-gray-500"></i>Status Admin:</strong> 
                     {% if dispositivo.ativo %}
                         <span class="px-2 py-0.5 bg-green-100 text-green-700 text-sm font-semibold rounded-full">Ativo</span>
@@ -93,17 +95,21 @@
                         {% endif %}
                     </p>
                     <p><strong class="font-medium text-secondary"><i class="far fa-clock fa-fw mr-2 text-gray-500"></i>Timestamp Leitura (Fiware):</strong> 
-                        {% if dados_fiware_live.TimeInstantParsed %}
-                            {{ dados_fiware_live.TimeInstantParsed|date:"d/m/Y H:i:s" }} (UTC)
+                        {% timezone "America/Sao_Paulo" %}
+                        {% if timestamp_fiware_em_brasilia %}
+                            {{ timestamp_fiware_em_brasilia|date:"d/m/Y H:i:s" }} (Horário de Brasília)
+                        {% elif dados_fiware_live.TimeInstantParsed %}
+                            {{ dados_fiware_live.TimeInstantParsed|to_brasilia_time|date:"d/m/Y H:i:s" }} {# Fallback #}
                         {% elif dados_fiware_live.timestampParsed %}
-                            {{ dados_fiware_live.timestampParsed|date:"d/m/Y H:i:s" }} (UTC)
+                            {{ dados_fiware_live.timestampParsed|to_brasilia_time|date:"d/m/Y H:i:s" }} {# Fallback #}
                         {% elif dados_fiware_live.TimeInstant %}
-                            {{ dados_fiware_live.TimeInstant }} (Raw String)
+                            {{ dados_fiware_live.TimeInstant }} (Raw String - Provavelmente UTC)
                         {% elif dados_fiware_live.timestamp %}
-                            {{ dados_fiware_live.timestamp }} (Raw String)
+                            {{ dados_fiware_live.timestamp }} (Raw String - Provavelmente UTC)
                         {% else %}
                             N/A
                         {% endif %}
+                        {% endtimezone %}
                     </p>
                     <!-- Você pode adicionar mais campos aqui conforme eles existirem no seu JSON do Fiware -->
                     <!-- Exemplo: <p><strong class="font-medium text-secondary">Outro Dado:</strong> {{ dados_fiware_live.outro_dado|default:"N/A" }}</p> -->

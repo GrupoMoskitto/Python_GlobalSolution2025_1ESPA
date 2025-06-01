@@ -1,5 +1,7 @@
 {% extends 'sensores/base.html' %}
 {% load static %}
+{% load timezone_filters %}
+{% load tz %}
 
 {% block title %}Lista de Dispositivos - Moskitto{% endblock %}
 
@@ -106,7 +108,7 @@
                                     <strong class="{{ text_color }}">{{ sensor_nome }}:</strong> 
                                     <span class="{{ status_text_strong }} font-medium">{{ leitura_info.valor }}</span>
                                     <span class="text-gray-600 text-xs">{{ leitura_info.unidade_medida }}</span>
-                                    <em class="block text-xs text-gray-500 mt-0.5">(@ {{ leitura_info.timestamp_leitura|date:"d/m/y H:i" }})</em>
+                                    <em class="block text-xs text-gray-500 mt-0.5">(@ {% timezone "America/Sao_Paulo" %}{{ leitura_info.timestamp_leitura|to_brasilia_time|date:"d/m/y H:i" }}{% endtimezone %})</em>
                                 </div>
                             {% endfor %}
                             </div>

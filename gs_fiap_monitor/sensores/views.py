@@ -9,6 +9,7 @@ from collections import defaultdict
 import requests # Adicionado import
 from django.contrib import messages # Adicionar este import no topo do arquivo views.py
 from django.urls import reverse, NoReverseMatch
+import pytz
 
 import plotly.express as px
 import pandas as pd
@@ -165,6 +166,7 @@ def listar_dispositivos(request):
     }
 
     for dispositivo in dispositivos_list:
+        print(f"[LISTAR DEBUG] Processando dispositivo: {dispositivo.id_dispositivo_fiware}")
         dispositivo.ultimas_leituras_dict = {}
         tipos_sensores_usados_ids = LeituraSensor.objects.filter(dispositivo=dispositivo).values_list('tipo_sensor_id', flat=True).distinct()
         tipos_sensores_usados = TipoSensor.objects.filter(id__in=tipos_sensores_usados_ids)
@@ -172,9 +174,14 @@ def listar_dispositivos(request):
         ultima_leitura_nivel_agua = None
         timestamp_mais_recente_geral = None # Para status operacional
 
+        if not tipos_sensores_usados.exists():
+            print(f"[LISTAR DEBUG] Dispositivo {dispositivo.id_dispositivo_fiware} não possui nenhum TipoSensor associado a leituras.")
+
         for tipo_sensor in tipos_sensores_usados:
+            print(f"[LISTAR DEBUG]   Buscando última leitura para TipoSensor: {tipo_sensor.nome} (ID: {tipo_sensor.id})")
             ultima_leitura = LeituraSensor.objects.filter(dispositivo=dispositivo, tipo_sensor=tipo_sensor).order_by('-timestamp_leitura').first()
             if ultima_leitura:
+                print(f"[LISTAR DEBUG]     Última leitura encontrada para {tipo_sensor.nome}: Valor={ultima_leitura.valor}, Timestamp={ultima_leitura.timestamp_leitura}, ID Leitura={ultima_leitura.id}")
                 nome_traduzido = SENSOR_NOME_TRADUZIDO.get(tipo_sensor.nome, tipo_sensor.nome)
                 dispositivo.ultimas_leituras_dict[nome_traduzido] = {
                     'valor': ultima_leitura.valor,
@@ -188,6 +195,8 @@ def listar_dispositivos(request):
                 # Atualiza o timestamp mais recente geral para este dispositivo
                 if timestamp_mais_recente_geral is None or ultima_leitura.timestamp_leitura > timestamp_mais_recente_geral:
                     timestamp_mais_recente_geral = ultima_leitura.timestamp_leitura
+            else:
+                print(f"[LISTAR DEBUG]     Nenhuma leitura encontrada para {tipo_sensor.nome} no dispositivo {dispositivo.id_dispositivo_fiware}")
         
         # Determinar status do dispositivo (baseado em waterLevel)
         dispositivo.status = 'normal' # Default
@@ -241,6 +250,8 @@ def mapa_interativo_view(request):
         # Adicione outros sensores se necessário
     }
 
+    brasilia_tz = pytz.timezone('America/Sao_Paulo') # Adicionado para conversão
+
     for disp in dispositivos_ativos:
         ultimas_leituras_formatadas = {} # Usaremos este para o popup, com nomes traduzidos
         tipos_sensores_usados_ids = LeituraSensor.objects.filter(dispositivo=disp).values_list('tipo_sensor_id', flat=True).distinct()
@@ -253,9 +264,19 @@ def mapa_interativo_view(request):
             ultima_leitura = LeituraSensor.objects.filter(dispositivo=disp, tipo_sensor=ts).order_by('-timestamp_leitura').first()
             if ultima_leitura:
                 nome_traduzido = SENSOR_NOME_TRADUZIDO_MAPA.get(ts.nome, ts.nome)
+                
+                # Converter timestamp para Brasília
+                timestamp_brasilia = ""
+                if ultima_leitura.timestamp_leitura:
+                    if not timezone.is_aware(ultima_leitura.timestamp_leitura):
+                        utc_timestamp = timezone.make_aware(ultima_leitura.timestamp_leitura, timezone.utc)
+                    else:
+                        utc_timestamp = ultima_leitura.timestamp_leitura
+                    timestamp_brasilia = utc_timestamp.astimezone(brasilia_tz).strftime('%d/%m %H:%M')
+
                 ultimas_leituras_formatadas[nome_traduzido] = (
                     f"{ultima_leitura.valor} {ts.unidade_medida} "
-                    f"<span class='text-xs text-gray-500'>({ultima_leitura.timestamp_leitura.strftime('%d/%m %H:%M')})</span>"
+                    f"<span class='text-xs text-gray-500'>({timestamp_brasilia})</span>"
                 )
                 if ts.nome == nome_sensor_nivel_agua:
                     ultima_leitura_nivel_agua_valor = ultima_leitura.valor
@@ -346,6 +367,7 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     # Buscar dados ao vivo do Fiware
     dados_fiware_live = {}
     timestamp_leitura_fiware_live = timezone.now() # Default para o momento da busca
+    timestamp_fiware_em_brasilia = None # << ADICIONADO
 
     try:
         fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware}?type=SensorDevice&options=keyValues"
@@ -365,12 +387,14 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
             try:
                 dados_fiware_live['TimeInstantParsed'] = datetime.fromisoformat(dados_fiware_live['TimeInstant'].replace('Z', '+00:00'))
                 timestamp_leitura_fiware_live = dados_fiware_live['TimeInstantParsed']
+                timestamp_fiware_em_brasilia = timestamp_leitura_fiware_live.astimezone(pytz.timezone('America/Sao_Paulo')) # << CONVERSÃO
             except ValueError:
                 dados_fiware_live['TimeInstantParsed'] = dados_fiware_live['TimeInstant'] # Mantém como string se falhar
         elif 'timestamp' in dados_fiware_live and isinstance(dados_fiware_live['timestamp'], str): # Outro nome comum
              try:
                 dados_fiware_live['timestampParsed'] = datetime.fromisoformat(dados_fiware_live['timestamp'].replace('Z', '+00:00'))
                 timestamp_leitura_fiware_live = dados_fiware_live['timestampParsed']
+                timestamp_fiware_em_brasilia = timestamp_leitura_fiware_live.astimezone(pytz.timezone('America/Sao_Paulo')) # << CONVERSÃO
              except ValueError:
                 dados_fiware_live['timestampParsed'] = dados_fiware_live['timestamp']
         
@@ -506,6 +530,7 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     context = {
         'dispositivo': dispositivo,
         'dados_fiware_live': dados_fiware_live, # Adicionado dados do Fiware ao contexto
+        'timestamp_fiware_em_brasilia': timestamp_fiware_em_brasilia, # << ADICIONADO AO CONTEXTO
         'graficos_html': graficos_html,
         'pagina_atual': 'detalhes_dispositivo' 
     }
