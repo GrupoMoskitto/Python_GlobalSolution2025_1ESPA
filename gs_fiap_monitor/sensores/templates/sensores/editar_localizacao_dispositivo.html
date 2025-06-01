@@ -1,0 +1,197 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Editar Localização: {{ dispositivo.nome_dispositivo }} - Moskitto{% endblock %}
+
+{% block extra_head %}
+    <!-- Leaflet CSS (já incluso no base.html, mas garantindo) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 400px; /* Altura do mapa */
+            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <header class="mb-10 border-b border-gray-200 pb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-secondary mb-2">Editar Localização do Dispositivo</h1>
+                <p class="text-lg text-gray-600">Dispositivo: <span class="font-semibold text-primary">{{ dispositivo.nome_dispositivo }}</span> ({{ dispositivo.id_dispositivo_fiware }})</p>
+            </div>
+            <a href="{% url 'sensores:detalhes_dispositivo' dispositivo.id_dispositivo_fiware %}" 
+               class="mt-4 md:mt-0 inline-block px-6 py-3 bg-gray-200 text-secondary font-semibold rounded-lg hover:bg-gray-300 transition duration-300 shadow hover:shadow-md">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar para Detalhes
+            </a>
+        </div>
+    </header>
+
+    {% if mensagem_sucesso %}
+        <div class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-md shadow" role="alert">
+            <p class="font-bold">Sucesso!</p>
+            <p>{{ mensagem_sucesso }}</p>
+        </div>
+    {% endif %}
+    {% if mensagem_erro_fiware %}
+        <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-md shadow" role="alert">
+            <p class="font-bold">Atenção Fiware!</p>
+            <p>{{ mensagem_erro_fiware }}</p>
+        </div>
+    {% endif %}
+
+    <form method="post" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {% csrf_token %}
+        
+        <!-- Coluna do Formulário -->
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-semibold text-primary mb-6">Coordenadas Geográficas</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="{{ form.localizacao_latitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ form.localizacao_latitude.label }}</label>
+                    {{ form.localizacao_latitude }}
+                    {% if form.localizacao_latitude.help_text %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.localizacao_latitude.help_text }}</p>
+                    {% endif %}
+                    {% if form.localizacao_latitude.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.localizacao_latitude.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.localizacao_longitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ form.localizacao_longitude.label }}</label>
+                    {{ form.localizacao_longitude }}
+                    {% if form.localizacao_longitude.help_text %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.localizacao_longitude.help_text }}</p>
+                    {% endif %}
+                    {% if form.localizacao_longitude.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.localizacao_longitude.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="mt-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <button type="submit" class="w-full px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-400 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                    <i class="fas fa-save mr-2"></i>Salvar Localização
+                </button>
+            </div>
+        </div>
+
+        <!-- Coluna do Mapa -->
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-semibold text-primary mb-6">Definir no Mapa</h2>
+            <p class="text-sm text-gray-600 mb-4">Clique no mapa para definir a localização ou arraste o marcador. A localização atual é <strong id="current-map-coords">N/A</strong>.</p>
+            <div id="map"></div>
+            <p class="mt-2 text-xs text-gray-500">O mapa é uma ferramenta auxiliar. As coordenadas nos campos acima serão as salvas.</p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- Leaflet JS (já incluso no base.html, mas garantindo) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const latField = document.getElementById("{{ form.localizacao_latitude.id_for_label }}");
+            const lonField = document.getElementById("{{ form.localizacao_longitude.id_for_label }}");
+            const currentCoordsDisplay = document.getElementById('current-map-coords');
+
+            // Coordenadas iniciais (do dispositivo ou padrão para São Paulo se não houver)
+            let initialLat = parseFloat(latField.value) || -23.550520;
+            let initialLon = parseFloat(lonField.value) || -46.633308;
+            let initialZoom = (latField.value && lonField.value) ? 15 : 10;
+
+            if (isNaN(initialLat)) initialLat = -23.550520;
+            if (isNaN(initialLon)) initialLon = -46.633308;
+
+            const map = L.map('map').setView([initialLat, initialLon], initialZoom);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            let marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+            updateCoordsDisplay(initialLat, initialLon);
+
+            function updateCoordsDisplay(lat, lon) {
+                currentCoordsDisplay.textContent = `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+            }
+
+            function updateFieldsAndMarker(lat, lon, shouldUpdateMarker = true) {
+                latField.value = lat.toFixed(6);
+                lonField.value = lon.toFixed(6);
+                updateCoordsDisplay(lat, lon);
+                if (shouldUpdateMarker) {
+                    marker.setLatLng([lat, lon]);
+                    map.panTo([lat, lon]);
+                }
+            }
+
+            // Atualiza marcador e display quando os campos do formulário mudam
+            latField.addEventListener('change', function() {
+                const lat = parseFloat(this.value);
+                const lon = parseFloat(lonField.value);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    marker.setLatLng([lat, lon]);
+                    map.panTo([lat, lon]);
+                    updateCoordsDisplay(lat, lon);
+                }
+            });
+            lonField.addEventListener('change', function() {
+                const lat = parseFloat(latField.value);
+                const lon = parseFloat(this.value);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    marker.setLatLng([lat, lon]);
+                    map.panTo([lat, lon]);
+                    updateCoordsDisplay(lat, lon);
+                }
+            });
+
+            // Atualiza campos quando o mapa é clicado
+            map.on('click', function (e) {
+                updateFieldsAndMarker(e.latlng.lat, e.latlng.lng);
+            });
+
+            // Atualiza campos quando o marcador é arrastado
+            marker.on('dragend', function (e) {
+                const latLng = e.target.getLatLng();
+                updateFieldsAndMarker(latLng.lat, latLng.lng, false); // false para não mover o marcador que já foi movido
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Tema dark via CSS para o mapa (similar ao mapa_interativo.html) */
+    #map .leaflet-tile {
+        filter: invert(90%) hue-rotate(180deg);
+    }
+    #map .leaflet-container {
+        background: #111; /* Ou a cor de fundo escura que preferir */
+    }
+    /* Remove filtro dos controles, marcadores e overlays dentro deste mapa específico */
+    #map .leaflet-control,
+    #map .leaflet-marker-icon,
+    #map .leaflet-pane > *:not(.leaflet-tile) {
+        filter: none !important;
+    }
+</style>
+{% endblock %} 

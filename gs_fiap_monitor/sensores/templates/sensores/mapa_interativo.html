@@ -65,6 +65,7 @@
         <a href="{% url 'home_page' %}" class="text-primary hover:text-blue-700 font-medium px-4 py-2 rounded border border-primary hover:bg-primary hover:text-white transition-colors">&larr; Voltar para a Home Page</a>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -72,7 +73,7 @@
 
 <script>
     let map;
-    let allMapMarkers = []; // Para guardar referência a todos os marcadores
+    let allMapMarkers = [];
 
     function initMap() {
         const mapElement = document.getElementById('map');
@@ -90,7 +91,6 @@
         if (dispositivosDataElement) {
             try {
                 dispositivos = JSON.parse(dispositivosDataElement.textContent);
-                console.log('[DEBUG] Dispositivos recebidos para o mapa:', dispositivos);
             } catch (e) {
                 console.error("Erro ao parsear dados dos dispositivos:", e);
             }
@@ -102,9 +102,8 @@
         });
         tileLayer.addTo(map);
 
-        renderMarkers(dispositivos); // Chama a função para renderizar marcadores
+        renderMarkers(dispositivos);
 
-        // Ajusta o mapa para mostrar todos os dispositivos
         const bounds = [];
         dispositivos.forEach(d => {
             if (typeof d.latitude === 'number' && typeof d.longitude === 'number') {
@@ -115,48 +114,70 @@
             map.fitBounds(bounds, {padding: [40, 40]});
         }
 
-        // Adiciona listeners para os checkboxes de filtro
         document.querySelectorAll('.filter-status').forEach(checkbox => {
             checkbox.addEventListener('change', filterMarkersByStatus);
         });
     }
 
     function renderMarkers(dispositivosList) {
-        // Limpa marcadores existentes
         allMapMarkers.forEach(marker => map.removeLayer(marker));
         allMapMarkers = [];
 
         dispositivosList.forEach(disp => {
             if (typeof disp.latitude !== 'number' || typeof disp.longitude !== 'number') {
-                console.warn(`[DEBUG] Dispositivo '${disp.nome}' (ID: ${disp.id}) sem coordenadas válidas.`, disp);
                 return;
             }
-            console.log(`[DEBUG] Renderizando marcador: ${disp.nome} | Status: ${disp.status} | Lat: ${disp.latitude} | Lng: ${disp.longitude}`);
-
-            // A lógica de status já vem da view agora em disp.status
-            const status = disp.status || 'normal';
-
-            const iconClasses = `map-marker ${status}`; // As classes CSS já devem estar no base.html ou aqui
+            const statusClass = disp.status_marcador || 'normal';
+            const iconClasses = `map-marker ${statusClass}`;
             const markerElement = L.divIcon({
                 className: iconClasses,
-                html: `<span class='pulse-inner'>${status === 'critical' ? '!' : ''}</span>`,
+                html: `<span class='pulse-inner'>${statusClass === 'critical' ? '!' : ''}</span>`,
                 iconSize: [32, 32],
-                iconAnchor: [16, 16] // Centraliza o círculo do marcador
+                iconAnchor: [16, 16]
             });
             
-            let statusLabel = status === 'critical' ? 'Crítico' : status === 'moderate' ? 'Moderado' : 'Normal';
-            let popupContent = `<b>${disp.nome}</b> (ID: ${disp.id})<br>${disp.descricao || ''}`;
-            if (disp.leituras) {
-                for (const sensorNome in disp.leituras) {
-                    const leitura = disp.leituras[sensorNome];
-                    popupContent += `<br>${sensorNome}: ${leitura.valor} ${leitura.unidade} (${leitura.timestamp})`;
-                }
-            }
-            popupContent += `<br><b>Status:</b> <span class="status-popup-${status}">${statusLabel}</span>`;
+            let statusNivelAguaLabel = disp.status_marcador === 'critical' ? 'Crítico' :
+                                   disp.status_marcador === 'moderate' ? 'Moderado' : 'Normal';
 
-            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: status}) // Adiciona status ao marcador
+            let leiturasHtml = '';
+            if (disp.leituras_formatadas && Object.keys(disp.leituras_formatadas).length > 0) {
+                leiturasHtml = Object.entries(disp.leituras_formatadas).map(([sensor, leitura]) => {
+                    return `<p class="text-xs text-gray-700 leading-tight"><strong class="font-medium">${sensor}:</strong> ${leitura}</p>`;
+                }).join('');
+            } else {
+                leiturasHtml = '<p class="text-xs text-gray-500 italic">Nenhuma leitura registrada.</p>';
+            }
+
+            const popupContent = `
+                <div class="map-popup-content text-sm text-gray-800" style="min-width: 230px; max-width:280px;">
+                    <h3 class="text-base font-bold text-secondary mb-0.5">${disp.nome}</h3>
+                    <p class="text-xs text-gray-500 mb-1.5 leading-tight">ID: ${disp.id}<br>${disp.descricao}</p>
+                    <div class="mb-2 text-xs leading-tight">
+                        <strong class="font-medium">Nível Água:</strong> 
+                        <span class="font-semibold px-1.5 py-0.5 rounded-full text-white text-[10px] 
+                            ${disp.status_marcador === 'critical' ? 'bg-red-500' : disp.status_marcador === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'}">
+                            ${statusNivelAguaLabel}
+                        </span><br>
+                        <strong class="font-medium">Operacional:</strong> 
+                        <span class="font-semibold ${disp.status_operacional === 'Online' ? 'text-green-600' : 'text-red-600'}">
+                            ${disp.status_operacional}
+                        </span>
+                    </div>
+                    <div class="border-t border-gray-200 pt-1.5 mt-1.5">
+                        <h4 class="text-xs font-semibold text-gray-600 mb-0.5">Últimas Leituras:</h4>
+                        ${leiturasHtml}
+                    </div>
+                    ${disp.url_detalhes !== '#' ? 
+                        `<div class="mt-2 pt-1 border-t border-gray-200 text-right">
+                            <a href="${disp.url_detalhes}" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">Ver Detalhes &rarr;</a>
+                         </div>` : ''}
+                </div>
+            `;
+
+            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: disp.status_marcador})
                 .addTo(map)
                 .bindPopup(popupContent);
+            
             allMapMarkers.push(leafletMarker);
         });
     }
@@ -182,7 +203,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initMap();
-        // Outros scripts específicos para esta página podem ir aqui
     });
 </script>
 <style>
@@ -244,6 +264,11 @@
     .leaflet-marker-icon,
     .leaflet-pane > *:not(.leaflet-tile) {
         filter: none !important;
+    }
+
+    /* Adicionar um z-index mais alto para o popup do Leaflet para ficar sobre o overlay do modal quando o modal está fechado */
+    .leaflet-popup-pane {
+        z-index: 650; /* Menor que o modal (1000), mas acima de outros elementos */
     }
 </style>
 {% endblock %} 

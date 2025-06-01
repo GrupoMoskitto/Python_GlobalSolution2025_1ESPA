@@ -5,10 +5,47 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <header class="mb-12 text-center">
+    <header class="mb-8 text-center">
         <h1 class="text-4xl font-bold text-secondary mb-3">Nossos Dispositivos em Campo</h1>
         <p class="text-xl text-gray-600 mt-1 max-w-3xl mx-auto">Acompanhe o status e as últimas informações de cada unidade de monitoramento.</p>
     </header>
+
+    {% if messages %}
+        <div class="mb-6 space-y-3">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-sm
+                        {% if message.tags == 'success' %} bg-green-100 border-l-4 border-green-500 text-green-700
+                        {% elif message.tags == 'info' %} bg-blue-100 border-l-4 border-blue-500 text-blue-700
+                        {% elif message.tags == 'warning' %} bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700
+                        {% elif message.tags == 'error' %} bg-red-100 border-l-4 border-red-500 text-red-700
+                        {% else %} bg-gray-100 border-l-4 border-gray-500 text-gray-700
+                        {% endif %}"
+                 role="alert">
+                <div class="flex">
+                    <div class="py-1">
+                        {% if message.tags == 'success' %}<i class="fas fa-check-circle mr-2"></i>
+                        {% elif message.tags == 'info' %}<i class="fas fa-info-circle mr-2"></i>
+                        {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle mr-2"></i>
+                        {% elif message.tags == 'error' %}<i class="fas fa-times-circle mr-2"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {{ message }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mb-8 text-center md:text-left">
+        <form method="POST" action="{% url 'sensores:detectar_novos_dispositivos' %}" class="inline-block">
+            {% csrf_token %}
+            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <i class="fas fa-search-plus mr-2"></i>Detectar Novos Dispositivos
+            </button>
+        </form>
+    </div>
 
     {% if dispositivos %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -42,9 +79,15 @@
                             </div>
                             <div class="text-sm font-medium {{ text_color }}">
                                 {% if dispositivo.ativo %}
-                                    <span class="flex items-center"><i class="fas fa-power-off text-green-500 mr-1.5"></i>Ativo</span>
+                                    <span class="flex items-center"><i class="fas fa-power-off text-green-500 mr-1.5"></i>Admin: Ativo</span>
                                 {% else %}
-                                    <span class="flex items-center"><i class="fas fa-power-off text-gray-400 mr-1.5"></i>Inativo</span>
+                                    <span class="flex items-center"><i class="fas fa-power-off text-gray-400 mr-1.5"></i>Admin: Inativo</span>
+                                {% endif %}
+                                <br> {# Quebra de linha para o novo status #}
+                                {% if dispositivo.status_operacional == 'Online' %}
+                                    <span class="flex items-center"><i class="fas fa-signal text-green-500 mr-1.5"></i>Status: Online</span>
+                                {% else %}
+                                    <span class="flex items-center"><i class="fas fa-signal text-red-500 mr-1.5"></i>Status: Offline</span>
                                 {% endif %}
                             </div>
                         </div>
