@@ -1,7 +1,7 @@
 {% extends 'sensores/base.html' %}
 {% load static %}
 
-{% block title %}Início - Sistema de Monitoramento de Desastres Naturais{% endblock %}
+{% block title %}Início - Moskitto: Prevenção Inteligente de Enchentes{% endblock %}
 
 {% block body_class %}page-home{% endblock %}
 
@@ -26,11 +26,11 @@
         <div class="relative z-10 max-w-7xl mx-auto px-6 pt-28 md:pt-36 flex-grow flex flex-col justify-center">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="text-center lg:text-left">
-                    <h1 class="text-4xl md:text-6xl font-bold text-secondary mb-6 leading-tight">
-                        Tecnologia <span class="text-primary">Inteligente</span> contra Enchentes
+                    <h1 class="text-4xl md:text-6xl font-bold text-secondary mb-6 leading-tight font-heading">
+                        Chega de Enchentes: <span class="text-primary">Monitoramento Inteligente</span> para proteger sua cidade!
                     </h1>
-                    <p class="text-xl text-gray-700 mb-8 max-w-2xl mx-auto lg:mx-0">
-                        Monitoramento em tempo real de bueiros e áreas de risco com alertas preventivos para reduzir danos causados por enchentes.
+                    <p class="text-xl text-gray-700 mb-8 max-w-2xl mx-auto lg:mx-0 font-body">
+                        Nossa solução inovadora utiliza tecnologia de baixo custo para prever alagamentos, permitindo ações rápidas e salvando vidas e patrimônio.
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
                         <a href="{% url 'sensores:mapa_interativo' %}" 
@@ -97,74 +97,170 @@
         <div class="absolute bottom-0 left-0 w-full h-80 md:h-96 pointer-events-none z-20" style="background: linear-gradient(to bottom, transparent 85%, rgba(255,255,255,0.6) 95%, #fff 100%);"></div>
     </section>
 
+    <!-- Problema: Enchentes urbanas, um desafio crescente -->
+    <section id="problema" class="py-16 md:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-heading">Problema: Enchentes urbanas, um desafio crescente</h2>
+                <div class="w-20 h-1 bg-primary mx-auto mb-6"></div>
+                <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-body">
+                    Centenas de pontos de alagamento, ruas intransitáveis, cidadãos ilhados. Essa é a dura realidade em muitas cidades brasileiras durante as chuvas. O entupimento de bueiros por lixo agrava a situação, causando prejuízos, riscos à saúde e paralisando a vida urbana. A prevenção é o melhor caminho, e alertas precoces podem fazer toda a diferença.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="animate-on-scroll">
+                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-house-damage text-4xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Prejuízos Materiais</h3>
+                        <p class="text-gray-600 font-body">Inundações causam perdas significativas em residências, comércios e infraestrutura pública.</p>
+                    </div>
+                </div>
+                <div class="animate-on-scroll" style="animation-delay: 0.2s;">
+                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-heartbeat text-4xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Riscos à Saúde</h3>
+                        <p class="text-gray-600 font-body">Contato com água contaminada e proliferação de vetores de doenças.</p>
+                    </div>
+                </div>
+                <div class="animate-on-scroll" style="animation-delay: 0.4s;">
+                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-car text-4xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Mobilidade Comprometida</h3>
+                        <p class="text-gray-600 font-body">Vias bloqueadas dificultam o trânsito e o acesso a serviços essenciais.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Sobre a Solução -->
     <section class="py-24 bg-white" id="sobre">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-20">
-                <h2 class="text-4xl font-bold text-secondary mb-4">Solução Tecnológica Acessível</h2>
+                <h2 class="text-4xl font-bold text-secondary mb-4 font-heading">Nossa solução: Inteligência e Economia contra alagamentos</h2>
                 <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
-                    Nosso sistema inovador combina hardware acessível e software avançado para monitorar enchentes em tempo real
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto font-body">
+                    Apresentamos um sistema de monitoramento de bueiros em tempo real, usando sensores e microcontroladores ESP32, com transmissão MQTT e um dashboard interativo para alertas preventivos.
                 </p>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="animate-on-scroll">
                     <div class="bg-gray-100 rounded-3xl p-8">
-                        <p class="text-gray-700 text-lg leading-relaxed">
-                            <span class="font-bold text-primary">Nosso sistema</span>, desenvolvido pela equipe de Engenharia de Software da 1ESPA, utiliza microcontroladores ESP32 com sensores de nível de água analógico (R$10, instalado na parte superior do bueiro voltado para baixo) e umidade DHT22 (R$40, próximo à base do bueiro para detectar acúmulo antecipado de água), alojados em caixas IP67 (R$50) com bateria Li-ion e painel solar ou alimentação elétrica municipal, custando menos de R$300 por unidade (ESP32 entre R$28-50).
+                        <p class="text-gray-700 text-lg leading-relaxed font-body">
+                            <span class="font-bold text-primary">Como funciona:</span> Nosso sistema utiliza microcontroladores ESP32 com sensores de nível de água e umidade, alojados em caixas de proteção IP67. Estes dispositivos monitoram continuamente os bueiros e transmitem os dados via MQTT para um broker (Fiware ou Mosquitto).
                         </p>
-                        <p class="text-gray-700 text-lg leading-relaxed mt-6">
-                            Os dispositivos monitoram em tempo real o nível da água em bueiros espalhados pela cidade e transmitem dados via MQTT para um broker Fiware ou Mosquitto, exibidos em um dashboard interativo desenvolvido em Python e Django, que dispara alertas automáticos via HTTP ou SMS quando níveis atingem limites críticos, permitindo que prefeituras e a Defesa Civil ajam rapidamente para reduzir danos materiais, riscos à saúde pública e impactos na mobilidade urbana.
+                        <p class="text-gray-700 text-lg leading-relaxed mt-6 font-body">
+                            As informações são visualizadas em um dashboard interativo (Python/Django), que também dispara alertas automáticos (HTTP/SMS) quando níveis críticos são atingidos. Isso permite que prefeituras e a Defesa Civil atuem rapidamente, minimizando danos e protegendo a população.
                         </p>
-                        <p class="text-gray-700 text-lg leading-relaxed mt-6">
-                            Nossa solução é escalável para cidades pequenas com orçamento limitado, superando alternativas como o dispositivo da USP de São Carlos (R$15 mil por unidade), viabilizando instalação em dezenas de bueiros críticos.
+                        <div class="mt-8 bg-gradient-to-r from-blue-600 to-primary rounded-2xl p-8 text-white shadow-xl">
+                            <h3 class="text-2xl font-bold mb-4 text-center font-heading">Diferencial de Custo Revolucionário</h3>
+                            <div class="flex items-center justify-around text-center">
+                                <div>
+                                    <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="300">R$300</div>
+                                    <div class="text-sm">Nossa solução (por unidade)</div>
+                                </div>
+                                <div class="text-2xl font-bold text-white seta-comparativo">
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                </div>
+                                <div>
+                                    <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="15000">R$15.000</div>
+                                    <div class="text-sm">Outras soluções (por unidade)</div>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-center text-lg font-semibold">Economia de até <span class="font-bold text-white">98%</span>, democratizando a prevenção!</p>
+                        </div>
+                        <p class="text-gray-700 text-sm leading-relaxed mt-6 font-body">
+                            <em>Componentes principais: ESP32 (R$28-50), Sensor de Nível Analógico (R$10), Sensor de Umidade DHT22 (R$40), Caixa IP67 (R$50), bateria Li-ion com painel solar ou alimentação municipal.</em>
                         </p>
                     </div>
                 </div>
                 
                 <div class="animate-on-scroll">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
-                            <i class="fas fa-dollar-sign text-primary text-4xl mb-4"></i>
-                            <h3 class="text-xl font-bold text-secondary mb-2">Custo Acessível</h3>
-                            <p class="text-gray-700">Menos de R$300 por unidade contra R$15 mil das alternativas</p>
-                        </div>
-                        
-                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
-                            <i class="fas fa-bolt text-primary text-4xl mb-4"></i>
-                            <h3 class="text-xl font-bold text-secondary mb-2">Autonomia Energética</h3>
-                            <p class="text-gray-700">Bateria Li-ion com painel solar ou alimentação municipal</p>
-                        </div>
-                        
-                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
-                            <i class="fas fa-shield-alt text-primary text-4xl mb-4"></i>
-                            <h3 class="text-xl font-bold text-secondary mb-2">Proteção IP67</h3>
-                            <p class="text-gray-700">Caixas resistentes à água e poeira para ambientes hostis</p>
-                        </div>
-                        
-                        <div class="bg-primary bg-opacity-10 rounded-2xl p-6 border border-primary border-opacity-30">
-                            <i class="fas fa-chart-line text-primary text-4xl mb-4"></i>
-                            <h3 class="text-xl font-bold text-secondary mb-2">Monitoramento em Tempo Real</h3>
-                            <p class="text-gray-700">Dados atualizados constantemente via MQTT</p>
+                    <!-- Diagrama Visual Simplificado (Conceitual) -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-200">
+                        <h3 class="text-2xl font-bold text-secondary mb-6 text-center font-heading">Fluxo da Solução</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-water text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-semibold text-secondary font-heading">1. Sensores no bueiro</h4>
+                                    <p class="text-gray-600 font-body">Detectam nível da água e umidade.</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center my-2">
+                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-microchip text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-semibold text-secondary font-heading">2. ESP32 Processa</h4>
+                                    <p class="text-gray-600 font-body">Coleta e prepara os dados dos sensores.</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center my-2">
+                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-broadcast-tower text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-semibold text-secondary font-heading">3. Transmissão MQTT</h4>
+                                    <p class="text-gray-600 font-body">Dados enviados para o Broker (Fiware/Mosquitto).</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center my-2">
+                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-tachometer-alt text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-semibold text-secondary font-heading">4. Dashboard e Alertas</h4>
+                                    <p class="text-gray-600 font-body">Visualização em tempo real e notificações (Python/Django).</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="mt-8 bg-gradient-to-r from-blue-600 to-primary rounded-2xl p-8 text-white">
-                        <h3 class="text-2xl font-bold mb-4">Vantagem Competitiva</h3>
-                        <div class="flex items-center justify-between">
-                            <div class="text-center">
-                                <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="300">R$300</div>
-                                <div>Nossa solução</div>
-                            </div>
-                            <i class="fas fa-arrow-right text-2xl vantagem-competitiva-seta"></i>
-                            <div class="text-center">
-                                <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="15000">R$15.000</div>
-                                <div>Solução USP</div>
-                            </div>
-                        </div>
-                        <div class="mt-4 text-center">Economia de <span class="font-bold">98%</span> por unidade instalada</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Funcionalidades Chave -->
+    <section id="funcionalidades" class="py-16 md:py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-heading">Funcionalidades chave: O que você ganha?</h2>
+                <div class="w-20 h-1 bg-primary mx-auto mb-6"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card">
+                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
+                        <i class="fas fa-eye text-2xl"></i>
                     </div>
+                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Visualização em Tempo Real</h3>
+                    <p class="text-gray-600 font-body">Acompanhe o nível da água nos bueiros monitorados através de um dashboard intuitivo e atualizado instantaneamente.</p>
+                </div>
+                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.2s;">
+                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
+                        <i class="fas fa-bell text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Alertas Preventivos Inteligentes</h3>
+                    <p class="text-gray-600 font-body">Seja notificado ANTES que o alagamento ocorra! O sistema envia alertas automáticos para a Defesa Civil e equipes responsáveis.</p>
+                </div>
+                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.4s;">
+                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
+                        <i class="fas fa-history text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Histórico e Análise de Dados</h3>
+                    <p class="text-gray-600 font-body">Acesse relatórios e gráficos mensais sobre ocorrências por local, ajudando no planejamento urbano e otimizando a manutenção.</p>
                 </div>
             </div>
         </div>
@@ -174,15 +270,73 @@
     <section id="equipe-stakeholders" class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-20">
-                <h2 class="text-4xl font-bold text-secondary mb-4">Sobre</h2>
+                <h2 class="text-4xl font-bold text-secondary mb-4 font-heading">Sobre o projeto e seus benefícios</h2>
                 <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
-                    Conheça a equipe por trás da solução inovadora de monitoramento de enchentes
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto font-body">
+                    Conheça a equipe por trás da solução e como ela beneficia toda a comunidade.
                 </p>
             </div>
             
+            <!-- Benefícios Para Todos -->
             <div class="mb-20">
-                <h3 class="text-3xl font-bold text-secondary mb-3 text-center">Nossa Equipe</h3>
+                <h3 class="text-3xl font-bold text-secondary mb-3 text-center font-heading">Benefícios para todos</h3>
+                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto font-body">
+                    Nossa solução é projetada para trazer vantagens significativas para diversos públicos envolvidos na gestão e prevenção de enchentes.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card">
+                        <div class="flex justify-center mb-4">
+                            <i class="fas fa-city text-5xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Prefeituras Municipais</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                            <li>Redução de custos com danos.</li>
+                            <li>Otimização da infraestrutura.</li>
+                            <li>Melhora da segurança pública.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.1s;">
+                        <div class="flex justify-center mb-4">
+                            <i class="fas fa-shield-alt text-5xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Defesa Civil</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                            <li>Informação antecipada para ações.</li>
+                            <li>Maior capacidade de resposta.</li>
+                            <li>Proteção eficaz de vidas.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.2s;">
+                        <div class="flex justify-center mb-4">
+                            <i class="fas fa-house-user text-5xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Cidadãos</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                            <li>Mais segurança e tranquilidade.</li>
+                            <li>Redução de perdas materiais.</li>
+                            <li>Alertas preventivos diretos (futuro).</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.3s;">
+                        <div class="flex justify-center mb-4">
+                            <i class="fas fa-chart-area text-5xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Pesquisadores</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                            <li>Dados históricos para estudos.</li>
+                            <li>Base para planejamento urbano.</li>
+                            <li>Identificação de áreas críticas.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nossa Equipe (Mantida como estava, mas dentro da seção renomeada) -->
+            <div class="mb-20">
+                <h3 class="text-3xl font-bold text-secondary mb-3 text-center font-heading">Nossa equipe</h3>
                 <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto">
                     Juntos, desenvolvemos uma solução que combina tecnologia acessível com impacto social significativo para prevenir desastres causados por enchentes.
                 </p>
@@ -241,38 +395,20 @@
                 </div>
             </div>
             
-            <div>
-                <h3 class="text-3xl font-bold text-secondary mb-3 text-center">Stakeholders</h3>
-                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto">
-                    Nossa solução beneficia diversos atores envolvidos na prevenção e resposta a enchentes urbanas.
+            <!-- Call to Action -->
+            <div class="text-center pt-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-secondary mb-6 font-heading">Interessado em levar esta solução para sua cidade?</h3>
+                <p class="text-lg text-gray-700 mb-8 max-w-xl mx-auto font-body">
+                    Entre em contato conosco para discutir um projeto piloto ou saber mais sobre a implementação do sistema Moskitto.
                 </p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
-                        <i class="fas fa-city text-4xl mb-4"></i>
-                        <h4 class="text-xl font-bold mb-2">Prefeituras Municipais</h4>
-                        <p>Responsáveis pela infraestrutura urbana e gestão de crises</p>
-                    </div>
-                    
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
-                        <i class="fas fa-shield-alt text-4xl mb-4"></i>
-                        <h4 class="text-xl font-bold mb-2">Defesa Civil</h4>
-                        <p>Atuam em situações de risco e coordenam ações emergenciais</p>
-                    </div>
-                    
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
-                        <i class="fas fa-house-user text-4xl mb-4"></i>
-                        <h4 class="text-xl font-bold mb-2">Moradores de Áreas de Risco</h4>
-                        <p>Recebem alertas preventivos para proteger vidas e propriedades</p>
-                    </div>
-                    
-                    <div class="bg-gradient-to-br from-primary to-blue-400 rounded-2xl p-6 text-white animate-on-scroll stakeholder-3d-card">
-                        <i class="fas fa-laptop-code text-4xl mb-4"></i>
-                        <h4 class="text-xl font-bold mb-2">Equipe Técnica</h4>
-                        <p>Responsável pela implementação, integração e manutenção</p>
-                    </div>
-                </div>
+                <a href="#contato" 
+                   class="px-10 py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
+                          hover:bg-blue-400 hover:shadow-xl hover:-translate-y-1 
+                          focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 text-lg">
+                    Fale Conosco
+                </a>
             </div>
+
         </div>
     </section>
 
@@ -290,7 +426,7 @@
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="bg-white rounded-3xl shadow-xl p-8 contact-form-block">
-                    <h3 class="text-2xl font-bold text-secondary mb-6">Envie uma Mensagem</h3>
+                    <h3 class="text-2xl font-bold text-secondary mb-6">Envie uma mensagem</h3>
                     
                     <form class="space-y-6">
                         <div>
@@ -316,7 +452,7 @@
                 
                 <div class="contact-info-block">
                     <div class="bg-gradient-to-br from-primary to-blue-500 rounded-3xl shadow-xl p-8 text-white h-full">
-                        <h3 class="text-2xl font-bold mb-6">Informações de Contato</h3>
+                        <h3 class="text-2xl font-bold mb-6">Informações de contato</h3>
                         
                         <div class="space-y-6">
                             <div class="flex items-start">
@@ -402,6 +538,7 @@
             }
             add3DEffect('.team-3d-card', 18);
             add3DEffect('.stakeholder-3d-card', 32);
+            add3DEffect('.content-3d-card', 10);
         }
 
         // Overlay social da equipe
@@ -490,6 +627,21 @@
                             }
                         }
                     );
+                    // Animação para a nova seta no card de comparativo de custo
+                    if (document.querySelector('.seta-comparativo')) {
+                        gsap.to('.seta-comparativo', {
+                            x: 10, // Move 10 pixels para a direita
+                            repeat: -1, // Repete infinitamente
+                            yoyo: true, // Faz a animação ir e voltar
+                            duration: 0.7, // Duração de cada ciclo
+                            ease: 'sine.inOut', // Suavização da animação
+                            scrollTrigger: { // Inicia a animação quando o card estiver visível
+                                trigger: '.seta-comparativo',
+                                start: 'top 90%'
+                            }
+                        });
+                    }
+
                     gsap.to('.vantagem-competitiva-seta', {
                         x: 18,
                         repeat: -1,
