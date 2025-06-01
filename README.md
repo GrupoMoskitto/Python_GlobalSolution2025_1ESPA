@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/Plotly-Graphs-orange?logo=plotly" alt="Plotly"/>
 </p>
 
-<h1 align="center">🌱 GS FIAP Monitor</h1>
+<h1 align="center"><img src="gs_fiap_monitor/static/sensores/img/favicon.png" alt="Moskitto Logo" width="40" style="vertical-align: middle; margin-right: 10px;"/>GS FIAP Monitor</h1>
 
 > **Sistema web para monitoramento de sensores (umidade, temperatura, nível de água) integrados via ESP32 e Fiware Orion Context Broker. Visual moderno, responsivo e com gráficos interativos.**
 
