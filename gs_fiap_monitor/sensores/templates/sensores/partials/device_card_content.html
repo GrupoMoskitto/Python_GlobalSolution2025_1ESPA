@@ -3,25 +3,25 @@
 
 <div class="real-device-card group relative flex flex-col h-full bg-white rounded-xl shadow-lg hover:shadow-2xl border-l-4 {{ border_color }} transition-all duration-300 ease-in-out transform hover:-translate-y-1.5 overflow-hidden cursor-pointer" data-main-link="{% url 'sensores:detalhes_dispositivo' id_dispositivo_fiware=dispositivo.id_dispositivo_fiware %}">
     {# Link invisível que cobre o card removido, card agora é clicável via JS se não for o link de editar localização #}
-    <div class="p-5 flex flex-col flex-grow relative z-10"> 
+    <div class="p-3 sm:p-4 md:p-5 flex flex-col flex-grow relative z-10"> 
         <!-- Cabeçalho do Card -->
         <div class="mb-3">
             <div class="flex justify-between items-start">
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-xl lg:text-2xl font-bold text-gray-800 group-hover:text-primary truncate transition-colors duration-300">{{ dispositivo.nome_dispositivo|default:"Dispositivo Sem Nome" }}</h2>
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 group-hover:text-primary truncate transition-colors duration-300">{{ dispositivo.nome_dispositivo|default:"Dispositivo Sem Nome" }}</h2>
                     <span class="mt-1 inline-flex items-center px-2.5 py-0.5 text-xs font-semibold {{ badge_bg_color }} text-white rounded-full capitalize">
                         <i class="{{ status_icon }} mr-1.5"></i>{{ status_texto_para_exibir|default:"Indefinido" }}
                     </span>
                 </div>
-                <div class="text-xs text-gray-600 text-right space-y-0.5 flex-shrink-0 ml-2">
-                    <p class="flex items-center justify-end whitespace-nowrap" title="Status Administrativo">
+                <div class="text-xs text-gray-600 text-right space-y-0.5 flex-shrink-0 ml-1 sm:ml-2">
+                    <p class="flex items-center justify-end" title="Status Administrativo">
                         {% if dispositivo.ativo %}
                             <i class="fas fa-toggle-on text-green-500 mr-1.5"></i>Ativo
                         {% else %}
                             <i class="fas fa-toggle-off text-gray-400 mr-1.5"></i>Inativo
                         {% endif %}
                     </p>
-                    <p class="flex items-center justify-end whitespace-nowrap" title="Status Operacional (Comunicação)">
+                    <p class="flex items-center justify-end" title="Status Operacional (Comunicação)">
                         {% if dispositivo.status_operacional == 'Online' %}
                             <i class="fas fa-wifi text-green-500 mr-1.5"></i>Online
                         {% else %}
@@ -80,11 +80,15 @@
                                 <i class="fas fa-chart-bar fa-fw w-4 text-center mr-1.5 text-gray-400 opacity-75 mt-0.5"></i>
                             {% endif %}
                             <div class="flex-1 min-w-0">
-                                <span class="font-medium text-gray-600">{{ sensor_nome }}:</span>
-                                <span class="ml-1">{{ leitura_info.valor }} {{ leitura_info.unidade_medida }}</span>
-                                {% if leitura_info.timestamp_leitura %}
-                                    <span class="ml-1.5 text-gray-500">({% timezone "America/Sao_Paulo" %}{{ leitura_info.timestamp_leitura|to_brasilia_time|date:"d/m H:i" }}{% endtimezone %})</span>
-                                {% endif %}
+                                <div class="sm:flex sm:items-baseline sm:flex-wrap"> 
+                                    <div class="mr-1.5">
+                                        <span class="font-medium text-gray-600">{{ sensor_nome }}:</span>
+                                        <span class="ml-1">{{ leitura_info.valor }} {{ leitura_info.unidade_medida }}</span>
+                                    </div>
+                                    {% if leitura_info.timestamp_leitura %}
+                                        <span class="block sm:inline text-gray-500 text-[0.7rem] sm:text-xs">({% timezone "America/Sao_Paulo" %}{{ leitura_info.timestamp_leitura|to_brasilia_time|date:"d/m H:i" }}{% endtimezone %})</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     {% endfor %}

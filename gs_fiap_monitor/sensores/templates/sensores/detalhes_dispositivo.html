@@ -6,28 +6,30 @@
 {% block title %}{{ dispositivo.nome_dispositivo }} - Detalhes - Moskitto{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-12">
-    <header class="mb-10 border-b border-gray-200 pb-8">
+<div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <header class="mb-8 sm:mb-10 border-b border-gray-200 pb-6 sm:pb-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-                <h1 class="text-4xl font-bold text-secondary mb-2">{{ dispositivo.nome_dispositivo }}</h1>
-                <p class="text-lg text-gray-600">Detalhes e histórico de leituras do dispositivo.</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-secondary mb-1 sm:mb-2">{{ dispositivo.nome_dispositivo }}</h1>
+                <p class="text-base sm:text-lg text-gray-600">Detalhes e histórico de leituras do dispositivo.</p>
             </div>
-            <a href="{% url 'sensores:listar_dispositivos' %}" class="mt-4 md:mt-0 inline-block px-6 py-3 bg-secondary text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                <i class="fas fa-arrow-left mr-2"></i>Voltar para Lista
+            <a href="{% url 'sensores:listar_dispositivos' %}" class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-secondary text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-gray-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <i class="fas fa-arrow-left mr-1.5 sm:mr-2"></i>
+                <span class="hidden sm:inline">Voltar para Lista</span>
+                <span class="sm:hidden">Voltar</span>
             </a>
         </div>
     </header>
 
     {% if dispositivo.localizacao_latitude is None or dispositivo.localizacao_longitude is None %}
-    <div class="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-md shadow-sm">
+    <div class="mb-6 sm:mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-md shadow-sm">
         <div class="flex items-center">
             <div class="flex-shrink-0">
-                <i class="fas fa-map-marked-alt fa-2x text-yellow-600"></i>
+                <i class="fas fa-map-marked-alt fa-lg sm:fa-2x text-yellow-600"></i>
             </div>
-            <div class="ml-4 flex-grow">
-                <h3 class="text-lg font-semibold text-yellow-800">Configurar Localização Pendente</h3>
-                <p class="text-sm text-yellow-700 mt-1">
+            <div class="ml-3 sm:ml-4 flex-grow">
+                <h3 class="text-base sm:text-lg font-semibold text-yellow-800">Configurar Localização Pendente</h3>
+                <p class="text-xs sm:text-sm text-yellow-700 mt-1">
                     Este dispositivo ainda não tem uma localização geográfica definida. 
                     Por favor, <a href="{% url 'sensores:editar_localizacao_dispositivo' dispositivo.id_dispositivo_fiware %}" class="font-bold underline hover:text-yellow-900">configure a localização</a> 
                     para que ele possa ser exibido corretamente no mapa interativo e em outras funcionalidades.
@@ -45,20 +47,20 @@
     </div>
     {% endif %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-            <h2 class="text-2xl font-semibold text-primary mb-6">Informações do Dispositivo</h2>
-            <div class="space-y-4 text-gray-700">
-                <p><strong class="font-medium text-secondary"><i class="fas fa-tag fa-fw mr-2 text-gray-500"></i>ID Fiware:</strong> {{ dispositivo.id_dispositivo_fiware }}</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-12">
+        <div class="lg:col-span-1 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl sm:text-2xl font-semibold text-primary mb-4 sm:mb-6">Informações do Dispositivo</h2>
+            <div class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700">
+                <p><strong class="font-medium text-secondary"><i class="fas fa-tag fa-fw mr-2 text-gray-500"></i>ID Fiware:</strong> <span class="break-all">{{ dispositivo.id_dispositivo_fiware }}</span></p>
                 <p><strong class="font-medium text-secondary"><i class="fas fa-align-left fa-fw mr-2 text-gray-500"></i>Descrição:</strong> {{ dispositivo.descricao|default:"N/A" }}</p>
                 <p><strong class="font-medium text-secondary"><i class="fas fa-map-marker-alt fa-fw mr-2 text-gray-500"></i>Localização:</strong></p>
-                <ul class="list-disc list-inside ml-4 text-sm">
+                <ul class="list-disc list-inside ml-4 text-xs sm:text-sm">
                     <li>Latitude: {{ dispositivo.localizacao_latitude|default_if_none:"N/A" }}</li>
                     <li>Longitude: {{ dispositivo.localizacao_longitude|default_if_none:"N/A" }}</li>
                 </ul>
-                <div class="mt-2">
+                <div class="mt-1 sm:mt-2">
                     <a href="{% url 'sensores:editar_localizacao_dispositivo' dispositivo.id_dispositivo_fiware %}" 
-                       class="inline-block px-3 py-1.5 bg-blue-500 text-white text-xs font-semibold rounded-md hover:bg-blue-600 transition duration-150 ease-in-out shadow-sm hover:shadow-md transform hover:-translate-y-px">
+                       class="inline-block px-2.5 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-150 ease-in-out shadow-sm hover:shadow-md transform hover:-translate-y-px">
                         <i class="fas fa-edit mr-1"></i>Editar Localização
                     </a>
                 </div>
@@ -92,37 +94,37 @@
         </div>
 
         <!-- Dados em Tempo Real do Fiware -->
-        <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-            <h2 class="text-2xl font-semibold text-blue-700 mb-6 flex items-center">
-                <i class="fas fa-sync-alt mr-3 text-blue-500"></i>Dados Atuais (Fiware)
+        <div class="lg:col-span-1 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4 sm:mb-6 flex items-center">
+                <i class="fas fa-sync-alt mr-2 sm:mr-3 text-blue-500"></i>Dados Atuais (Fiware)
             </h2>
             {% if dados_fiware_formatados %}
-                <div class="space-y-6 text-xl text-gray-700">
+                <div class="space-y-4 sm:space-y-6 text-gray-700">
                     {% for dado in dados_fiware_formatados %}
-                        <div class="flex items-start py-3">
+                        <div class="flex items-start py-2 sm:py-3">
                             {% if 'temperatura' in dado.nome|lower %}
-                                <i class="fas fa-thermometer-half fa-lg fa-fw w-auto text-center mr-4 text-red-500 opacity-80 mt-2"></i>
+                                <i class="fas fa-thermometer-half fa-md sm:fa-lg fa-fw w-auto text-center mr-2 sm:mr-4 text-red-500 opacity-80 mt-1 sm:mt-2"></i>
                             {% elif 'umidade' in dado.nome|lower %}
-                                <i class="fas fa-tint fa-lg fa-fw w-auto text-center mr-4 text-blue-500 opacity-80 mt-2"></i>
+                                <i class="fas fa-tint fa-md sm:fa-lg fa-fw w-auto text-center mr-2 sm:mr-4 text-blue-500 opacity-80 mt-1 sm:mt-2"></i>
                             {% elif 'nível de água' in dado.nome|lower or 'nivel de agua' in dado.nome|lower or 'waterlevel' in dado.nome_original|lower %}
-                                <i class="fas fa-water fa-lg fa-fw w-auto text-center mr-4 text-cyan-500 opacity-80 mt-2"></i>
+                                <i class="fas fa-water fa-md sm:fa-lg fa-fw w-auto text-center mr-2 sm:mr-4 text-cyan-500 opacity-80 mt-1 sm:mt-2"></i>
                             {% else %}
-                                <i class="fas fa-info-circle fa-lg fa-fw w-auto text-center mr-4 text-gray-400 opacity-80 mt-2"></i>
+                                <i class="fas fa-info-circle fa-md sm:fa-lg fa-fw w-auto text-center mr-2 sm:mr-4 text-gray-400 opacity-80 mt-1 sm:mt-2"></i>
                             {% endif %}
                             <div class="flex-1 min-w-0">
-                                <strong class="font-medium text-gray-600">{{ dado.nome }}:</strong>
-                                <span class="ml-1.5 text-gray-800">
+                                <strong class="font-medium text-gray-600 text-base sm:text-lg">{{ dado.nome }}:</strong>
+                                <span class="ml-1 sm:ml-1.5 text-gray-800 text-base sm:text-lg md:text-xl">
                                     {{ dado.valor }}
                                     {% if dado.unidade and dado.unidade != "Desconhecida" %}
                                         {{ dado.unidade }}
                                     {% endif %}
                                 </span>
                                 {% if dado.timestamp_dt %}
-                                    <span class="block text-lg text-gray-500 mt-1">
+                                    <span class="block text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
                                         <i class="far fa-clock fa-xs mr-1"></i>{% timezone "America/Sao_Paulo" %}{{ dado.timestamp_dt|to_brasilia_time|date:"d/m H:i:s" }}{% endtimezone %}
                                     </span>
                                 {% elif timestamp_fiware_em_brasilia and not forloop.counter0 %} {# Mostra timestamp geral apenas para o primeiro se nenhum específico for encontrado #}
-                                     <span class="block text-lg text-gray-500 mt-1">
+                                     <span class="block text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
                                         <i class="far fa-clock fa-xs mr-1"></i>Timestamp Geral: {% timezone "America/Sao_Paulo" %}{{ timestamp_fiware_em_brasilia|date:"d/m H:i:s" }}{% endtimezone %}
                                     </span>
                                 {% endif %}
@@ -131,38 +133,38 @@
                     {% endfor %}
                 </div>
             {% elif dados_fiware_live.erro_fiware %}
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 rounded-md text-sm sm:text-base" role="alert">
                     <p class="font-bold">Erro ao buscar dados do Fiware:</p>
                     <p>{{ dados_fiware_live.erro_fiware }}</p>
                 </div>
             {% else %}
-                <p class="text-gray-500 italic">Nenhum dado em tempo real recebido do Fiware ou o dispositivo não foi encontrado.</p>
+                <p class="text-gray-500 italic text-sm sm:text-base">Nenhum dado em tempo real recebido do Fiware ou o dispositivo não foi encontrado.</p>
             {% endif %}
         </div>
 
-        <div class="lg:col-span-2 space-y-8">
-            <h2 class="text-3xl font-semibold text-primary mb-6 border-b border-gray-200 pb-4">Histórico de Leituras</h2>
+        <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 border-b border-gray-200 pb-3 sm:pb-4">Histórico de Leituras</h2>
             {% if graficos_html %}
                 {% for nome_sensor, grafico_html_content in graficos_html.items %}
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                        <h3 class="text-xl font-semibold text-secondary mb-4 text-center">{{ nome_sensor }}</h3>
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
+                        <h3 class="text-lg sm:text-xl font-semibold text-secondary mb-3 sm:mb-4 text-center">{{ nome_sensor }}</h3>
                         {# A view agora sempre fornece grafico_html_content (o gráfico ou uma msg de erro) #}
                         {{ grafico_html_content|safe }}
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200 text-center">
-                    <i class="fas fa-chart-line fa-3x text-gray-300 mb-4"></i>
-                    <p class="text-xl text-gray-600">Nenhum histórico de leitura encontrado para este dispositivo.</p>
-                    <p class="text-sm text-gray-500 mt-2">Verifique se o dispositivo está enviando dados ou se há leituras registradas.</p>
+                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 text-center">
+                    <i class="fas fa-chart-line fa-2xl sm:fa-3x text-gray-300 mb-3 sm:mb-4"></i>
+                    <p class="text-lg sm:text-xl text-gray-600">Nenhum histórico de leitura encontrado para este dispositivo.</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Verifique se o dispositivo está enviando dados ou se há leituras registradas.</p>
                 </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="mt-12 text-center">
-        <a href="{% url 'sensores:listar_dispositivos' %}" class="inline-block px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-blue-400 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            <i class="fas fa-arrow-left mr-2"></i>Voltar para a Lista de Dispositivos
+    <div class="mt-10 sm:mt-12 text-center">
+        <a href="{% url 'sensores:listar_dispositivos' %}" class="inline-block px-6 py-3 text-sm sm:px-8 sm:py-4 sm:text-base bg-primary text-white font-bold rounded-full hover:bg-blue-400 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <i class="fas fa-arrow-left mr-1.5 sm:mr-2"></i>Voltar para a Lista de Dispositivos
         </a>
     </div>
 </div>

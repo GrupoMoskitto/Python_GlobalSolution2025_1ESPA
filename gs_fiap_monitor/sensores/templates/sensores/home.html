@@ -9,82 +9,82 @@
 
 {% block content %}
     <!-- Hero Section -->
-    <section id="home" class="relative pt-0 pb-32 md:pt-0 md:pb-48 overflow-hidden min-h-screen flex flex-col">
+    <section id="home" class="relative pt-0 pb-24 md:pb-32 lg:pb-48 overflow-hidden min-h-screen flex flex-col">
         <div class="absolute inset-0 bg-gradient-to-r from-primary to-blue-300 opacity-30 z-0"></div>
         <div class="absolute inset-0 z-0">
-            <div class="absolute top-1/4 left-1/4 w-48 h-48 rounded-full bg-primary opacity-20 animate-pulse"></div>
-            <div class="absolute top-1/3 right-1/4 w-32 h-32 rounded-full bg-primary opacity-20 animate-pulse"></div>
-            <div class="absolute bottom-1/4 left-1/3 w-40 h-40 rounded-full bg-primary opacity-20 animate-pulse"></div>
-            <div class="absolute top-8 left-32 w-20 h-20 rounded-full bg-primary opacity-15 animate-pulse"></div>
-            <div class="absolute top-1/5 right-16 w-16 h-16 rounded-full bg-primary opacity-15 animate-pulse"></div>
-            <div class="absolute bottom-16 right-1/5 w-24 h-24 rounded-full bg-primary opacity-15 animate-pulse"></div>
-            <div class="absolute bottom-8 left-24 w-14 h-14 rounded-full bg-primary opacity-15 animate-pulse"></div>
-            <div class="absolute top-1/3 right-1/3 w-12 h-12 rounded-full bg-primary opacity-15 animate-pulse"></div>
-            <div class="absolute bottom-1/3 left-1/2 w-10 h-10 rounded-full bg-primary opacity-15 animate-pulse" style="transform: translateX(-50%);"></div>
+            <div class="absolute top-1/4 left-1/4 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-48 lg:h-48 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            <div class="absolute top-1/3 right-1/4 w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 lg:w-32 lg:h-32 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            <div class="absolute bottom-1/4 left-1/3 w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-40 lg:h-40 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            <div class="absolute top-8 left-32 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 lg:w-20 lg:h-20 rounded-full bg-primary opacity-15 animate-pulse"></div>
+            <div class="absolute top-1/5 right-16 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary opacity-15 animate-pulse"></div>
+            <div class="absolute bottom-16 right-1/5 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-full bg-primary opacity-15 animate-pulse"></div>
+            <div class="absolute bottom-8 left-24 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary opacity-15 animate-pulse"></div>
+            <div class="absolute top-1/3 right-1/3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary opacity-15 animate-pulse"></div>
+            <div class="absolute bottom-1/3 left-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary opacity-15 animate-pulse" style="transform: translateX(-50%);"></div>
         </div>
         
-        <div class="relative z-10 max-w-7xl mx-auto px-6 pt-28 md:pt-36 flex-grow flex flex-col justify-center">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 md:pt-36 flex-grow flex flex-col justify-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
                 <div class="text-center lg:text-left">
-                    <h1 class="text-4xl md:text-6xl font-bold text-secondary mb-6 leading-tight font-heading">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-secondary mb-4 md:mb-6 leading-tight font-heading">
                         Chega de Enchentes: <span class="text-primary">Monitoramento Inteligente</span> para proteger sua cidade!
                     </h1>
-                    <p class="text-xl text-gray-700 mb-8 max-w-2xl mx-auto lg:mx-0 font-body">
+                    <p class="text-lg sm:text-xl text-gray-700 mb-6 md:mb-8 max-w-2xl mx-auto lg:mx-0 font-body">
                         Nossa solução inovadora utiliza tecnologia de baixo custo para prever alagamentos, permitindo ações rápidas e salvando vidas e patrimônio.
                     </p>
-                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4">
                         <a href="{% url 'sensores:mapa_interativo' %}" 
-                           class="px-8 py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
+                           class="px-6 py-3 sm:px-8 sm:py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
                                   hover:bg-blue-400 hover:shadow-xl hover:-translate-y-1 
-                                  focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50">
+                                  focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 text-base sm:text-lg">
                             Ver Mapa ao Vivo
                         </a>
                         <a href="{% url 'home_page' %}#sobre" 
-                           class="px-8 py-4 bg-white text-secondary border-2 border-primary font-bold rounded-full transition-all duration-300 shadow-lg 
+                           class="px-6 py-3 sm:px-8 sm:py-4 bg-white text-secondary border-2 border-primary font-bold rounded-full transition-all duration-300 shadow-lg 
                                   hover:bg-gray-100 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 
-                                  focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-50">
+                                  focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-50 text-base sm:text-lg">
                             Conheça a Solução
                         </a>
                     </div>
                 </div>
                 
-                <div class="relative perspective-container group">
-                    <div class="tilt-card bg-white rounded-3xl shadow-2xl p-6 transform rotate-3 group-hover:shadow-custom-hover-hero">
-                        <div class="relative h-64 bg-gray-200 border-2 border-dashed rounded-xl overflow-hidden">
+                <div class="relative perspective-container group mt-12 lg:mt-0">
+                    <div class="tilt-card bg-white rounded-3xl shadow-2xl p-4 sm:p-6 transform sm:rotate-3 group-hover:shadow-custom-hover-hero">
+                        <div class="relative h-56 sm:h-64 bg-gray-200 border-2 border-dashed rounded-xl overflow-hidden">
                             <div class="water-level-animation">
                                 <div class="water-level" id="water-level"></div>
-                                <div class="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-gray-800 to-gray-700"></div>
-                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-gray-900 rounded-full flex items-center justify-center">
-                                    <div class="sensor sensor-animate w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                        <i class="fas fa-water text-white text-xl"></i>
+                                <div class="absolute top-0 left-0 right-0 h-12 sm:h-16 bg-gradient-to-b from-gray-800 to-gray-700"></div>
+                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32 bg-gray-900 rounded-full flex items-center justify-center">
+                                    <div class="sensor sensor-animate w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-water text-white text-lg sm:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flip-card absolute -bottom-8 -left-8 w-40 h-40 md:-bottom-10 md:-left-10 md:w-48 md:h-48 group">
+                    <div class="flip-card absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 md:-bottom-8 md:-left-8 w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 group">
                         <div class="flip-card-inner rounded-2xl shadow-xl group-hover:shadow-2xl">
-                            <div class="flip-card-front bg-secondary text-white flex flex-col items-center justify-center p-4 rounded-2xl">
-                                <i class="fas fa-microchip text-4xl md:text-5xl mb-2"></i>
-                                <p class="font-bold text-lg md:text-xl">ESP32</p>
+                            <div class="flip-card-front bg-secondary text-white flex flex-col items-center justify-center p-2 sm:p-4 rounded-2xl">
+                                <i class="fas fa-microchip text-3xl sm:text-4xl md:text-5xl mb-1 sm:mb-2"></i>
+                                <p class="font-bold text-sm sm:text-lg md:text-xl">ESP32</p>
                             </div>
-                            <div class="flip-card-back bg-blue-400 text-white flex flex-col items-center justify-center p-4 rounded-2xl">
-                                <h5 class="font-bold text-md mb-1">Microcontrolador</h5>
-                                <p class="text-xs text-center">Processamento inteligente e conectividade para os sensores.</p>
+                            <div class="flip-card-back bg-blue-400 text-white flex flex-col items-center justify-center p-2 sm:p-4 rounded-2xl">
+                                <h5 class="font-bold text-xs sm:text-md mb-1">Microcontrolador</h5>
+                                <p class="text-xs text-center px-1">Processamento inteligente e conectividade para os sensores.</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flip-card absolute -top-8 -right-8 w-40 h-40 md:-top-10 md:-right-10 md:w-48 md:h-48 group">
+                    <div class="flip-card absolute -top-4 -right-4 sm:-top-6 sm:-right-6 md:-top-8 md:-right-8 w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 group">
                         <div class="flip-card-inner rounded-2xl shadow-xl group-hover:shadow-2xl">
-                            <div class="flip-card-front bg-white text-primary flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-primary">
-                                <i class="fas fa-sun text-4xl md:text-5xl mb-2"></i>
-                                <p class="font-bold text-lg md:text-xl text-secondary">Painel Solar</p>
+                            <div class="flip-card-front bg-white text-primary flex flex-col items-center justify-center p-2 sm:p-4 rounded-2xl border-2 border-primary">
+                                <i class="fas fa-sun text-3xl sm:text-4xl md:text-5xl mb-1 sm:mb-2"></i>
+                                <p class="font-bold text-sm sm:text-lg md:text-xl text-secondary">Painel Solar</p>
                             </div>
-                            <div class="flip-card-back bg-yellow-100 text-secondary flex flex-col items-center justify-center p-4 rounded-2xl">
-                                <h5 class="font-bold text-md mb-1">Energia Sustentável</h5>
-                                <p class="text-xs text-center">Garante autonomia energética para monitoramento contínuo.</p>
+                            <div class="flip-card-back bg-yellow-100 text-secondary flex flex-col items-center justify-center p-2 sm:p-4 rounded-2xl">
+                                <h5 class="font-bold text-xs sm:text-md mb-1">Energia Sustentável</h5>
+                                <p class="text-xs text-center px-1">Garante autonomia energética para monitoramento contínuo.</p>
                             </div>
                         </div>
                     </div>
@@ -94,39 +94,39 @@
         
         <div class="mqtt-line" style="top: 50%; left: 0; right: 0; width: 100%;"></div>
         <!-- Degradê na base da hero section para transição suave -->
-        <div class="absolute bottom-0 left-0 w-full h-80 md:h-96 pointer-events-none z-20" style="background: linear-gradient(to bottom, transparent 85%, rgba(255,255,255,0.6) 95%, #fff 100%);"></div>
+        <div class="absolute bottom-0 left-0 w-full h-64 sm:h-80 md:h-96 pointer-events-none z-20" style="background: linear-gradient(to bottom, transparent 85%, rgba(255,255,255,0.6) 95%, #fff 100%);"></div>
     </section>
 
     <!-- Problema: Enchentes urbanas, um desafio crescente -->
-    <section id="problema" class="py-16 md:py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-heading">Problema: Enchentes urbanas, um desafio crescente</h2>
-                <div class="w-20 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-body">
+    <section id="problema" class="py-12 md:py-16 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10 md:mb-12 lg:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary mb-3 sm:mb-4 font-heading">Problema: Enchentes urbanas, um desafio crescente</h2>
+                <div class="w-16 sm:w-20 h-1 bg-primary mx-auto mb-4 sm:mb-6"></div>
+                <p class="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-body">
                     Centenas de pontos de alagamento, ruas intransitáveis, cidadãos ilhados. Essa é a dura realidade em muitas cidades brasileiras durante as chuvas. O entupimento de bueiros por lixo agrava a situação, causando prejuízos, riscos à saúde e paralisando a vida urbana. A prevenção é o melhor caminho, e alertas precoces podem fazer toda a diferença.
                 </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-center">
                 <div class="animate-on-scroll">
-                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
-                        <i class="fas fa-house-damage text-4xl text-primary mb-4"></i>
-                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Prejuízos Materiais</h3>
-                        <p class="text-gray-600 font-body">Inundações causam perdas significativas em residências, comércios e infraestrutura pública.</p>
+                    <div class="p-4 sm:p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-house-damage text-3xl sm:text-4xl text-primary mb-3 sm:mb-4"></i>
+                        <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 font-heading">Prejuízos Materiais</h3>
+                        <p class="text-sm sm:text-base text-gray-600 font-body">Inundações causam perdas significativas em residências, comércios e infraestrutura pública.</p>
                     </div>
                 </div>
                 <div class="animate-on-scroll" style="animation-delay: 0.2s;">
-                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
-                        <i class="fas fa-heartbeat text-4xl text-primary mb-4"></i>
-                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Riscos à Saúde</h3>
-                        <p class="text-gray-600 font-body">Contato com água contaminada e proliferação de vetores de doenças.</p>
+                    <div class="p-4 sm:p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-heartbeat text-3xl sm:text-4xl text-primary mb-3 sm:mb-4"></i>
+                        <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 font-heading">Riscos à Saúde</h3>
+                        <p class="text-sm sm:text-base text-gray-600 font-body">Contato com água contaminada e proliferação de vetores de doenças.</p>
                     </div>
                 </div>
                 <div class="animate-on-scroll" style="animation-delay: 0.4s;">
-                    <div class="p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
-                        <i class="fas fa-car text-4xl text-primary mb-4"></i>
-                        <h3 class="text-xl font-bold text-secondary mb-2 font-heading">Mobilidade Comprometida</h3>
-                        <p class="text-gray-600 font-body">Vias bloqueadas dificultam o trânsito e o acesso a serviços essenciais.</p>
+                    <div class="p-4 sm:p-6 bg-gray-100 rounded-xl shadow-lg content-3d-card">
+                        <i class="fas fa-car text-3xl sm:text-4xl text-primary mb-3 sm:mb-4"></i>
+                        <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 font-heading">Mobilidade Comprometida</h3>
+                        <p class="text-sm sm:text-base text-gray-600 font-body">Vias bloqueadas dificultam o trânsito e o acesso a serviços essenciais.</p>
                     </div>
                 </div>
             </div>
@@ -134,96 +134,99 @@
     </section>
 
     <!-- Sobre a Solução -->
-    <section class="py-24 bg-white" id="sobre">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-20">
-                <h2 class="text-4xl font-bold text-secondary mb-4 font-heading">Nossa solução: Inteligência e Economia contra alagamentos</h2>
-                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-xl text-gray-700 max-w-3xl mx-auto font-body">
+    <section class="py-16 md:py-24 bg-white" id="sobre">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12 md:mb-16 lg:mb-20">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary mb-3 sm:mb-4 font-heading">Nossa solução: Inteligência e Economia contra alagamentos</h2>
+                <div class="w-20 sm:w-24 h-1 bg-primary mx-auto mb-4 sm:mb-6"></div>
+                <p class="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-body">
                     Apresentamos um sistema de monitoramento de bueiros em tempo real, usando sensores e microcontroladores ESP32, com transmissão MQTT e um dashboard interativo para alertas preventivos.
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
                 <div class="animate-on-scroll">
-                    <div class="bg-gray-100 rounded-3xl p-8">
-                        <p class="text-gray-700 text-lg leading-relaxed font-body">
+                    <div class="bg-gray-100 rounded-3xl p-6 sm:p-8">
+                        <p class="text-gray-700 text-base sm:text-lg leading-relaxed font-body">
                             <span class="font-bold text-primary">Como funciona:</span> Nosso sistema utiliza microcontroladores ESP32 com sensores de nível de água e umidade, alojados em caixas de proteção IP67. Estes dispositivos monitoram continuamente os bueiros e transmitem os dados via MQTT para um broker (Fiware ou Mosquitto).
                         </p>
-                        <p class="text-gray-700 text-lg leading-relaxed mt-6 font-body">
+                        <p class="text-gray-700 text-base sm:text-lg leading-relaxed mt-4 sm:mt-6 font-body">
                             As informações são visualizadas em um dashboard interativo (Python/Django), que também dispara alertas automáticos (HTTP/SMS) quando níveis críticos são atingidos. Isso permite que prefeituras e a Defesa Civil atuem rapidamente, minimizando danos e protegendo a população.
                         </p>
-                        <div class="mt-8 bg-gradient-to-r from-blue-600 to-primary rounded-2xl p-8 text-white shadow-xl">
-                            <h3 class="text-2xl font-bold mb-4 text-center font-heading">Diferencial de Custo Revolucionário</h3>
-                            <div class="flex items-center justify-around text-center">
+                        <div class="mt-6 sm:mt-8 bg-gradient-to-r from-blue-600 to-primary rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+                            <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center font-heading">Diferencial de Custo Revolucionário</h3>
+                            <div class="flex flex-col sm:flex-row items-center justify-around text-center space-y-4 sm:space-y-0 sm:space-x-4">
                                 <div>
-                                    <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="300">R$300</div>
-                                    <div class="text-sm">Nossa solução (por unidade)</div>
+                                    <div class="text-3xl sm:text-4xl font-bold vantagem-competitiva-valor" data-final="300">R$300</div>
+                                    <div class="text-xs sm:text-sm">Nossa solução (por unidade)</div>
                                 </div>
-                                <div class="text-2xl font-bold text-white seta-comparativo">
-                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                <div class="text-xl sm:text-2xl font-bold text-white my-2 sm:my-0">
+                                    <!-- Seta para Desktop (direita) -->
+                                    <i class="fas fa-long-arrow-alt-right hidden sm:inline-block seta-comparativo-desktop"></i>
+                                    <!-- Seta para Mobile (baixo) -->
+                                    <i class="fas fa-long-arrow-alt-down inline-block sm:hidden seta-comparativo-mobile"></i>
                                 </div>
                                 <div>
-                                    <div class="text-4xl font-bold vantagem-competitiva-valor" data-final="15000">R$15.000</div>
-                                    <div class="text-sm">Outras soluções (por unidade)</div>
+                                    <div class="text-3xl sm:text-4xl font-bold vantagem-competitiva-valor" data-final="15000">R$15.000</div>
+                                    <div class="text-xs sm:text-sm">Outras soluções (por unidade)</div>
                                 </div>
                             </div>
-                            <p class="mt-4 text-center text-lg font-semibold">Economia de até <span class="font-bold text-white">98%</span>, democratizando a prevenção!</p>
+                            <p class="mt-3 sm:mt-4 text-center text-base sm:text-lg font-semibold">Economia de até <span class="font-bold text-white">98%</span>, democratizando a prevenção!</p>
                         </div>
-                        <p class="text-gray-700 text-sm leading-relaxed mt-6 font-body">
+                        <p class="text-gray-700 text-xs sm:text-sm leading-relaxed mt-4 sm:mt-6 font-body">
                             <em>Componentes principais: ESP32 (R$28-50), Sensor de Nível Analógico (R$10), Sensor de Umidade DHT22 (R$40), Caixa IP67 (R$50), bateria Li-ion com painel solar ou alimentação municipal.</em>
                         </p>
                     </div>
                 </div>
                 
-                <div class="animate-on-scroll">
+                <div class="animate-on-scroll mt-8 lg:mt-0">
                     <!-- Diagrama Visual Simplificado -->
-                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-200">
-                        <h3 class="text-2xl font-bold text-secondary mb-6 text-center font-heading">Fluxo da Solução</h3>
-                        <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-gray-200">
+                        <h3 class="text-xl sm:text-2xl font-bold text-secondary mb-4 sm:mb-6 text-center font-heading">Fluxo da Solução</h3>
+                        <div class="space-y-4 sm:space-y-6">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
-                                    <i class="fas fa-water text-2xl"></i>
+                                <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-water text-xl sm:text-2xl"></i>
                                 </div>
-                                <div class="ml-4">
-                                    <h4 class="text-lg font-semibold text-secondary font-heading">1. Sensores no bueiro</h4>
-                                    <p class="text-gray-600 font-body">Detectam nível da água e umidade.</p>
+                                <div class="ml-3 sm:ml-4">
+                                    <h4 class="text-base sm:text-lg font-semibold text-secondary font-heading">1. Sensores no bueiro</h4>
+                                    <p class="text-xs sm:text-sm text-gray-600 font-body">Detectam nível da água e umidade.</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center my-1 sm:my-2">
+                                <i class="fas fa-arrow-down text-primary text-xl sm:text-2xl"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-microchip text-xl sm:text-2xl"></i>
+                                </div>
+                                <div class="ml-3 sm:ml-4">
+                                    <h4 class="text-base sm:text-lg font-semibold text-secondary font-heading">2. ESP32 Processa</h4>
+                                    <p class="text-xs sm:text-sm text-gray-600 font-body">Coleta e prepara os dados dos sensores.</p>
                                 </div>
                             </div>
                             <div class="flex justify-center my-2">
-                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
+                                <i class="fas fa-arrow-down text-primary text-xl sm:text-2xl"></i>
                             </div>
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
-                                    <i class="fas fa-microchip text-2xl"></i>
+                                <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-broadcast-tower text-xl sm:text-2xl"></i>
                                 </div>
-                                <div class="ml-4">
-                                    <h4 class="text-lg font-semibold text-secondary font-heading">2. ESP32 Processa</h4>
-                                    <p class="text-gray-600 font-body">Coleta e prepara os dados dos sensores.</p>
+                                <div class="ml-3 sm:ml-4">
+                                    <h4 class="text-base sm:text-lg font-semibold text-secondary font-heading">3. Transmissão MQTT</h4>
+                                    <p class="text-xs sm:text-sm text-gray-600 font-body">Dados enviados para o Broker (Fiware/Mosquitto).</p>
                                 </div>
                             </div>
                             <div class="flex justify-center my-2">
-                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
+                                <i class="fas fa-arrow-down text-primary text-xl sm:text-2xl"></i>
                             </div>
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
-                                    <i class="fas fa-broadcast-tower text-2xl"></i>
+                                <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
+                                    <i class="fas fa-tachometer-alt text-xl sm:text-2xl"></i>
                                 </div>
-                                <div class="ml-4">
-                                    <h4 class="text-lg font-semibold text-secondary font-heading">3. Transmissão MQTT</h4>
-                                    <p class="text-gray-600 font-body">Dados enviados para o Broker (Fiware/Mosquitto).</p>
-                                </div>
-                            </div>
-                            <div class="flex justify-center my-2">
-                                <i class="fas fa-arrow-down text-primary text-2xl"></i>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md">
-                                    <i class="fas fa-tachometer-alt text-2xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <h4 class="text-lg font-semibold text-secondary font-heading">4. Dashboard e Alertas</h4>
-                                    <p class="text-gray-600 font-body">Visualização em tempo real e notificações (Python/Django).</p>
+                                <div class="ml-3 sm:ml-4">
+                                    <h4 class="text-base sm:text-lg font-semibold text-secondary font-heading">4. Dashboard e Alertas</h4>
+                                    <p class="text-xs sm:text-sm text-gray-600 font-body">Visualização em tempo real e notificações (Python/Django).</p>
                                 </div>
                             </div>
                         </div>
@@ -234,98 +237,98 @@
     </section>
 
     <!-- Funcionalidades Chave -->
-    <section id="funcionalidades" class="py-16 md:py-24 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-heading">Funcionalidades chave: O que você ganha?</h2>
-                <div class="w-20 h-1 bg-primary mx-auto mb-6"></div>
+    <section id="funcionalidades" class="py-12 md:py-16 lg:py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10 md:mb-12 lg:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary mb-3 sm:mb-4 font-heading">Funcionalidades chave: O que você ganha?</h2>
+                <div class="w-16 sm:w-20 h-1 bg-primary mx-auto mb-4 sm:mb-6"></div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card">
-                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
-                        <i class="fas fa-eye text-2xl"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="animate-on-scroll bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card">
+                    <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-4 sm:mb-6">
+                        <i class="fas fa-eye text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Visualização em Tempo Real</h3>
-                    <p class="text-gray-600 font-body">Acompanhe o nível da água nos bueiros monitorados através de um dashboard intuitivo e atualizado instantaneamente.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3 font-heading">Visualização em Tempo Real</h3>
+                    <p class="text-sm sm:text-base text-gray-600 font-body">Acompanhe o nível da água nos bueiros monitorados através de um dashboard intuitivo e atualizado instantaneamente.</p>
                 </div>
-                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.2s;">
-                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
-                        <i class="fas fa-bell text-2xl"></i>
+                <div class="animate-on-scroll bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.2s;">
+                    <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-4 sm:mb-6">
+                        <i class="fas fa-bell text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Alertas Preventivos Inteligentes</h3>
-                    <p class="text-gray-600 font-body">Seja notificado ANTES que o alagamento ocorra! O sistema envia alertas automáticos para a Defesa Civil e equipes responsáveis.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3 font-heading">Alertas Preventivos Inteligentes</h3>
+                    <p class="text-sm sm:text-base text-gray-600 font-body">Seja notificado ANTES que o alagamento ocorra! O sistema envia alertas automáticos para a Defesa Civil e equipes responsáveis.</p>
                 </div>
-                <div class="animate-on-scroll bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.4s;">
-                    <div class="flex-shrink-0 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-6">
-                        <i class="fas fa-history text-2xl"></i>
+                <div class="animate-on-scroll bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 content-3d-card" style="animation-delay: 0.4s;">
+                    <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-md mb-4 sm:mb-6">
+                        <i class="fas fa-history text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary mb-3 font-heading">Histórico e Análise de Dados</h3>
-                    <p class="text-gray-600 font-body">Acesse relatórios e gráficos mensais sobre ocorrências por local, ajudando no planejamento urbano e otimizando a manutenção.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3 font-heading">Histórico e Análise de Dados</h3>
+                    <p class="text-sm sm:text-base text-gray-600 font-body">Acesse relatórios e gráficos mensais sobre ocorrências por local, ajudando no planejamento urbano e otimizando a manutenção.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Sobre -->
-    <section id="equipe-stakeholders" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-20">
-                <h2 class="text-4xl font-bold text-secondary mb-4 font-heading">Sobre o projeto e seus benefícios</h2>
-                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-xl text-gray-700 max-w-3xl mx-auto font-body">
+    <section id="equipe-stakeholders" class="py-16 md:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12 md:mb-16 lg:mb-20">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary mb-3 sm:mb-4 font-heading">Sobre o projeto e seus benefícios</h2>
+                <div class="w-20 sm:w-24 h-1 bg-primary mx-auto mb-4 sm:mb-6"></div>
+                <p class="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-body">
                     Conheça a equipe por trás da solução e como ela beneficia toda a comunidade.
                 </p>
             </div>
             
             <!-- Benefícios Para Todos -->
-            <div class="mb-20">
-                <h3 class="text-3xl font-bold text-secondary mb-3 text-center font-heading">Benefícios para todos</h3>
-                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto font-body">
+            <div class="mb-12 md:mb-16 lg:mb-20">
+                <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-secondary mb-2 sm:mb-3 text-center font-heading">Benefícios para todos</h3>
+                <p class="text-gray-700 text-center mb-8 md:mb-12 max-w-3xl mx-auto font-body text-sm sm:text-base">
                     Nossa solução é projetada para trazer vantagens significativas para diversos públicos envolvidos na gestão e prevenção de enchentes.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card">
-                        <div class="flex justify-center mb-4">
-                            <i class="fas fa-city text-5xl"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card">
+                        <div class="flex justify-center mb-3 sm:mb-4">
+                            <i class="fas fa-city text-3xl sm:text-4xl md:text-5xl"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Prefeituras Municipais</h4>
-                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                        <h4 class="text-base sm:text-lg md:text-xl font-bold mb-2 text-center font-heading">Prefeituras Municipais</h4>
+                        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm font-body">
                             <li>Redução de custos com danos.</li>
                             <li>Otimização da infraestrutura.</li>
                             <li>Melhora da segurança pública.</li>
                         </ul>
                     </div>
                     
-                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.1s;">
-                        <div class="flex justify-center mb-4">
-                            <i class="fas fa-shield-alt text-5xl"></i>
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.1s;">
+                        <div class="flex justify-center mb-3 sm:mb-4">
+                            <i class="fas fa-shield-alt text-3xl sm:text-4xl md:text-5xl"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Defesa Civil</h4>
-                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                        <h4 class="text-base sm:text-lg md:text-xl font-bold mb-2 text-center font-heading">Defesa Civil</h4>
+                        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm font-body">
                             <li>Informação antecipada para ações.</li>
                             <li>Maior capacidade de resposta.</li>
                             <li>Proteção eficaz de vidas.</li>
                         </ul>
                     </div>
                     
-                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.2s;">
-                        <div class="flex justify-center mb-4">
-                            <i class="fas fa-house-user text-5xl"></i>
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.2s;">
+                        <div class="flex justify-center mb-3 sm:mb-4">
+                            <i class="fas fa-house-user text-3xl sm:text-4xl md:text-5xl"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Cidadãos</h4>
-                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                        <h4 class="text-base sm:text-lg md:text-xl font-bold mb-2 text-center font-heading">Cidadãos</h4>
+                        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm font-body">
                             <li>Mais segurança e tranquilidade.</li>
                             <li>Redução de perdas materiais.</li>
                             <li>Alertas preventivos diretos (futuro).</li>
                         </ul>
                     </div>
                     
-                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.3s;">
-                        <div class="flex justify-center mb-4">
-                            <i class="fas fa-chart-area text-5xl"></i>
+                    <div class="animate-on-scroll bg-gradient-to-br from-primary/80 to-blue-500/80 rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 stakeholder-3d-card" style="animation-delay: 0.3s;">
+                        <div class="flex justify-center mb-3 sm:mb-4">
+                            <i class="fas fa-chart-area text-3xl sm:text-4xl md:text-5xl"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2 text-center font-heading">Pesquisadores</h4>
-                        <ul class="list-disc list-inside space-y-1 text-sm font-body">
+                        <h4 class="text-base sm:text-lg md:text-xl font-bold mb-2 text-center font-heading">Pesquisadores</h4>
+                        <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm font-body">
                             <li>Dados históricos para estudos.</li>
                             <li>Base para planejamento urbano.</li>
                             <li>Identificação de áreas críticas.</li>
@@ -335,59 +338,59 @@
             </div>
 
             <!-- Nossa Equipe -->
-            <div class="mb-20">
-                <h3 class="text-3xl font-bold text-secondary mb-3 text-center font-heading">Nossa equipe</h3>
-                <p class="text-gray-700 text-center mb-12 max-w-3xl mx-auto">
+            <div class="mb-12 md:mb-16 lg:mb-20">
+                <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-secondary mb-2 sm:mb-3 text-center font-heading">Nossa equipe</h3>
+                <p class="text-gray-700 text-center mb-8 md:mb-12 max-w-3xl mx-auto text-sm sm:text-base">
                     Juntos, desenvolvemos uma solução que combina tecnologia acessível com impacto social significativo para prevenir desastres causados por enchentes.
                 </p>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
-                        <div class="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden bg-white">
-                            <img src="https://github.com/joaomatosq.png" alt="João Vitor de Matos Araujo" class="w-32 h-32 object-cover rounded-full shadow-lg" />
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-6 sm:p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 sm:mb-6 flex items-center justify-center overflow-hidden bg-white">
+                            <img src="https://github.com/joaomatosq.png" alt="João Vitor de Matos Araujo" class="w-full h-full object-cover rounded-full shadow-lg" />
                         </div>
-                        <h4 class="text-xl font-bold text-secondary">João Vitor de Matos Araujo</h4>
-                        <p class="text-blue-300 mb-3">RM559246</p>
-                        <p class="text-gray-700">Product Owner & Dev IoT</p>
+                        <h4 class="text-lg sm:text-xl font-bold text-secondary">João Vitor de Matos Araujo</h4>
+                        <p class="text-blue-300 mb-2 sm:mb-3 text-sm sm:text-base">RM559246</p>
+                        <p class="text-gray-700 text-xs sm:text-sm">Product Owner & Dev IoT</p>
                         <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
-                            <a href="https://www.linkedin.com/in/joaomatosq/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://www.linkedin.com/in/joaomatosq/" target="_blank" class="mb-2 sm:mb-4 flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-linkedin mr-2"></i> /joaomatosq
                             </a>
-                            <a href="https://github.com/joaomatosq" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://github.com/joaomatosq" target="_blank" class="flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-github mr-2"></i> /joaomatosq
                             </a>
                         </div>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
-                        <div class="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden bg-white">
-                            <img src="https://github.com/kato8088.png" alt="Gabriel Kato Peres" class="w-32 h-32 object-cover rounded-full shadow-lg" />
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-6 sm:p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 sm:mb-6 flex items-center justify-center overflow-hidden bg-white">
+                            <img src="https://github.com/kato8088.png" alt="Gabriel Kato Peres" class="w-full h-full object-cover rounded-full shadow-lg" />
                         </div>
-                        <h4 class="text-xl font-bold text-secondary">Gabriel Kato Peres</h4>
-                        <p class="text-blue-300 mb-3">RM560000</p>
-                        <p class="text-gray-700">Dev Back-End & Integração MQTT</p>
+                        <h4 class="text-lg sm:text-xl font-bold text-secondary">Gabriel Kato Peres</h4>
+                        <p class="text-blue-300 mb-2 sm:mb-3 text-sm sm:text-base">RM560000</p>
+                        <p class="text-gray-700 text-xs sm:text-sm">Dev Back-End & Integração MQTT</p>
                         <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
-                            <a href="https://www.linkedin.com/in/gabrikato/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://www.linkedin.com/in/gabrikato/" target="_blank" class="mb-2 sm:mb-4 flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-linkedin mr-2"></i> /gabrikato
                             </a>
-                            <a href="https://github.com/kato8088" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://github.com/kato8088" target="_blank" class="flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-github mr-2"></i> /kato8088
                             </a>
                         </div>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
-                        <div class="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                            <img src="https://github.com/rouri404.png" alt="Gabriel Couto Ribeiro" class="w-32 h-32 object-cover rounded-full shadow-lg" />
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-200 rounded-2xl p-6 sm:p-8 text-center animate-on-scroll team-3d-card team-card-hover relative overflow-hidden">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 sm:mb-6 flex items-center justify-center overflow-hidden">
+                            <img src="https://github.com/rouri404.png" alt="Gabriel Couto Ribeiro" class="w-full h-full object-cover rounded-full shadow-lg" />
                         </div>
-                        <h4 class="text-xl font-bold text-secondary">Gabriel Couto Ribeiro</h4>
-                        <p class="text-blue-300 mb-3">RM559579</p>
-                        <p class="text-gray-700">Dev Full Stack & Database</p>
+                        <h4 class="text-lg sm:text-xl font-bold text-secondary">Gabriel Couto Ribeiro</h4>
+                        <p class="text-blue-300 mb-2 sm:mb-3 text-sm sm:text-base">RM559579</p>
+                        <p class="text-gray-700 text-xs sm:text-sm">Dev Full Stack & Database</p>
                         <div class="team-social-overlay absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 opacity-0 pointer-events-none transition-opacity duration-300">
-                            <a href="https://www.linkedin.com/in/gabricouto/" target="_blank" class="mb-4 flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://www.linkedin.com/in/gabricouto/" target="_blank" class="mb-2 sm:mb-4 flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-linkedin mr-2"></i> /gabricouto
                             </a>
-                            <a href="https://github.com/rouri404" target="_blank" class="flex items-center text-white text-2xl hover:text-primary transition">
+                            <a href="https://github.com/rouri404" target="_blank" class="flex items-center text-white text-lg sm:text-2xl hover:text-primary transition">
                                 <i class="fab fa-github mr-2"></i> /rouri404
                             </a>
                         </div>
@@ -396,15 +399,15 @@
             </div>
             
             <!-- Call to Action -->
-            <div class="text-center pt-12">
-                <h3 class="text-2xl md:text-3xl font-bold text-secondary mb-6 font-heading">Interessado em levar esta solução para sua cidade?</h3>
-                <p class="text-lg text-gray-700 mb-8 max-w-xl mx-auto font-body">
+            <div class="text-center pt-8 md:pt-12">
+                <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-secondary mb-4 sm:mb-6 font-heading">Interessado em levar esta solução para sua cidade?</h3>
+                <p class="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8 max-w-xl mx-auto font-body">
                     Entre em contato conosco para discutir um projeto piloto ou saber mais sobre a implementação do sistema Moskitto.
                 </p>
                 <a href="#contato" 
-                   class="px-10 py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
+                   class="px-8 py-3 sm:px-10 sm:py-4 bg-primary text-white font-bold rounded-full transition-all duration-300 shadow-lg 
                           hover:bg-blue-400 hover:shadow-xl hover:-translate-y-1 
-                          focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 text-lg">
+                          focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 text-base sm:text-lg">
                     Fale Conosco
                 </a>
             </div>
@@ -414,78 +417,78 @@
 
     <!-- Contato -->
     <section id="contato" class="relative bg-gradient-to-br from-gray-50 to-primary bg-opacity-10">
-        <div class="absolute top-0 left-0 w-full h-48 md:h-64" style="background: linear-gradient(to bottom, #fff 0%, transparent 100%);"></div>
-        <div class="relative max-w-7xl mx-auto px-6 py-24">
-            <div class="text-center mb-20">
-                <h2 class="text-4xl font-bold text-secondary mb-4">Contato</h2>
-                <div class="w-24 h-1 bg-primary mx-auto mb-6"></div>
-                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+        <div class="absolute top-0 left-0 w-full h-32 sm:h-48 md:h-64" style="background: linear-gradient(to bottom, #fff 0%, transparent 100%);"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+            <div class="text-center mb-12 md:mb-16 lg:mb-20">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary mb-3 sm:mb-4">Contato</h2>
+                <div class="w-20 sm:w-24 h-1 bg-primary mx-auto mb-4 sm:mb-6"></div>
+                <p class="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
                     Entre em contato conosco para mais informações sobre nossa solução
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="bg-white rounded-3xl shadow-xl p-8 contact-form-block">
-                    <h3 class="text-2xl font-bold text-secondary mb-6">Envie uma mensagem</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 contact-form-block">
+                    <h3 class="text-xl sm:text-2xl font-bold text-secondary mb-4 sm:mb-6">Envie uma mensagem</h3>
                     
-                    <form class="space-y-6">
+                    <form class="space-y-4 sm:space-y-6">
                         <div>
-                            <label class="block text-gray-700 mb-2">Nome</label>
-                            <input type="text" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Nome</label>
+                            <input type="text" class="contact-input w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-gray-700 mb-2">Email</label>
-                            <input type="email" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Email</label>
+                            <input type="email" class="contact-input w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-gray-700 mb-2">Mensagem</label>
-                            <textarea rows="5" class="contact-input w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                            <label class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Mensagem</label>
+                            <textarea rows="4" class="contact-input w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"></textarea>
                         </div>
                         
-                        <button type="submit" class="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-blue-400 transition duration-300">
+                        <button type="submit" class="w-full py-3 sm:py-4 bg-primary text-white font-bold rounded-lg hover:bg-blue-400 transition duration-300 text-base sm:text-lg">
                             Enviar Mensagem
                         </button>
                     </form>
                 </div>
                 
-                <div class="contact-info-block">
-                    <div class="bg-gradient-to-br from-primary to-blue-500 rounded-3xl shadow-xl p-8 text-white h-full">
-                        <h3 class="text-2xl font-bold mb-6">Informações de contato</h3>
+                <div class="contact-info-block mt-8 lg:mt-0">
+                    <div class="bg-gradient-to-br from-primary to-blue-500 rounded-3xl shadow-xl p-6 sm:p-8 text-white h-full">
+                        <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Informações de contato</h3>
                         
-                        <div class="space-y-6">
+                        <div class="space-y-4 sm:space-y-6">
                             <div class="flex items-start">
-                                <i class="fas fa-envelope text-2xl mt-1 mr-4"></i>
-                                <div>
-                                    <h4 class="font-bold text-lg">Email</h4>
-                                    <p>moskitto.inc@gmail.com</p>
+                                <i class="fas fa-envelope text-xl sm:text-2xl mt-1 mr-3 sm:mr-4"></i>
+                                <div class="min-w-0"> 
+                                    <h4 class="font-bold text-base sm:text-lg">Email</h4>
+                                    <p class="text-sm sm:text-base break-words">moskitto.inc@gmail.com</p>
                                 </div>
                             </div>
                             
                             <div class="flex items-start">
-                                <i class="fas fa-phone-alt text-2xl mt-1 mr-4"></i>
-                                <div>
-                                    <h4 class="font-bold text-lg">Telefone</h4>
-                                    <p>+55 11 1234-5678</p>
+                                <i class="fas fa-phone-alt text-xl sm:text-2xl mt-1 mr-3 sm:mr-4"></i>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-base sm:text-lg">Telefone</h4>
+                                    <p class="text-sm sm:text-base break-words">+55 11 1234-5678</p>
                                 </div>
                             </div>
                             
                             <div class="flex items-start">
-                                <i class="fas fa-map-marker-alt text-2xl mt-1 mr-4"></i>
-                                <div>
-                                    <h4 class="font-bold text-lg">Endereço</h4>
-                                    <p>FIAP Paulista, Av. Paulista, 1106, Bela Vista, São Paulo - SP</p>
+                                <i class="fas fa-map-marker-alt text-xl sm:text-2xl mt-1 mr-3 sm:mr-4"></i>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-base sm:text-lg">Endereço</h4>
+                                    <p class="text-sm sm:text-base break-words">FIAP Paulista, Av. Paulista, 1106, Bela Vista, São Paulo - SP</p>
                                 </div>
                             </div>
                             
-                            <div class="mt-10">
-                                <h4 class="font-bold text-lg mb-4">Siga-nos</h4>
-                                <div class="flex space-x-4">
-                                    <a href="https://www.youtube.com/@moskitto-e6c" target="_blank" rel="noopener noreferrer" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                            <div class="mt-6 sm:mt-10">
+                                <h4 class="font-bold text-base sm:text-lg mb-3 sm:mb-4">Siga-nos</h4>
+                                <div class="flex space-x-3 sm:space-x-4">
+                                    <a href="https://www.youtube.com/@moskitto-e6c" target="_blank" rel="noopener noreferrer" class="social-icon w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl sm:text-2xl hover:bg-opacity-30 transition duration-300">
                                         <i class="fab fa-youtube"></i>
                                     </a>
-                                    <a href="https://github.com/GrupoMoskitto" target="_blank" rel="noopener noreferrer" class="social-icon w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition duration-300">
+                                    <a href="https://github.com/GrupoMoskitto" target="_blank" rel="noopener noreferrer" class="social-icon w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl sm:text-2xl hover:bg-opacity-30 transition duration-300">
                                         <i class="fab fa-github"></i>
                                     </a>
                                 </div>
@@ -501,17 +504,19 @@
 {% block extra_scripts %}
     <script>
         // Funções específicas da Home Page
-        function animateWaterLevel() {
+        function animateWaterLevelGSAP() {
             const waterLevelElement = document.getElementById('water-level');
             if (!waterLevelElement) return;
-            let level = 30;
-            let direction = 1;
-            
-            setInterval(() => {
-                level += direction * 10;
-                if (level >= 70 || level <= 20) direction *= -1;
-                waterLevelElement.style.height = level + '%';
-            }, 2000);
+
+            gsap.set(waterLevelElement, { height: '30%' });
+
+            gsap.to(waterLevelElement, {
+                height: '70%',
+                duration: 2,
+                ease: 'sine.inOut',
+                repeat: -1,
+                yoyo: true
+            });
         }
 
         // Efeito 3D interativo para cards da equipe e stakeholders
@@ -537,7 +542,7 @@
                 });
             }
             add3DEffect('.team-3d-card', 18);
-            add3DEffect('.stakeholder-3d-card', 32);
+            add3DEffect('.stakeholder-3d-card', 15);
             add3DEffect('.content-3d-card', 10);
         }
 
@@ -559,7 +564,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            animateWaterLevel();
+            animateWaterLevelGSAP();
             setup3DCards();
             setupTeamSocialOverlay();
             
@@ -618,41 +623,71 @@
                             onUpdate: function() {
                                 document.querySelectorAll('.vantagem-competitiva-valor[data-final]').forEach(el => {
                                     let val = parseInt(el.innerText.replace(/\D/g, ''));
-                                    if (el.getAttribute('data-final').includes('15')) {
+                                    if (el.getAttribute('data-final').includes('15')) { // Assume R$15000
                                         el.innerText = 'R$' + val.toLocaleString('pt-BR');
-                                    } else {
-                                        el.innerText = 'R$' + val;
+                                    } else { // Assume R$300
+                                        el.innerText = 'R$' + val; // Para valores menores, .toLocaleString pode não ser necessário ou desejado sem centavos
                                     }
+                                });
+                            },
+                            onComplete: function() { // Garante formatação final correta
+                                document.querySelectorAll('.vantagem-competitiva-valor[data-final]').forEach(el => {
+                                    let finalVal = parseInt(el.getAttribute('data-final'));
+                                     if (el.getAttribute('data-final').includes('15')) {
+                                        el.innerText = 'R$' + finalVal.toLocaleString('pt-BR');
+                                     } else {
+                                        el.innerText = 'R$' + finalVal;
+                                     }
                                 });
                             }
                         }
                     );
                     // Animação para a nova seta no card de comparativo de custo
-                    if (document.querySelector('.seta-comparativo')) {
-                        gsap.to('.seta-comparativo', {
-                            x: 10, // Move 10 pixels para a direita
-                            repeat: -1, // Repete infinitamente
-                            yoyo: true, // Faz a animação ir e voltar
-                            duration: 0.7, // Duração de cada ciclo
-                            ease: 'sine.inOut', // Suavização da animação
-                            scrollTrigger: { // Inicia a animação quando o card estiver visível
-                                trigger: '.seta-comparativo',
+                    // if (document.querySelector('.seta-comparativo')) { // Comentando a antiga verificação
+                    //     gsap.to('.seta-comparativo', { // Comentando a antiga animação
+                    //         x: 10, // Move 10 pixels para a direita
+                    //         repeat: -1, // Repete infinitamente
+                    //         yoyo: true, // Faz a animação ir e voltar
+                    //         duration: 0.7, // Duração de cada ciclo
+                    //         ease: 'sine.inOut', // Suavização da animação
+                    //         scrollTrigger: { // Inicia a animação quando o card estiver visível
+                    //             trigger: '.seta-comparativo',
+                    //             start: 'top 90%'
+                    //         }
+                    //     });
+                    // }
+
+                    // Animação para a seta de desktop
+                    if (document.querySelector('.seta-comparativo-desktop')) {
+                        gsap.to('.seta-comparativo-desktop', {
+                            x: 10, 
+                            repeat: -1, 
+                            yoyo: true, 
+                            duration: 0.7, 
+                            ease: 'sine.inOut', 
+                            scrollTrigger: { 
+                                trigger: '.seta-comparativo-desktop',
                                 start: 'top 90%'
                             }
                         });
                     }
 
-                    gsap.to('.vantagem-competitiva-seta', {
-                        x: 18,
-                        repeat: -1,
-                        yoyo: true,
-                        duration: 1.2,
-                        ease: 'sine.inOut',
-                        scrollTrigger: {
-                            trigger: '.vantagem-competitiva-seta',
-                            start: 'top 95%'
-                        }
-                    });
+                    // Animação para a seta de mobile
+                    if (document.querySelector('.seta-comparativo-mobile')) {
+                        gsap.to('.seta-comparativo-mobile', {
+                            y: 8, 
+                            repeat: -1,
+                            yoyo: true,
+                            duration: 0.7,
+                            ease: 'sine.inOut',
+                            scrollTrigger: {
+                                trigger: '.seta-comparativo-mobile',
+                                start: 'top 90%'
+                            }
+                        });
+                    }
+
+                    // Código removido para .vantagem-competitiva-seta pois não encontrei no HTML
                 }
 
                 // Animação específica para a seção de contato
