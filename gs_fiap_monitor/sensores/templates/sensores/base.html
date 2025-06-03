@@ -70,6 +70,7 @@
         .navbar {
             backdrop-filter: blur(10px);
             transition: background 0.3s;
+            z-index: 1000;
         }
         
         .navbar.scrolled {
@@ -253,20 +254,13 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
-        /* Estilos do base.html anterior para .container e header/nav, se quiser mantê-los para páginas não-Tailwind */
-        /* Se a home page e outras usarem full Tailwind, podem não ser necessários */
-        /* 
-        header.django-default-header { background-color: #333; color: #fff; padding: 10px 0; text-align: center; }
-        header.django-default-header nav a { margin: 0 10px; color: #fff; text-decoration: none; }
-        .django-default-container { background-color: #fff; padding: 20px; margin-top: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-left: 20px; margin-right: 20px; }
-        */
     </style>
     {% block extra_styles %}{% endblock %}
     {% block extra_head %}{% endblock %} <!-- Bloco para CSS ou JS específico da página no head -->
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen {% block body_class %}{% endblock %}">
 
-    <nav class="navbar fixed top-4 left-1/2 transform -translate-x-1/2 w-[96%] z-50 py-3 px-6 bg-white/80 backdrop-blur-2xl shadow-xl rounded-2xl flex items-center justify-between transition-all duration-300">
+    <nav class="navbar fixed top-4 left-1/2 transform -translate-x-1/2 w-[96%] py-3 px-6 bg-white/80 backdrop-blur-2xl shadow-xl rounded-2xl flex items-center justify-between transition-all duration-300">
         <div class="flex items-center space-x-3">
             <a href="{% url 'home_page' %}" class="flex items-center group">
                 <img src="{% static 'sensores/img/favicon.png' %}" alt="Logo" class="w-10 h-10 mr-2 drop-shadow-lg transition-transform duration-300 group-hover:scale-105" />

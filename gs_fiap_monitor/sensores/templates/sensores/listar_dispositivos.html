@@ -138,17 +138,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const deviceCards = document.querySelectorAll('.real-device-card');
 
     deviceCards.forEach(card => {
-        // O link principal que cobre o card agora é o próprio card <div>,
-        // e a navegação será feita via JS se o clique não for no link de editar localização.
         const editLocationLink = card.querySelector('a[href*="editar_localizacao_dispositivo"]');
         const loader = card.querySelector('.loading-overlay');
-        const mainNavigationUrl = card.dataset.mainLink; // URL do link principal armazenada em data attribute
+        const mainNavigationUrl = card.dataset.mainLink;
 
         card.addEventListener('click', function(event) {
             let targetElement = event.target;
             let isEditLinkClicked = false;
 
-            // Verifica se o clique foi no link de editar localização ou em um de seus filhos
             if (editLocationLink) {
                 if (targetElement === editLocationLink || editLocationLink.contains(targetElement)) {
                     isEditLinkClicked = true;
@@ -227,8 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     instructionButtonIcon.classList.remove('fa-chevron-down');
                     instructionButtonIcon.classList.add('fa-chevron-up');
                 }
-                // Opcional: rolar para a div de instruções se ela estiver fora da tela ao abrir
-                // manualInstructionsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
     }
