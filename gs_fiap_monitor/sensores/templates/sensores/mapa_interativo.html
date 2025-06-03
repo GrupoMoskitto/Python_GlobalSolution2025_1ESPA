@@ -123,11 +123,23 @@
         allMapMarkers.forEach(marker => map.removeLayer(marker));
         allMapMarkers = [];
 
+        // Helper para formatar timestamp (America/Sao_Paulo)
+        const formatTimestampSP = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleTimeString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+            } catch (e) {
+                console.warn('Erro formatando data para SP:', dateString, e);
+                return dateString; // fallback
+            }
+        };
+
         dispositivosList.forEach(disp => {
             if (typeof disp.latitude !== 'number' || typeof disp.longitude !== 'number') {
                 return;
             }
-            const statusClass = disp.status_marcador || 'normal';
+            const statusClass = disp.status_marcador_code || 'normal'; // Usar o _code para a classe do marcador
             const iconClasses = `map-marker ${statusClass}`;
             const markerElement = L.divIcon({
                 className: iconClasses,
@@ -136,45 +148,96 @@
                 iconAnchor: [16, 16]
             });
             
-            let statusNivelAguaLabel = disp.status_marcador === 'critical' ? 'Crítico' :
-                                   disp.status_marcador === 'moderate' ? 'Moderado' : 'Normal';
+            // --- Construção do HTML do Popup ---
+            let statusBadgeHtml = '';
+            let statusIconClass = 'fas fa-check-circle';
+            let statusBgColor = 'bg-green-500';
 
-            let leiturasHtml = '';
-            if (disp.leituras_formatadas && Object.keys(disp.leituras_formatadas).length > 0) {
-                leiturasHtml = Object.entries(disp.leituras_formatadas).map(([sensor, leitura]) => {
-                    return `<p class="text-xs text-gray-700 leading-tight"><strong class="font-medium">${sensor}:</strong> ${leitura}</p>`;
-                }).join('');
+            if (disp.status_nivel_agua_texto === 'Crítico') {
+                statusIconClass = 'fas fa-exclamation-triangle';
+                statusBgColor = 'bg-red-500';
+            } else if (disp.status_nivel_agua_texto === 'Moderado') {
+                statusIconClass = 'fas fa-exclamation-circle';
+                statusBgColor = 'bg-yellow-500';
+            }
+            statusBadgeHtml = `<span class="mt-1 inline-flex items-center px-2 py-0.5 text-xs font-semibold ${statusBgColor} text-white rounded-full capitalize"><i class="${statusIconClass} mr-1.5"></i>${disp.status_nivel_agua_texto || 'Indefinido'}</span>`;
+
+            const statusAdminIcon = disp.status_admin_texto === 'Ativo' ? 'fas fa-toggle-on text-green-500' : 'fas fa-toggle-off text-gray-400';
+            const statusOperacionalIcon = disp.status_operacional === 'Online' ? 'fas fa-wifi text-green-500' : 'fas fa-ban text-red-500';
+
+            let localizacaoHtml = '';
+            if (disp.latitude && disp.longitude) {
+                localizacaoHtml = `<span class="ml-1">Lat: ${parseFloat(disp.latitude).toFixed(4)}, Lon: ${parseFloat(disp.longitude).toFixed(4)}</span>`;
             } else {
-                leiturasHtml = '<p class="text-xs text-gray-500 italic">Nenhuma leitura registrada.</p>';
+                localizacaoHtml = `<a href="${disp.url_editar_localizacao}" target="_blank" class="ml-1 text-xs italic text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150">Adicionar localização</a>`;
+            }
+
+            let ultimasLeiturasHtml = '';
+            if (disp.ultimas_leituras_detalhadas && disp.ultimas_leituras_detalhadas.length > 0) {
+                disp.ultimas_leituras_detalhadas.forEach(leitura => {
+                    let iconLeitura = 'fas fa-chart-bar text-gray-400'; // Default
+                    if (leitura.nome_original === 'temperature') iconLeitura = 'fas fa-thermometer-half text-red-500';
+                    if (leitura.nome_original === 'humidity') iconLeitura = 'fas fa-tint text-blue-500';
+                    if (leitura.nome_original === 'waterLevel') iconLeitura = 'fas fa-water text-cyan-500';
+                    
+                    ultimasLeiturasHtml += `
+                        <div class="flex items-start text-xs mt-1">
+                            <i class="${iconLeitura} fa-fw w-4 text-center mr-1.5 opacity-75 mt-0.5"></i>
+                            <div class="flex-1 min-w-0">
+                                <span class="font-medium text-gray-600">${leitura.nome_sensor}:</span>
+                                <span class="ml-1">${leitura.valor} ${leitura.unidade_medida || ''}</span>
+                                ${leitura.timestamp_dt ? `<span class="ml-1.5 text-gray-500">(${formatTimestampSP(leitura.timestamp_dt)})</span>` : ''}
+                            </div>
+                        </div>`;
+                });
+            } else {
+                ultimasLeiturasHtml = '<p class="text-xs italic text-gray-500 mt-1">Nenhuma leitura recente.</p>';
             }
 
             const popupContent = `
-                <div class="map-popup-content text-sm text-gray-800" style="min-width: 230px; max-width:280px;">
-                    <h3 class="text-base font-bold text-secondary mb-0.5">${disp.nome}</h3>
-                    <p class="text-xs text-gray-500 mb-1.5 leading-tight">ID: ${disp.id}<br>${disp.descricao}</p>
-                    <div class="mb-2 text-xs leading-tight">
-                        <strong class="font-medium">Nível Água:</strong> 
-                        <span class="font-semibold px-1.5 py-0.5 rounded-full text-white text-[10px] 
-                            ${disp.status_marcador === 'critical' ? 'bg-red-500' : disp.status_marcador === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'}">
-                            ${statusNivelAguaLabel}
-                        </span><br>
-                        <strong class="font-medium">Operacional:</strong> 
-                        <span class="font-semibold ${disp.status_operacional === 'Online' ? 'text-green-600' : 'text-red-600'}">
-                            ${disp.status_operacional}
-                        </span>
+                <div class="map-popup-content text-sm text-gray-800" style="min-width: 260px; max-width:320px;">
+                    <div class="mb-2">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1 min-w-0">
+                                <h2 class="text-base font-bold text-gray-800 group-hover:text-primary truncate transition-colors duration-300">${disp.nome}</h2>
+                                ${statusBadgeHtml}
+                            </div>
+                            <div class="text-xs text-gray-600 text-right space-y-0.5 flex-shrink-0 ml-2">
+                                <p class="flex items-center justify-end whitespace-nowrap" title="Status Administrativo"><i class="${statusAdminIcon} mr-1.5"></i>${disp.status_admin_texto}</p>
+                                <p class="flex items-center justify-end whitespace-nowrap" title="Status Operacional"><i class="${statusOperacionalIcon} mr-1.5"></i>${disp.status_operacional}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="border-t border-gray-200 pt-1.5 mt-1.5">
-                        <h4 class="text-xs font-semibold text-gray-600 mb-0.5">Últimas Leituras:</h4>
-                        ${leiturasHtml}
+                    
+                    <div class="space-y-1 text-xs text-gray-700 mb-2">
+                        <div class="flex items-start">
+                            <i class="fas fa-tag fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
+                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">ID:</strong> <span class="break-all ml-1">${disp.id_dispositivo_fiware}</span></div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-align-left fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
+                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Desc.:</strong> <span class="ml-1 line-clamp-2">${disp.descricao}</span></div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
+                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Local:</strong> ${localizacaoHtml}</div>
+                        </div>
                     </div>
+
+                    <div class="text-xs text-gray-700 mt-2 pt-2 border-t border-gray-200">
+                        <h4 class="font-medium text-gray-600 mb-0.5 text-[11px] uppercase">Últimos Registros:</h4>
+                        ${ultimasLeiturasHtml}
+                    </div>
+
                     ${disp.url_detalhes !== '#' ? 
-                        `<div class="mt-2 pt-1 border-t border-gray-200 text-right">
-                            <a href="${disp.url_detalhes}" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">Ver Detalhes &rarr;</a>
+                        `<div class="mt-3 pt-2 border-t border-gray-200 text-right">
+                            <a href="${disp.url_detalhes}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">Ver Detalhes &rarr;</a>
                          </div>` : ''}
                 </div>
             `;
+            // --- Fim da Construção do HTML do Popup ---
 
-            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: disp.status_marcador})
+            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: disp.status_marcador_code})
                 .addTo(map)
                 .bindPopup(popupContent);
             

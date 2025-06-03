@@ -41,91 +41,82 @@
     {% endif %}
 
     <div class="mb-8 text-center md:text-left">
-        <form method="POST" action="{% url 'sensores:detectar_novos_dispositivos' %}" class="inline-block">
+        <form method="POST" action="{% url 'sensores:detectar_novos_dispositivos' %}" class="inline-block" id="detectFormTop">
             {% csrf_token %}
-            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                <i class="fas fa-search-plus mr-2"></i>Detectar Novos Dispositivos
+            <button type="submit" id="detectButtonTop" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-base focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center">
+                <i class="fas fa-broadcast-tower mr-2 button-icon-normal-top"></i>
+                <span class="button-text-top">Detectar Novos Dispositivos</span>
+                <i class="fas fa-spinner fa-spin ml-2 button-loader-top" style="display: none;"></i>
             </button>
         </form>
     </div>
 
     {% if dispositivos %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
         {% for dispositivo in dispositivos %}
-            {% with status_real=dispositivo.status %}
-                {# Define as classes base do card e do badge de acordo com o status #}
-                {% if status_real == 'critical' %}
-                    {% with status_card_bg="bg-red-50" status_border="border-red-500" text_color="text-red-700" badge_bg="bg-red-500" status_text_strong="text-red-600" %}
-                    {{ block.super }}
-                    {% endwith %}
-                {% elif status_real == 'moderate' %}
-                    {% with status_card_bg="bg-yellow-50" status_border="border-yellow-500" text_color="text-yellow-700" badge_bg="bg-yellow-500" status_text_strong="text-yellow-600" %}
-                    {{ block.super }}
-                    {% endwith %}
-                {% else %} {# normal ou default #}
-                    {% with status_card_bg="bg-green-50" status_border="border-green-500" text_color="text-green-700" badge_bg="bg-green-500" status_text_strong="text-green-600" %}
-                    {{ block.super }}
-                    {% endwith %}
+            {% with status_code=dispositivo.status|default:"normal" %}
+                {% if status_code == 'critical' %}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Crítico" badge_bg_color="bg-red-500" status_icon="fas fa-exclamation-triangle" border_color="border-gray-200" %}
+                {% elif status_code == 'moderate' %}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Moderado" badge_bg_color="bg-yellow-500" status_icon="fas fa-exclamation-circle" border_color="border-gray-200" %}
+                {% else %} {# normal ou qualquer outro valor, incluindo o default #}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Normal" badge_bg_color="bg-green-500" status_icon="fas fa-check-circle" border_color="border-gray-200" %}
                 {% endif %}
-
-                <a href="{% url 'sensores:detalhes_dispositivo' id_dispositivo_fiware=dispositivo.id_dispositivo_fiware %}" class="block rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out {{ status_card_bg }} border-l-4 {{ status_border }} overflow-hidden group">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h2 class="text-2xl font-bold {{ status_text_strong }} group-hover:text-primary transition-colors duration-300">
-                                    {{ dispositivo.nome_dispositivo }}
-                                </h2>
-                                <span class="mt-1 inline-block px-3 py-1 text-xs font-semibold text-white {{ badge_bg }} rounded-full capitalize">
-                                    Status: {{ status_real }}
-                                </span>
-                            </div>
-                            <div class="text-sm font-medium {{ text_color }}">
-                                {% if dispositivo.ativo %}
-                                    <span class="flex items-center"><i class="fas fa-power-off text-green-500 mr-1.5"></i>Admin: Ativo</span>
-                                {% else %}
-                                    <span class="flex items-center"><i class="fas fa-power-off text-gray-400 mr-1.5"></i>Admin: Inativo</span>
-                                {% endif %}
-                                <br> {# Quebra de linha para o novo status #}
-                                {% if dispositivo.status_operacional == 'Online' %}
-                                    <span class="flex items-center"><i class="fas fa-signal text-green-500 mr-1.5"></i>Status: Online</span>
-                                {% else %}
-                                    <span class="flex items-center"><i class="fas fa-signal text-red-500 mr-1.5"></i>Status: Offline</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="space-y-2 text-sm mb-5 {{ text_color }}">
-                            <p class="flex items-center"><i class="fas fa-tag fa-fw mr-2 opacity-70"></i><strong>ID Fiware:</strong><span class="ml-1">{{ dispositivo.id_dispositivo_fiware }}</span></p>
-                            <p class="flex items-start"><i class="fas fa-info-circle fa-fw mr-2 mt-0.5 opacity-70"></i><strong>Descrição:</strong><span class="ml-1">{{ dispositivo.descricao|default:"Nenhuma descrição fornecida." }}</span></p>
-                            <p class="flex items-center"><i class="fas fa-map-marker-alt fa-fw mr-2 opacity-70"></i><strong>Local:</strong><span class="ml-1">Lat: {{ dispositivo.localizacao_latitude|default_if_none:"N/A" }}, Lon: {{ dispositivo.localizacao_longitude|default_if_none:"N/A" }}</span></p>
-                        </div>
-                        
-                        <h4 class="font-semibold text-md {{ status_text_strong }} mb-2">Últimas Leituras Registradas:</h4>
-                        {% if dispositivo.ultimas_leituras_dict %}
-                            <div class="space-y-2 text-sm">
-                            {% for sensor_nome, leitura_info in dispositivo.ultimas_leituras_dict.items %}
-                                <div class="p-3 bg-white bg-opacity-70 rounded-md shadow-sm border {{ status_border }}">
-                                    <strong class="{{ text_color }}">{{ sensor_nome }}:</strong> 
-                                    <span class="{{ status_text_strong }} font-medium">{{ leitura_info.valor }}</span>
-                                    <span class="text-gray-600 text-xs">{{ leitura_info.unidade_medida }}</span>
-                                    <em class="block text-xs text-gray-500 mt-0.5">(@ {% timezone "America/Sao_Paulo" %}{{ leitura_info.timestamp_leitura|to_brasilia_time|date:"d/m/y H:i" }}{% endtimezone %})</em>
-                                </div>
-                            {% endfor %}
-                            </div>
-                        {% else %}
-                            <p class="italic {{ text_color }} opacity-80">Nenhuma leitura recente encontrada.</p>
-                        {% endif %}
-                    </div>
-                </a>
-            {% endwith %}{# Fecha o with das classes de status #}
+            {% endwith %}
         {% endfor %}
         </div>
     {% else %}
-        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-6 rounded-lg shadow-md flex items-center space-x-4 max-w-2xl mx-auto">
-            <i class="fas fa-info-circle fa-2x"></i>
-            <div>
-                <p class="font-bold text-lg">Nenhum Dispositivo Encontrado</p>
-                <p>Parece que ainda não há dispositivos cadastrados no sistema. Você pode adicioná-los através da <a href="{% url 'admin:index' %}" class="inline-block px-4 py-2 bg-primary text-white text-sm font-semibold rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 shadow-sm hover:shadow-md">interface de administração</a>.</p>
+        <div class="bg-blue-50 border-l-8 border-primary p-8 rounded-xl shadow-lg max-w-6xl mx-auto text-center">
+            <i class="fas fa-satellite-dish fa-4x text-primary mb-6"></i>
+            <h2 class="text-3xl font-semibold text-secondary mb-3">Nenhum Dispositivo Encontrado</h2>
+            <p class="text-gray-600 text-lg mb-10">Para começar, você tem duas opções para adicionar dispositivos ao sistema:</p>
+
+            <div class="flex flex-col md:flex-row md:space-x-10 text-left">
+                
+                <!-- Coluna 1: Detecção Automática -->
+                <div class="md:flex-1 bg-white p-8 rounded-lg shadow-lg border border-gray-200 border-t-4 border-t-blue-500 mb-6 md:mb-0 flex flex-col md:border-r md:border-gray-300">
+                    <h3 class="text-2xl font-bold text-primary mb-4"><i class="fas fa-search-plus mr-2"></i>Opção 1: Detecção Automática</h3>
+                    <p class="text-sm text-gray-600 mb-6 flex-grow">O sistema tentará encontrar novos dispositivos ESP32 que já estejam configurados e online na rede Fiware.</p>
+                    <form method="POST" action="{% url 'sensores:detectar_novos_dispositivos' %}" class="inline-block w-full mt-auto" id="detectForm">
+                        {% csrf_token %}
+                        <button type="submit" id="detectButton" class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-base focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center">
+                            <i class="fas fa-broadcast-tower mr-2 button-icon-normal"></i>
+                            <span class="button-text">Detectar Novos Dispositivos</span>
+                            <i class="fas fa-spinner fa-spin ml-2 button-loader" style="display: none;"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Coluna 2: Configuração Manual -->
+                <div class="md:flex-1 bg-white p-8 rounded-lg shadow-lg border border-gray-200 border-t-4 border-t-gray-500 flex flex-col">
+                    <h3 class="text-2xl font-bold text-primary mb-4"><i class="fas fa-tools mr-2"></i>Opção 2: Configuração Manual</h3>
+                    <p class="text-sm text-gray-600 mb-6">Adicione dispositivos manualmente através do painel administrativo. Ideal para controle total ou se a detecção automática não funcionar.</p>
+                    <button id="toggleInstructions" class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-200 flex items-center justify-center text-sm mb-3">
+                        <span class="button-text-instructions">Ver Guia de Configuração Manual</span>
+                        <i class="fas fa-chevron-down ml-2 transform transition-transform duration-200 inline-block"></i>
+                    </button>
+                    <div id="manualInstructions" class="hidden p-4 bg-gray-50 rounded-md border border-gray-200 space-y-3 text-xs text-gray-700 flex-grow overflow-y-auto">
+                        <h4 class="font-bold text-sm text-secondary mb-2 text-center">Guia Rápido: Configuração via Admin</h4>
+                        <ol class="space-y-2">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full text-xs font-bold flex items-center justify-center mr-2 mt-0.5">1</span>
+                                <div>Acesse o <a href="{% url 'admin:index' %}" target="_blank" class="text-blue-600 hover:underline">Painel Admin</a> &rarr; "Dispositivos".</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full text-xs font-bold flex items-center justify-center mr-2 mt-0.5">2</span>
+                                <div>Clique em "<strong>Adicionar dispositivo +</strong>".</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full text-xs font-bold flex items-center justify-center mr-2 mt-0.5">3</span>
+                                <div>Preencha: <strong>ID Fiware</strong> (igual ao do hardware), <strong>Nome</strong>, Localização, e marque <strong>Ativo</strong>.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full text-xs font-bold flex items-center justify-center mr-2 mt-0.5">4</span>
+                                <div>Salve. Seu dispositivo físico deve estar enviando dados com o mesmo ID.</div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
             </div>
         </div>
     {% endif %}
@@ -139,4 +130,108 @@
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deviceCards = document.querySelectorAll('.real-device-card');
+
+    deviceCards.forEach(card => {
+        // O link principal que cobre o card agora é o próprio card <div>,
+        // e a navegação será feita via JS se o clique não for no link de editar localização.
+        const editLocationLink = card.querySelector('a[href*="editar_localizacao_dispositivo"]');
+        const loader = card.querySelector('.loading-overlay');
+        const mainNavigationUrl = card.dataset.mainLink; // URL do link principal armazenada em data attribute
+
+        card.addEventListener('click', function(event) {
+            let targetElement = event.target;
+            let isEditLinkClicked = false;
+
+            // Verifica se o clique foi no link de editar localização ou em um de seus filhos
+            if (editLocationLink) {
+                if (targetElement === editLocationLink || editLocationLink.contains(targetElement)) {
+                    isEditLinkClicked = true;
+                }
+            }
+
+            if (isEditLinkClicked) {
+                // Permite a navegação padrão do link de edição
+                // O z-index no HTML deve garantir que ele seja clicável sobre o card
+                return;
+            }
+            
+            // Se o clique foi em qualquer outra parte do card (que não seja o link de editar)
+            // e o card tem uma URL de navegação principal, ativa o loader e navega.
+            if (mainNavigationUrl) {
+                if (loader) {
+                    loader.style.display = 'flex';
+                }
+                window.location.href = mainNavigationUrl;
+            }
+        });
+    });
+
+    // Novo script para a tela de "Nenhum dispositivo"
+    const detectForm = document.getElementById('detectForm');
+    const detectButton = document.getElementById('detectButton');
+    const toggleInstructionsButton = document.getElementById('toggleInstructions');
+    const manualInstructionsDiv = document.getElementById('manualInstructions');
+
+    if (detectForm && detectButton) {
+        detectForm.addEventListener('submit', function() {
+            const buttonText = detectButton.querySelector('.button-text');
+            const buttonLoader = detectButton.querySelector('.button-loader');
+            const buttonIconNormal = detectButton.querySelector('.button-icon-normal');
+
+            detectButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Detectando...';
+            if (buttonLoader) buttonLoader.style.display = 'inline-block';
+            if (buttonIconNormal) buttonIconNormal.style.display = 'none';
+        });
+    }
+
+    // Lógica para o botão de detectar no TOPO da página (quando há dispositivos)
+    const detectFormTop = document.getElementById('detectFormTop');
+    const detectButtonTop = document.getElementById('detectButtonTop');
+
+    if (detectFormTop && detectButtonTop) {
+        detectFormTop.addEventListener('submit', function() {
+            const buttonTextTop = detectButtonTop.querySelector('.button-text-top');
+            const buttonLoaderTop = detectButtonTop.querySelector('.button-loader-top');
+            const buttonIconNormalTop = detectButtonTop.querySelector('.button-icon-normal-top');
+
+            detectButtonTop.disabled = true;
+            if (buttonTextTop) buttonTextTop.textContent = 'Detectando...';
+            if (buttonLoaderTop) buttonLoaderTop.style.display = 'inline-block';
+            if (buttonIconNormalTop) buttonIconNormalTop.style.display = 'none';
+        });
+    }
+
+    if (toggleInstructionsButton && manualInstructionsDiv) {
+        const instructionButtonTextSpan = toggleInstructionsButton.querySelector('.button-text-instructions');
+        const instructionButtonIcon = toggleInstructionsButton.querySelector('i.fas');
+
+        toggleInstructionsButton.addEventListener('click', function() {
+            const isHidden = manualInstructionsDiv.classList.toggle('hidden');
+            
+            if (isHidden) {
+                if (instructionButtonTextSpan) instructionButtonTextSpan.textContent = 'Ver Guia de Configuração Manual';
+                if (instructionButtonIcon) {
+                    instructionButtonIcon.classList.remove('fa-chevron-up');
+                    instructionButtonIcon.classList.add('fa-chevron-down');
+                }
+            } else {
+                if (instructionButtonTextSpan) instructionButtonTextSpan.textContent = 'Ocultar Guia de Configuração Manual';
+                if (instructionButtonIcon) {
+                    instructionButtonIcon.classList.remove('fa-chevron-down');
+                    instructionButtonIcon.classList.add('fa-chevron-up');
+                }
+                // Opcional: rolar para a div de instruções se ela estiver fora da tela ao abrir
+                // manualInstructionsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    }
+});
+</script>
 {% endblock %} 
