@@ -6,60 +6,48 @@
 
 <h1 align="center"><img src="gs_fiap_monitor/static/sensores/img/favicon.png" alt="Moskitto Logo" width="40" style="vertical-align: middle; margin-right: 10px;"/>  GS FIAP Monitor</h1>
 
-> **Sistema web para monitoramento de sensores (umidade, temperatura, nível de água) integrados via ESP32 e Fiware Orion Context Broker. Visual moderno, responsivo e com gráficos interativos.**
+> **Sistema web para monitorar sensores (umidade, temperatura, nível de água) via ESP32 e Fiware. Interface moderna, responsiva e com gráficos interativos.**
 
 ---
 
 ## 🚀 Funcionalidades
 
-| Funcionalidade                        | Descrição                                                                                                 |
-|---------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| 📡 Integração Fiware                  | Recebe dados de sensores via Orion Context Broker e busca dados "ao vivo" para detalhes do dispositivo. |
-| 📋 Listagem de Dispositivos           | Cards com status colorido (baseado no nível de água), últimas leituras, status operacional e link para detalhes. |
-| 📈 Gráficos Interativos               | Histórico de leituras com Plotly na página de detalhes do dispositivo.                                    |
-| 🗺️ Mapa Interativo                    | Localização dos dispositivos com marcadores de status, legendas e filtros. Popup com link direto para página de detalhes. |
-| 📍 Edição de Localização              | Permite editar a latitude/longitude de um dispositivo, atualizando também no Fiware.                      |
-| ✨ Detecção de Novos Dispositivos     | Funcionalidade para buscar e cadastrar automaticamente novos dispositivos registrados no Fiware.         |
-| 🔋 Status Operacional                 | Indica se um dispositivo está Online (última leitura recente) ou Offline.                                 |
-| 🔒 Administração                      | Gerenciamento fácil via Django Admin.                                                                     |
-| 🎨 Visual Moderno                     | TailwindCSS, responsivo, navegação fluida.                                                                |
+| Funcionalidade                | Descrição                                                                                                |
+|-------------------------------|----------------------------------------------------------------------------------------------------------|
+| 📡 Integração Fiware          | Recebe e busca dados de sensores do Orion Context Broker.                                                  |
+| 📋 Listagem de Dispositivos   | Exibe dispositivos em cards com status, últimas leituras e links. Oferece detecção automática e guia manual. |
+| 📈 Gráficos Interativos       | Mostra histórico de leituras com Plotly.                                                                 |
+| 🗺️ Mapa Interativo            | Localiza dispositivos no mapa com marcadores de status e popups informativos.                            |
+| 📍 Edição de Localização      | Permite editar coordenadas de dispositivos (atualiza no Fiware).                                         |
+| ✨ Detecção Automática        | Busca e cadastra novos dispositivos do Fiware.                                                           |
+| 🔋 Status Operacional         | Indica se dispositivos estão Online ou Offline.                                                          |
+| 🔒 Administração              | Gerenciamento via Django Admin.                                                                          |
+| 🎨 Visual Moderno             | Interface responsiva com TailwindCSS.                                                                    |
 
 ---
 
-
 ## 📦 Modelos de Dados
 
-| Modelo           | Campos Principais                                                                                 |
-|------------------|--------------------------------------------------------------------------------------------------|
-| **Dispositivo**  | nome_dispositivo, id_dispositivo_fiware, localizacao_latitude, localizacao_longitude, descricao, data_criacao, ativo      |
-| **TipoSensor**   | nome, unidade_medida, descricao                                                                  |
-| **LeituraSensor**| dispositivo (FK), tipo_sensor (FK), valor, timestamp_leitura, timestamp_recebimento              |
-
-### Exemplo de Dados para LeituraSensor (armazenado no BD)
-
-```json
-{
-  "dispositivo": "urn:ngsi-ld:SensorDevice:001", // Referência ao Dispositivo
-  "tipo_sensor": "temperature", // Referência ao TipoSensor
-  "valor": 23.5,
-  "timestamp_leitura": "2024-06-10T12:00:00Z"
-}
-```
+| Modelo           | Campos Principais                                                                    |
+|------------------|--------------------------------------------------------------------------------------|
+| **Dispositivo**  | nome, id_fiware, latitude, longitude, descricao, data_criacao, ativo                 |
+| **TipoSensor**   | nome, unidade_medida, descricao                                                      |
+| **LeituraSensor**| dispositivo (FK), tipo_sensor (FK), valor, timestamp_leitura, timestamp_recebimento |
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Tecnologia         | Versão    | Descrição                                 |
-|--------------------|-----------|-------------------------------------------|
-| Django             | 5.2.1     | Backend web framework                     |
-| Django REST        | 3.16.0    | API REST                                  |
-| Plotly             | 6.1.2     | Gráficos interativos                      |
-| Pandas             | 2.2.3     | Manipulação de dados                      |
-| Prophet            | 1.1.7     | Previsão de séries temporais              |
-| Scikit-learn       | 1.6.1     | Machine Learning                          |
-| Leaflet.js         | (via CDN) | Mapas interativos                         |
-| TailwindCSS        | -         | Estilização moderna e responsiva          |
+| Tecnologia         | Versão    | Descrição                                           |
+|--------------------|-----------|-----------------------------------------------------|
+| Django             | 5.2.1     | Framework web backend                               |
+| Django REST        | 3.16.0    | Para APIs REST                                      |
+| Plotly             | 6.1.2     | Gráficos interativos                                |
+| Pandas             | 2.2.3     | Manipulação de dados                                |
+| Prophet            | 1.1.7     | Previsão (planejado/não implementado)               |
+| Scikit-learn       | 1.6.1     | Machine Learning (planejado/não implementado)       |
+| Leaflet.js         | (via CDN) | Mapas interativos                                   |
+| TailwindCSS        | -         | Estilização moderna                                 |
 
 ---
 
@@ -96,18 +84,34 @@
    - Sistema: [http://localhost:8000/sensores/](http://localhost:8000/sensores/) (ou a URL da sua página inicial, ex: `/` se configurado no `urls.py` principal)
    - Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
+
+---
+
+### 🧹 Limpar Dados do Banco (Desenvolvimento)
+
+**Atenção:** Remove todos os dados, mas mantém as tabelas.
+
+1.  Pare o servidor.
+2.  Execute: `python gs_fiap_monitor/manage.py flush` (confirme com `yes`).
+3.  (Opcional) Crie um superusuário: `python gs_fiap_monitor/manage.py createsuperuser`.
+4.  (Opcional) Popule com dados de teste (veja seção abaixo).
+
 ---
 
 ## 🔗 Integração com Fiware
 
-- O endpoint `/sensores/fiware_notification/` recebe notificações NGSI do Orion Context Broker e armazena as leituras automaticamente.
-- A página de detalhes de um dispositivo (`/sensores/dispositivo/<id_fiware>/`) busca dados "ao vivo" diretamente do Fiware para exibição e também os salva no banco de dados local para histórico.
+-   **Endpoint de Notificações:** `/sensores/fiware_notification/` (recebe dados do Fiware).
+-   **Dados ao Vivo:** Detalhes do dispositivo buscam informações atuais do Fiware.
 
-### Exemplo de Payload de Notificação Aceito (NGSI v2)
+**Importante:** Seu Orion Context Broker deve:
+1.  Estar acessível pela aplicação Django.
+2.  Enviar notificações NGSI v2 para `http://<SEU_HOST_DJANGO>:<PORTA>/sensores/fiware_notification/`.
+
+### Exemplo de Payload de Notificação (NGSI v2)
 
 ```json
 {
-  "subscriptionId": "some-subscription-id",
+  "subscriptionId": "id_da_sua_inscricao",
   "data": [
     {
       "id": "urn:ngsi-ld:SensorDevice:001",
@@ -117,81 +121,88 @@
       "waterLevel": {"value": 45, "type": "Number", "metadata": {"unitCode": {"value": "P1"}}},
       "TimeInstant": {"value": "2025-06-01T12:00:00.000Z", "type": "DateTime"} 
     }
-    // Pode haver outras entidades na mesma notificação
   ]
 }
 ```
-*Nota: O campo `TimeInstant` (ou `timestamp`) na raiz da entidade é usado para a data/hora da leitura. Se não presente, a data/hora do recebimento da notificação será usada. A unidade de medida (`unitCode`) é extraída dos metadados do atributo, se disponível.*
+*Nota: `TimeInstant` (ou `timestamp`) na entidade define a hora da leitura. `unitCode` nos metadados define a unidade.*
 
 ---
 
 ## 📊 Visualização
 
-| Página                  | Descrição                                                                                                  |
-|-------------------------|------------------------------------------------------------------------------------------------------------|
-| **Listagem**            | Cards de dispositivos com status de nível de água, status operacional (Online/Offline) e últimas leituras. |
-| **Detalhes**            | Informações completas do dispositivo, dados "ao vivo" do Fiware e gráficos interativos (Plotly) do histórico. |
-| **Mapa**                | Dispositivos geolocalizados com marcadores de status. Popups com informações resumidas e link para a página de detalhes. |
-| **Admin**               | Gerenciamento de dispositivos, tipos de sensores e leituras.                                               |
+| Página       | Descrição                                                       |
+|--------------|-----------------------------------------------------------------|
+| **Listagem** | Cards de dispositivos com status, leituras e geolocalização.    |
+| **Detalhes** | Informações completas, dados ao vivo e gráficos de histórico.   |
+| **Mapa**     | Dispositivos no mapa com marcadores de status e popups.         |
+| **Admin**    | Gerenciamento de dispositivos, sensores e leituras.             |
 
 ---
 
 ## 🧑‍💻 Contribuição
 
-1. Faça um fork do projeto
-2. Crie uma branch (`git checkout -b feature/sua-feature`)
-3. Commit suas alterações (`git commit -am 'feat: nova feature'`)
-4. Push para o branch (`git push origin feature/sua-feature`)
-5. Abra um Pull Request
+1.  Fork o projeto.
+2.  Crie uma branch (`git checkout -b feature/sua-feature`).
+3.  Commit suas alterações (`git commit -am 'feat: nova feature'`).
+4.  Push (`git push origin feature/sua-feature`).
+5.  Abra um Pull Request.
 
-## 🛰️ Como Adicionar e Configurar Dispositivos ESP32
+---
 
-Dispositivos são primariamente detectados automaticamente através da funcionalidade "Detectar Novos Dispositivos" na página de listagem, que consulta o Fiware por novos IDs `urn:ngsi-ld:SensorDevice:XXX`.
+## 🛰️ Adicionar Dispositivos ESP32
 
-Você também pode cadastrar e configurar dispositivos manualmente:
+O sistema pode detectar dispositivos automaticamente (`Detectar Novos Dispositivos` na listagem).
 
-### 1. Via Django Admin
+Para adicionar manualmente:
+1.  Acesse o **Painel Admin** (`http://localhost:8000/admin/`).
+2.  Vá em **Dispositivos** e clique em **Adicionar Dispositivo**.
+3.  **Campos importantes:**
+    *   **ID Fiware:** ID exato do seu dispositivo no Fiware (ex: `urn:ngsi-ld:SensorDevice:001`). **Crucial para a comunicação.**
+    *   **Nome do Dispositivo:** Nome.
+    *   **Latitude/Longitude:** Para o mapa.
+    *   **Ativo:** Marque para habilitar.
+4.  Salve.
 
-1. Acesse o painel de administração: `http://localhost:8000/admin/`
-2. Clique em **Dispositivos**.
-3. Clique em **Adicionar Dispositivo** ou edite um existente.
-4. Preencha os campos:
-   - **Nome do Dispositivo:** Ex: ESP32 Parque do Carmo (Será `urn:ngsi-ld:SensorDevice:XXX` se detectado automaticamente)
-   - **ID Fiware:** Ex: `urn:ngsi-ld:SensorDevice:001` (Este deve ser o ID exato usado no Fiware)
-   - **Latitude e Longitude:** Para geolocalização no mapa. Podem ser editados na página "Editar Localização".
-   - **Descrição:** (opcional)
-   - **Ativo:** Marque para ativar
-5. Salve.
+### Exemplo: Via Django Shell (para desenvolvimento/testes)
 
-### 2. Via Django Shell (Exemplo)
+Você também pode adicionar/atualizar dispositivos programaticamente usando o Django shell. Isto é útil para scripts de setup ou testes.
 
-Abra o shell:
-```bash
-python gs_fiap_monitor/manage.py shell
-```
-Cole e execute o seguinte código para criar/atualizar dispositivos de teste (ajuste os IDs conforme necessário):
-```python
-from sensores.models import Dispositivo
+1.  Abra o shell:
+    ```bash
+    python gs_fiap_monitor/manage.py shell
+    ```
 
-# Atualiza ou cria dispositivos de teste
-Dispositivo.objects.update_or_create(
-    id_dispositivo_fiware='urn:ngsi-ld:SensorDevice:001',
-    defaults={
-        'nome_dispositivo': 'ESP32 Teste 001',
-        'localizacao_latitude': -23.5695,
-        'localizacao_longitude': -46.4847,
-        'descricao': 'Sensor de teste no Parque do Carmo',
-        'ativo': True
-    }
-)
-# Adicione mais dispositivos conforme necessário
-```
+2.  Execute um script similar a este (ajuste os valores conforme necessário):
+    ```python
+    from sensores.models import Dispositivo
 
-## 🧪 Populando o Banco com Leituras Fictícias (Ambiente de Teste)
+    # Exemplo para criar ou atualizar um dispositivo:
+    obj, criado = Dispositivo.objects.update_or_create(
+        id_dispositivo_fiware='urn:ngsi-ld:SensorDevice:00X',  # Identificador único do dispositivo no Fiware
+        defaults={
+            'nome_dispositivo': 'Sensor Exemplo Alpha',
+            'localizacao_latitude': -23.5880, # Opcional: Coordenadas para o mapa
+            'localizacao_longitude': -46.6590, # Opcional
+            'descricao': 'Configurado via shell.', # Opcional
+            'ativo': True # Define se o dispositivo está operacional no sistema
+        }
+    )
 
-Para demonstrar o sistema com dados históricos, você pode criar leituras fictícias para os dispositivos cadastrados usando os comandos abaixo. Execute cada comando separadamente no terminal, dentro do diretório do projeto. Certifique-se de que os `id_dispositivo_fiware` correspondam aos dispositivos existentes no seu banco.
+    if criado:
+        print(f"Dispositivo 'Sensor Exemplo Alpha' (urn:ngsi-ld:SensorDevice:00X) CRIADO.")
+    else:
+        print(f"Dispositivo 'Sensor Exemplo Alpha' (urn:ngsi-ld:SensorDevice:00X) ATUALIZADO.")
 
-**Exemplo para um dispositivo com ID `urn:ngsi-ld:SensorDevice:001`:**
+    # Dica: Para adicionar múltiplos dispositivos, você pode chamar 
+    # Dispositivo.objects.update_or_create(...) repetidamente com dados diferentes,
+    # ou criar uma lista de dicionários e iterar sobre ela.
+    ```
+
+---
+
+## 🧪 Popular Banco com Dados Fictícios (Teste)
+
+Para testes, use os comandos abaixo no terminal (na pasta do projeto) para criar leituras para um dispositivo com ID `urn:ngsi-ld:SensorDevice:001`. Ajuste o ID se necessário.
 
 **Temperatura:**
 ```bash
@@ -207,5 +218,4 @@ python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositi
 ```bash
 python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp=Dispositivo.objects.get(id_dispositivo_fiware=device_id); tipo,_=TipoSensor.objects.get_or_create(nome='waterLevel',defaults={'unidade_medida':'P1','descricao':'Sensor de nível de água'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=30+i*5,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]"
 ```
-
-Esses comandos criam 5 leituras para cada tipo de sensor para o dispositivo especificado, com timestamps retroativos, facilitando a visualização dos gráficos.
+*Estes comandos criam 5 leituras retroativas para cada sensor, facilitando testes com gráficos.*
