@@ -217,8 +217,14 @@ def home_page(request):
     }
     return render(request, 'sensores/home.html', context)
 
+def hub_sensores_view(request):
+    context = {
+        'pagina_atual': 'hub_sensores', # Para destacar no menu, se aplicável
+    }
+    return render(request, 'sensores/hub_sensores.html', context)
+
 # View para a nova página do mapa interativo
-def mapa_interativo_view(request):
+def mapa_interativo(request): # Assumindo que o nome correto da função seja este, baseado no seu urls.py
     dispositivos_ativos = Dispositivo.objects.filter(ativo=True).order_by('nome_dispositivo')
     
     dispositivos_map_data = []

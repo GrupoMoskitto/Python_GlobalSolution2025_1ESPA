@@ -1,0 +1,72 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Painel de Sensores - Moskitto{% endblock %}
+
+{% block main_padding %}pt-20 sm:pt-24 pb-12{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-220px)] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl w-full">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-secondary font-heading mb-12">
+            Painel de Controle Moskitto
+        </h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Botão Mapa Interativo -->
+            <a href="{% url 'sensores:mapa_interativo' %}" 
+               class="group bg-white p-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex flex-col items-center justify-center aspect-square">
+                <div class="mb-6">
+                    <i class="fas fa-map-marked-alt text-7xl sm:text-8xl text-primary group-hover:text-blue-500 transition-colors duration-300"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-semibold text-secondary font-heading mb-2">
+                    Mapa Interativo
+                </h2>
+                <p class="text-gray-600 font-body text-base sm:text-lg">
+                    Visualize todos os sensores em tempo real.
+                </p>
+            </a>
+            
+            <!-- Botão Gerenciar Dispositivos -->
+            <a href="{% url 'sensores:listar_dispositivos' %}" 
+               class="group bg-white p-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex flex-col items-center justify-center aspect-square">
+                <div class="mb-6">
+                    <i class="fas fa-microchip text-7xl sm:text-8xl text-primary group-hover:text-blue-500 transition-colors duration-300"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-semibold text-secondary font-heading mb-2">
+                    Gerenciar Dispositivos
+                </h2>
+                <p class="text-gray-600 font-body text-base sm:text-lg">
+                    Liste, adicione e configure seus dispositivos.
+                </p>
+            </a>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// GSAP Animações para os botões (opcional, mas adiciona um toque legal)
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof gsap !== 'undefined') {
+        gsap.from(".grid > a", { // Anima cada link (botão) no grid
+            duration: 0.8,
+            opacity: 0,
+            y: 50,
+            stagger: 0.2,
+            ease: "power2.out",
+            delay: 0.3 // Pequeno delay para a página carregar
+        });
+        gsap.from("h1", {
+            duration: 0.7,
+            opacity: 0,
+            y: -30,
+            ease: "power2.out"
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from sensores import views as sensores_views
-from django.conf import settings
-from django.conf.urls.static import static
+# Os imports abaixo (settings e static) podem não ser mais necessários 
+# se não forem usados em nenhum outro lugar após a remoção do bloco if not settings.DEBUG
+# from django.conf import settings
+# from django.conf.urls.static import static # Removido pois static() não é mais usado aqui
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,3 +29,5 @@ urlpatterns = [
 ]
 
 handler404 = 'gs_fiap_monitor.views.custom_page_not_found_view'
+
+# O bloco if not settings.DEBUG foi removido pois WhiteNoise cuidará de servir estáticos.

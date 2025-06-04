@@ -85,6 +85,19 @@
    - Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
 
+### Servindo Arquivos Estáticos (com DEBUG = False)
+
+Para que os arquivos estáticos (CSS, JS, imagens, incluindo os do painel admin) funcionem corretamente quando `DEBUG = False` no `settings.py`, este projeto utiliza **WhiteNoise**.
+
+**Pontos Chave:**
+
+1.  **WhiteNoise:** Está configurado no `MIDDLEWARE` e `STATICFILES_STORAGE` em `gs_fiap_monitor/settings.py` para gerenciar os arquivos estáticos. As dependências (`whitenoise`, `brotlipy`) estão no `requirements.txt`.
+2.  **Comando Essencial:** Sempre que houver alterações nos arquivos estáticos ou se o CSS/JS do admin não carregar, execute:
+    ```bash
+    python gs_fiap_monitor/manage.py collectstatic
+    ```
+    Isso garante que todos os arquivos estáticos sejam coletados no diretório `STATIC_ROOT` (definido em `settings.py`) para que o WhiteNoise possa servi-los.
+
 ---
 
 ### 🧹 Limpar Dados do Banco (Desenvolvimento)
