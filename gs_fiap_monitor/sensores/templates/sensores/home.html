@@ -133,6 +133,57 @@
         </div>
     </section>
 
+    <!-- Impacto das Enchentes no Brasil -->
+    <section id="impacto-enchentes" class="py-12 md:py-16 lg:py-24 bg-gradient-to-br from-sky-700 to-indigo-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
+                <div class="order-2 lg:order-1">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 md:mb-8 font-heading">Impacto das Enchentes no Brasil</h2>
+                    <p class="text-lg sm:text-xl text-sky-100 mb-8 md:mb-10 max-w-2xl font-body">
+                        As enchentes causam anualmente bilhões em prejuízos, deslocam comunidades inteiras e colocam em risco a vida das pessoas nas áreas afetadas.
+                    </p>
+                    <div class="space-y-6 md:space-y-8">
+                        <div class="flex items-center">
+                            <span class="text-4xl sm:text-5xl md:text-6xl font-bold text-yellow-300 mr-4 min-w-[150px] sm:min-w-[180px] md:min-w-[220px]">R$ 4.0bi</span>
+                            <span class="text-base sm:text-lg md:text-xl text-indigo-200 font-medium">em prejuízos anuais</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-4xl sm:text-5xl md:text-6xl font-bold text-yellow-300 mr-4 min-w-[150px] sm:min-w-[180px] md:min-w-[220px]">+350k</span>
+                            <span class="text-base sm:text-lg md:text-xl text-indigo-200 font-medium">pessoas afetadas</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-4xl sm:text-5xl md:text-6xl font-bold text-yellow-300 mr-4 min-w-[150px] sm:min-w-[180px] md:min-w-[220px]">74%</span>
+                            <span class="text-base sm:text-lg md:text-xl text-indigo-200 font-medium">dos municípios têm áreas de risco</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 relative flex flex-col justify-center items-center mt-12 lg:mt-0 h-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
+                    <div class="water-simulator-container w-full max-w-xs h-64 sm:h-72 md:h-80 bg-black bg-opacity-20 rounded-xl shadow-2xl p-3">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:0.7" />
+                                    <stop offset="100%" style="stop-color:#3730a3;stop-opacity:0.9" />
+                                </linearGradient>
+                                <clipPath id="glassClip">
+                                    <rect x="5" y="5" width="90" height="90" rx="10" ry="10" />
+                                </clipPath>
+                            </defs>
+                            <rect x="5" y="5" width="90" height="90" rx="10" ry="10" fill="rgba(10, 20, 39, 0.2)" stroke="#7dd3fc" stroke-width="0.3" />
+                            <g clip-path="url(#glassClip)">
+                                <path id="waterPath" d="M0,100 Q50,100 100,100 L100,100 L0,100 Z" fill="url(#waterGradient)" />
+                            </g>
+                            <line x1="7" y1="75" x2="12" y2="75" stroke="#e0f2fe" stroke-width="0.5" /> <text x="14" y="75.5" font-size="3.5" fill="#e0f2fe" class="font-body">25%</text>
+                            <line x1="7" y1="50" x2="12" y2="50" stroke="#e0f2fe" stroke-width="0.5" /> <text x="14" y="50.5" font-size="3.5" fill="#e0f2fe" class="font-body">50%</text>
+                            <line x1="7" y1="25" x2="12" y2="25" stroke="#e0f2fe" stroke-width="0.5" /> <text x="14" y="25.5" font-size="3.5" fill="#e0f2fe" class="font-body">75%</text>
+                        </svg>
+                    </div>
+                    <p class="text-center text-indigo-100 mt-4 text-sm sm:text-base font-medium">Nível de água nas enchentes do RS</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Sobre a Solução -->
     <section class="py-16 md:py-24 bg-white" id="sobre">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -544,7 +595,11 @@
             add3DEffect('.team-3d-card', 18);
             add3DEffect('.stakeholder-3d-card', 15);
             add3DEffect('.content-3d-card', 10);
+
+            // Efeitos 3D para cards de estatística da seção Impacto REMOVIDOS para reverter ao estado do Passo 5
         }
+
+        // Função add3DEffectToElement REMOVIDA para reverter ao estado do Passo 5
 
         // Overlay social da equipe
         function setupTeamSocialOverlay() {
@@ -573,14 +628,14 @@
                 gsap.utils.toArray('.animate-on-scroll').forEach((el, i) => {
                     gsap.fromTo(el, {
                         opacity: 0,
-                        y: 50,
-                        scale: 0.98
+                        y: 70,
+                        scale: 0.95
                     }, {
                         opacity: 1,
                         y: 0,
                         scale: 1,
-                        duration: 1.2,
-                        delay: i * 0.15,
+                        duration: 1.0,
+                        delay: i * 0.1,
                         ease: 'power3.out',
                         scrollTrigger: {
                             trigger: el,
@@ -589,6 +644,149 @@
                         }
                     });
                 });
+
+                // Animação para a nova seção de Impacto das Enchentes
+                const impactoSection = document.getElementById('impacto-enchentes');
+                if (impactoSection) {
+                    // Animar título e parágrafo
+                    gsap.from([impactoSection.querySelector('h2'), impactoSection.querySelector('p.text-sky-100')], {
+                        scrollTrigger: {
+                            trigger: impactoSection,
+                            start: 'top 80%',
+                            once: true
+                        },
+                        opacity: 0,
+                        y: 50,
+                        duration: 1,
+                        stagger: 0.3,
+                        ease: 'power3.out'
+                    });
+
+                    // Animar os dados estatísticos (Restaurado do Passo 5)
+                    const statsElements = impactoSection.querySelectorAll('.space-y-6 > div, .space-y-8 > div');
+                    statsElements.forEach((statDiv, index) => {
+                        const numberSpan = statDiv.querySelector('span:first-child');
+                        const textSpan = statDiv.querySelector('span:last-child');
+
+                        if (numberSpan) {
+                            let finalValueText = numberSpan.textContent.trim();
+                            let statObj = { value: 0 };
+                            let targetValue = 0;
+                            let precision = 0;
+                            let prefix = "";
+                            let suffix = "";
+
+                            if (finalValueText === "R$ 4.0bi") {
+                                targetValue = 4.0;
+                                precision = 1; 
+                                prefix = "R$ ";
+                                suffix = "bi";
+                            } else if (finalValueText === "+350k") {
+                                targetValue = 350;
+                                precision = 0;
+                                prefix = "+";
+                                suffix = "k";
+                            } else if (finalValueText === "74%") {
+                                targetValue = 74;
+                                precision = 0;
+                                suffix = "%";
+                            }
+
+                            if (targetValue > 0 || finalValueText === "R$ 4.0bi") {
+                                gsap.to(statObj, {
+                                    value: targetValue,
+                                    duration: 2.8,
+                                    ease: 'power2.out',
+                                    snap: { value: precision > 0 ? 1 / Math.pow(10, precision) : 1 },
+                                    scrollTrigger: {
+                                        trigger: statDiv,
+                                        start: 'top 85%',
+                                        once: true
+                                    },
+                                    onUpdate: function() {
+                                        numberSpan.innerText = prefix + statObj.value.toFixed(precision) + suffix;
+                                    },
+                                    onComplete: function() {
+                                        numberSpan.innerText = finalValueText;
+                                    }
+                                });
+                            }
+                        }
+                        
+                        if (textSpan) {
+                             gsap.from(textSpan, {
+                                scrollTrigger: {
+                                    trigger: statDiv,
+                                    start: 'top 85%',
+                                    once: true
+                                },
+                                opacity: 0,
+                                x: 30,
+                                duration: 1,
+                                delay: 0.6 + (index * 0.2) 
+                            });
+                        }
+                        gsap.from(statDiv, {
+                            scrollTrigger: {
+                                trigger: statDiv,
+                                start: 'top 85%',
+                                once: true
+                            },
+                            opacity: 0,
+                            y: 30,
+                            duration: 1,
+                            delay: index * 0.2
+                        });
+                    });
+
+                    // Animar a simulação de água SVG (Restaurado do Passo 5)
+                    const waterPath = impactoSection.querySelector('#waterPath');
+                    const waterContainer = impactoSection.querySelector('.water-simulator-container');
+
+                    if (waterPath && waterContainer) {
+                        gsap.fromTo(waterPath,
+                            { attr: { d: "M0,95 Q50,95 100,95 L100,100 L0,100 Z" } }, // FROM state
+                            { // TO state
+                                attr: { d: "M0,23 Q50,23 100,23 L100,100 L0,100 Z" },
+                                duration: 2,
+                                ease: "power1.inOut",
+                                scrollTrigger: {
+                                    trigger: waterContainer,
+                                    start: "top 80%",
+                                    once: true,
+                                    toggleActions: "play none none none" // Explicitly prevent reset/reversal
+                                },
+                                onComplete: () => {
+                                    // Initialize wave animation only once after fill is complete
+                                    if (!waterContainer.dataset.waveAnimationInitialized) {
+                                        waterContainer.dataset.waveAnimationInitialized = 'true';
+
+                                        gsap.timeline({
+                                            scrollTrigger: {
+                                                trigger: waterContainer,
+                                                start: "top 70%", // Adjust if needed, ensures container is somewhat visible
+                                                toggleActions: "play pause resume pause"
+                                            },
+                                            repeat: -1,
+                                            yoyo: true,
+                                            defaults: {duration: 3.5, ease: "sine.inOut"}
+                                        })
+                                        .to(waterPath, { attr: { d: "M0,23 Q50,15 100,23 L100,100 L0,100 Z" } }) // Wave peak
+                                        .to(waterPath, { attr: { d: "M0,23 Q50,31 100,23 L100,100 L0,100 Z" } }); // Wave trough
+                                    }
+                                }
+                            }
+                        );
+                    }
+                }
+
+                // Efeito Parallax para a seção #impacto-enchentes REMOVIDO para reverter ao Passo 5
+                // if (impactoSection && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                    // const textBlock = impactoSection.querySelector('.order-2.lg\\:order-1\');
+                    // const waterBlock = impactoSection.querySelector('.order-1.lg\\:order-2\');
+                    // Lógica de parallax removida ...
+                // }
+
                 gsap.from('.hero-parallax', {
                     scrollTrigger: {
                         trigger: '#home',
@@ -606,7 +804,7 @@
                     duration: 1,
                     ease: "power1.inOut"
                 });
-                // Animação de contagem e seta na Vantagem Competitiva
+                // Animação de contagem e seta na Vantagem Competitiva (revertendo para a versão do Passo 5)
                 if (document.querySelector('.vantagem-competitiva-valor')) {
                     gsap.fromTo('.vantagem-competitiva-valor[data-final]',
                         { innerText: 0 },
@@ -623,14 +821,14 @@
                             onUpdate: function() {
                                 document.querySelectorAll('.vantagem-competitiva-valor[data-final]').forEach(el => {
                                     let val = parseInt(el.innerText.replace(/\D/g, ''));
-                                    if (el.getAttribute('data-final').includes('15')) { // Assume R$15000
+                                    if (el.getAttribute('data-final').includes('15')) { 
                                         el.innerText = 'R$' + val.toLocaleString('pt-BR');
-                                    } else { // Assume R$300
-                                        el.innerText = 'R$' + val; // Para valores menores, .toLocaleString pode não ser necessário ou desejado sem centavos
+                                    } else { 
+                                        el.innerText = 'R$' + val;
                                     }
                                 });
                             },
-                            onComplete: function() { // Garante formatação final correta
+                            onComplete: function() { 
                                 document.querySelectorAll('.vantagem-competitiva-valor[data-final]').forEach(el => {
                                     let finalVal = parseInt(el.getAttribute('data-final'));
                                      if (el.getAttribute('data-final').includes('15')) {
@@ -642,20 +840,6 @@
                             }
                         }
                     );
-                    // Animação para a nova seta no card de comparativo de custo
-                    // if (document.querySelector('.seta-comparativo')) { // Comentando a antiga verificação
-                    //     gsap.to('.seta-comparativo', { // Comentando a antiga animação
-                    //         x: 10, // Move 10 pixels para a direita
-                    //         repeat: -1, // Repete infinitamente
-                    //         yoyo: true, // Faz a animação ir e voltar
-                    //         duration: 0.7, // Duração de cada ciclo
-                    //         ease: 'sine.inOut', // Suavização da animação
-                    //         scrollTrigger: { // Inicia a animação quando o card estiver visível
-                    //             trigger: '.seta-comparativo',
-                    //             start: 'top 90%'
-                    //         }
-                    //     });
-                    // }
 
                     // Animação para a seta de desktop
                     if (document.querySelector('.seta-comparativo-desktop')) {
@@ -686,8 +870,6 @@
                             }
                         });
                     }
-
-                    // Código removido para .vantagem-competitiva-seta pois não encontrei no HTML
                 }
 
                 // Animação específica para a seção de contato
