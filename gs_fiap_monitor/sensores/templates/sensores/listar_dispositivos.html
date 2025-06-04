@@ -56,11 +56,11 @@
         {% for dispositivo in dispositivos %}
             {% with status_code=dispositivo.status|default:"normal" %}
                 {% if status_code == 'critical' %}
-                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Crítico" badge_bg_color="bg-red-500" status_icon="fas fa-exclamation-triangle" border_color="border-gray-200" %}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Crítico" badge_bg_color="bg-red-500" status_icon="fas fa-exclamation-triangle" border_color="border-red-500" %}
                 {% elif status_code == 'moderate' %}
-                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Moderado" badge_bg_color="bg-yellow-500" status_icon="fas fa-exclamation-circle" border_color="border-gray-200" %}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Moderado" badge_bg_color="bg-yellow-500" status_icon="fas fa-exclamation-circle" border_color="border-yellow-500" %}
                 {% else %} {# normal ou qualquer outro valor, incluindo o default #}
-                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Normal" badge_bg_color="bg-green-500" status_icon="fas fa-check-circle" border_color="border-gray-200" %}
+                    {% include "sensores/partials/device_card_content.html" with dispositivo=dispositivo status_texto_para_exibir="Normal" badge_bg_color="bg-green-500" status_icon="fas fa-check-circle" border_color="border-green-500" %}
                 {% endif %}
             {% endwith %}
         {% endfor %}
@@ -226,6 +226,146 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+
+    // --- NOVO SCRIPT PARA ATUALIZAÇÃO EM TEMPO REAL DA LISTA DE DISPOSITIVOS ---
+    function formatISODateToBrasil(isoString, format = "dd/mm H:i") {
+        if (!isoString) return 'N/A';
+        try {
+            const date = new Date(isoString);
+            let day = date.getDate().toString().padStart(2, '0');
+            let month = (date.getMonth() + 1).toString().padStart(2, '0');
+            let year = date.getFullYear();
+            let hours = date.getHours().toString().padStart(2, '0');
+            let minutes = date.getMinutes().toString().padStart(2, '0');
+            let seconds = date.getSeconds().toString().padStart(2, '0');
+
+            if (format === "dd/mm H:i:s") {
+                return `${day}/${month} ${hours}:${minutes}:${seconds}`;
+            } else if (format === "dd/mm/yyyy H:i:s") {
+                 return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            }
+            return `${day}/${month} ${hours}:${minutes}`;
+        } catch (e) {
+            console.error("Erro ao formatar data ISO para lista:", isoString, e);
+            return 'Data inválida';
+        }
+    }
+
+    function getSensorIconClass(sensorOriginalName) {
+        const nameLower = sensorOriginalName.toLowerCase();
+        if (nameLower.includes('temperatura') || nameLower.includes('temperature')) {
+            return 'fas fa-thermometer-half fa-fw w-4 text-center mr-1.5 text-red-500 opacity-75 mt-0.5';
+        } else if (nameLower.includes('umidade') || nameLower.includes('humidity')) {
+            return 'fas fa-tint fa-fw w-4 text-center mr-1.5 text-blue-500 opacity-75 mt-0.5';
+        } else if (nameLower.includes('nível de água') || nameLower.includes('nivel de agua') || nameLower.includes('waterlevel')) {
+            return 'fas fa-water fa-fw w-4 text-center mr-1.5 text-cyan-500 opacity-75 mt-0.5';
+        } else {
+            return 'fas fa-chart-bar fa-fw w-4 text-center mr-1.5 text-gray-400 opacity-75 mt-0.5';
+        }
+    }
+
+    function createLeituraHTML(sensorOriginalName, leituraData) {
+        const iconClass = getSensorIconClass(sensorOriginalName);
+        const valor = leituraData.valor !== null && leituraData.valor !== undefined ? `${leituraData.valor} ${leituraData.unidade_medida || ''}`.trim() : 'N/A';
+        const timestamp = leituraData.timestamp_leitura_iso ? formatISODateToBrasil(leituraData.timestamp_leitura_iso, "dd/mm H:i") : 'N/A';
+        
+        return `
+            <div class="flex items-start text-xs" data-sensor-original-name="${sensorOriginalName.replace(/[^a-zA-Z0-9-_]/g, '-')}">
+                <i class="${iconClass}"></i>
+                <div class="flex-1 min-w-0">
+                    <div class="sm:flex sm:items-baseline sm:flex-wrap">
+                        <div class="mr-1.5">
+                            <span class="font-medium text-gray-600">${leituraData.nome_exibicao || sensorOriginalName}:</span>
+                            <span data-update="leitura-valor" class="ml-1">${valor}</span>
+                        </div>
+                        <span data-update="leitura-timestamp" class="block sm:inline text-gray-500 text-[0.7rem] sm:text-xs">(${timestamp})</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function updateDeviceCardsData() {
+        fetch('{% url "sensores_api:api_listar_dispositivos_status" %}') // Usando o namespace da URL
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ao buscar lista de dispositivos: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.dispositivos && Array.isArray(data.dispositivos)) {
+                    data.dispositivos.forEach(apiDevice => {
+                        const cardElement = document.querySelector(`.real-device-card[data-device-id="${apiDevice.id_dispositivo_fiware}"]`);
+                        if (cardElement) {
+                            // Atualizar Status Nível da Água (badge principal)
+                            const statusNivelAguaBadge = cardElement.querySelector('[data-update="status-nivel-agua-badge"]');
+                            const statusNivelAguaIcon = cardElement.querySelector('[data-update="status-nivel-agua-icon"]');
+                            const statusNivelAguaTexto = cardElement.querySelector('[data-update="status-nivel-agua-texto"]');
+                            if (statusNivelAguaBadge && statusNivelAguaIcon && statusNivelAguaTexto) {
+                                let badgeClass = 'bg-green-500'; let iconClass = 'fas fa-check-circle'; let texto = 'Normal';
+                                let borderColorClass = 'border-green-500';
+                                if (apiDevice.status_nivel_agua === 'critical') {
+                                    badgeClass = 'bg-red-500'; iconClass = 'fas fa-exclamation-triangle'; texto = 'Crítico';
+                                    borderColorClass = 'border-red-500';
+                                } else if (apiDevice.status_nivel_agua === 'moderate') {
+                                    badgeClass = 'bg-yellow-500'; iconClass = 'fas fa-exclamation-circle'; texto = 'Moderado';
+                                    borderColorClass = 'border-yellow-500';
+                                }
+                                statusNivelAguaBadge.className = `mt-1 inline-flex items-center px-2.5 py-0.5 text-xs font-semibold ${badgeClass} text-white rounded-full capitalize`;
+                                statusNivelAguaIcon.className = `${iconClass} mr-1.5`;
+                                statusNivelAguaTexto.textContent = texto;
+                                // Atualizar a cor da borda esquerda do card
+                                cardElement.classList.remove('border-red-500', 'border-yellow-500', 'border-green-500', 'border-gray-200');
+                                cardElement.classList.add(borderColorClass);
+                            }
+
+                            // Atualizar Status Operacional
+                            const statusOperacionalElem = cardElement.querySelector('[data-update="status-operacional"]');
+                            if (statusOperacionalElem) {
+                                if (apiDevice.status_operacional === 'Online') {
+                                    statusOperacionalElem.innerHTML = '<i class="fas fa-wifi text-green-500 mr-1.5"></i>Online';
+                                } else {
+                                    statusOperacionalElem.innerHTML = '<i class="fas fa-ban text-red-500 mr-1.5"></i>Offline';
+                                }
+                            }
+
+                            // Atualizar Timestamp Geral do Card
+                            const timestampGeralCardElem = cardElement.querySelector('[data-update="timestamp-geral-card"]');
+                            if (timestampGeralCardElem) {
+                                const timestampFormatado = apiDevice.timestamp_ultimo_registro_iso ? formatISODateToBrasil(apiDevice.timestamp_ultimo_registro_iso, "dd/mm H:i:s") : "N/A";
+                                timestampGeralCardElem.textContent = `(Atualizado: ${timestampFormatado})`;
+                            }
+
+                            // Atualizar Últimas Leituras
+                            const leiturasContainer = cardElement.querySelector('[data-update="ultimas-leituras-container"]');
+                            if (leiturasContainer) {
+                                leiturasContainer.innerHTML = ''; // Limpa leituras antigas
+                                if (apiDevice.ultimas_leituras && Object.keys(apiDevice.ultimas_leituras).length > 0) {
+                                    for (const sensorNomeOriginal in apiDevice.ultimas_leituras) {
+                                        leiturasContainer.innerHTML += createLeituraHTML(sensorNomeOriginal, apiDevice.ultimas_leituras[sensorNomeOriginal]);
+                                    }
+                                } else {
+                                    leiturasContainer.innerHTML = '<p class="text-xs italic text-gray-500">Nenhuma leitura recente.</p>';
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.warn('API não retornou uma lista de dispositivos válida.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados da lista de dispositivos:', error);
+                // Opcional: Adicionar uma mensagem de erro visual para o usuário na página
+            });
+    }
+
+    // Chamar a função para buscar dados quando a página carregar e depois em intervalos
+    if (document.querySelectorAll('.real-device-card').length > 0) { // Só executa se houver cards na página
+        updateDeviceCardsData();
+        setInterval(updateDeviceCardsData, 30000); // Atualiza a cada 30 segundos
     }
 });
 </script>

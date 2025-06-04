@@ -6,8 +6,8 @@ from django.db import transaction
 import json
 from datetime import datetime, timedelta
 from collections import defaultdict
-import requests # Adicionado import
-from django.contrib import messages # Adicionar este import no topo do arquivo views.py
+import requests
+from django.contrib import messages
 from django.urls import reverse, NoReverseMatch
 import pytz
 
@@ -15,7 +15,7 @@ import plotly.express as px
 import pandas as pd
 
 from .models import Dispositivo, TipoSensor, LeituraSensor
-from .forms import DispositivoLocalizacaoForm # Adicionado import do novo formulário
+from .forms import DispositivoLocalizacaoForm
 
 # Função auxiliar para tentar parsear timestamps
 def parse_timestamp(timestamp_str):
@@ -56,7 +56,6 @@ def fiware_notification_receiver(request):
                         continue
 
                     # Encontra ou cria o dispositivo
-                    # Usaremos o id_dispositivo_fiware como nome_dispositivo se um nome específico não for enviado
                     dispositivo, created = Dispositivo.objects.get_or_create(
                         id_dispositivo_fiware=device_fiware_id,
                         defaults={ 'nome_dispositivo': device_fiware_id, 'descricao': f"Dispositivo {entity_type or 'Desconhecido'}"}
@@ -66,39 +65,28 @@ def fiware_notification_receiver(request):
 
                     # Extrai o timestamp da leitura da entidade.
                     timestamp_leitura_str = None
-                    print(f"[FIWARE NOTIFICATION - TS DEBUG] Entidade completa: {entity}")
                     if 'timestamp' in entity and isinstance(entity['timestamp'], dict) and 'value' in entity['timestamp']:
                         timestamp_leitura_str = entity['timestamp']['value']
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de entity[timestamp][value]: '{timestamp_leitura_str}'")
                     elif 'TimeInstant' in entity and isinstance(entity['TimeInstant'], dict) and 'value' in entity['TimeInstant']:
                         timestamp_leitura_str = entity['TimeInstant']['value']
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de entity[TimeInstant][value]: '{timestamp_leitura_str}'")
                     elif 'TimeInstant' in entity and isinstance(entity['TimeInstant'], str):
                         timestamp_leitura_str = entity['TimeInstant']
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de entity[TimeInstant] (string): '{timestamp_leitura_str}'")
                     elif 'timestamp' in entity and isinstance(entity['timestamp'], str):
                         timestamp_leitura_str = entity['timestamp']
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de entity[timestamp] (string): '{timestamp_leitura_str}'")
                     else:
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] NENHUM timestamp padrão encontrado na raiz da entidade. Verificando metadados...")
                         # Tentar encontrar em metadados de algum atributo (ex: dateObserved)
                         for attr_name, attr_data in entity.items():
                             if isinstance(attr_data, dict) and 'metadata' in attr_data:
                                 if 'TimeInstant' in attr_data['metadata'] and 'value' in attr_data['metadata']['TimeInstant']:
                                     timestamp_leitura_str = attr_data['metadata']['TimeInstant']['value']
-                                    print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de metadata.TimeInstant.value do atributo '{attr_name}': '{timestamp_leitura_str}'")
                                     break
                                 if 'timestamp' in attr_data['metadata'] and 'value' in attr_data['metadata']['timestamp']:
                                     timestamp_leitura_str = attr_data['metadata']['timestamp']['value']
-                                    print(f"[FIWARE NOTIFICATION - TS DEBUG] Timestamp extraído de metadata.timestamp.value do atributo '{attr_name}': '{timestamp_leitura_str}'")
                                     break
                     
                     if timestamp_leitura_str:
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Valor de timestamp_leitura_str ANTES de parse_timestamp: '{timestamp_leitura_str}'")
                         timestamp_leitura = parse_timestamp(timestamp_leitura_str)
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Valor de timestamp_leitura DEPOIS de parse_timestamp: {timestamp_leitura}")
                     else:
-                        print(f"[FIWARE NOTIFICATION - TS DEBUG] Nenhum timestamp encontrado para a entidade '{device_fiware_id}'. Usando timezone.now().")
                         timestamp_leitura = timezone.now()
 
                     # Processa cada atributo da entidade como uma possível leitura de sensor
@@ -122,10 +110,7 @@ def fiware_notification_receiver(request):
                                 nome=attr_name, # Usando o nome do atributo Fiware como nome do sensor
                                 defaults={'unidade_medida': unidade, 'descricao': f"Sensor para {attr_name}"}
                             )
-                            if created_type:
-                                print(f"TipoSensor '{tipo_sensor.nome}' ('{tipo_sensor.unidade_medida}') criado.")
-                            elif tipo_sensor.unidade_medida == 'Desconhecida' and unidade != 'Desconhecida':
-                                # Atualiza a unidade se encontrarmos uma e antes era desconhecida
+                            if created_type or (tipo_sensor.unidade_medida == 'Desconhecida' and unidade != 'Desconhecida'):
                                 tipo_sensor.unidade_medida = unidade
                                 tipo_sensor.save()
 
@@ -137,9 +122,8 @@ def fiware_notification_receiver(request):
                                 timestamp_leitura=timestamp_leitura,
                                 # timestamp_recebimento é default=timezone.now()
                             )
-                            print(f"Leitura salva: {dispositivo.nome_dispositivo} - {tipo_sensor.nome}: {attr_value} {tipo_sensor.unidade_medida}")
                         elif attr_value is not None:
-                            print(f"Atributo '{attr_name}' com valor não numérico '{attr_value}' ignorado como leitura de sensor.")
+                            pass # Valor não numérico já logado pela função de print que será removida ou já foi
 
             return HttpResponse("Notificação processada com sucesso.", status=200)
         except json.JSONDecodeError:
@@ -147,8 +131,6 @@ def fiware_notification_receiver(request):
         except Exception as e:
             print(f"Erro crítico ao processar notificação: {e}")
             # Em produção, logar o traceback completo aqui seria importante
-            # import traceback
-            # print(traceback.format_exc())
             return HttpResponse(f"Erro interno ao processar notificação: {str(e)}", status=500)
     else:
         return HttpResponse("Método não permitido. Use POST.", status=405)
@@ -156,17 +138,15 @@ def fiware_notification_receiver(request):
 def listar_dispositivos(request):
     dispositivos_list = Dispositivo.objects.all().order_by('nome_dispositivo')
     
-    nome_sensor_nivel_agua = 'waterLevel' # ATENÇÃO: Ajuste este nome se necessário
+    nome_sensor_nivel_agua = 'waterLevel'
 
     SENSOR_NOME_TRADUZIDO = {
         'humidity': 'Umidade',
         'temperature': 'Temperatura',
         'waterLevel': 'Nível de água',
-        'waterLevel': 'Nível de água',
     }
 
     for dispositivo in dispositivos_list:
-        print(f"[LISTAR DEBUG] Processando dispositivo: {dispositivo.id_dispositivo_fiware}")
         dispositivo.ultimas_leituras_dict = {}
         tipos_sensores_usados_ids = LeituraSensor.objects.filter(dispositivo=dispositivo).values_list('tipo_sensor_id', flat=True).distinct()
         tipos_sensores_usados = TipoSensor.objects.filter(id__in=tipos_sensores_usados_ids)
@@ -176,13 +156,11 @@ def listar_dispositivos(request):
         dispositivo.timestamp_do_ultimo_registro = None # Inicializa o novo atributo
 
         if not tipos_sensores_usados.exists():
-            print(f"[LISTAR DEBUG] Dispositivo {dispositivo.id_dispositivo_fiware} não possui nenhum TipoSensor associado a leituras.")
+            pass # Nenhuma ação específica se não houver tipos de sensores associados
 
         for tipo_sensor in tipos_sensores_usados:
-            print(f"[LISTAR DEBUG]   Buscando última leitura para TipoSensor: {tipo_sensor.nome} (ID: {tipo_sensor.id})")
             ultima_leitura = LeituraSensor.objects.filter(dispositivo=dispositivo, tipo_sensor=tipo_sensor).order_by('-timestamp_leitura').first()
             if ultima_leitura:
-                print(f"[LISTAR DEBUG]     Última leitura encontrada para {tipo_sensor.nome}: Valor={ultima_leitura.valor}, Timestamp={ultima_leitura.timestamp_leitura}, ID Leitura={ultima_leitura.id}")
                 nome_traduzido = SENSOR_NOME_TRADUZIDO.get(tipo_sensor.nome, tipo_sensor.nome)
                 dispositivo.ultimas_leituras_dict[nome_traduzido] = {
                     'valor': ultima_leitura.valor,
@@ -197,7 +175,7 @@ def listar_dispositivos(request):
                 if timestamp_mais_recente_geral is None or ultima_leitura.timestamp_leitura > timestamp_mais_recente_geral:
                     timestamp_mais_recente_geral = ultima_leitura.timestamp_leitura
             else:
-                print(f"[LISTAR DEBUG]     Nenhuma leitura encontrada para {tipo_sensor.nome} no dispositivo {dispositivo.id_dispositivo_fiware}")
+                pass # Nenhuma leitura encontrada para este tipo de sensor no dispositivo
         
         dispositivo.timestamp_do_ultimo_registro = timestamp_mais_recente_geral # Atribui o valor calculado
 
@@ -211,23 +189,23 @@ def listar_dispositivos(request):
                 elif valor_nivel > 50: # Limite para moderado
                     dispositivo.status = 'moderate'
             except ValueError:
-                print(f"Valor não numérico para {nome_sensor_nivel_agua} no dispositivo {dispositivo.nome_dispositivo}: {ultima_leitura_nivel_agua}")
+                pass # Valor não numérico já tratado ou logado anteriormente
 
         # Determinar status operacional (Online/Offline)
         dispositivo.status_operacional = 'Offline' # Default
         if timestamp_mais_recente_geral:
-            limite_inatividade = timedelta(hours=2) # Limite de 2 horas
+            limite_inatividade = timedelta(hours=2)
             agora_utc = timezone.now()
             if (agora_utc - timestamp_mais_recente_geral) < limite_inatividade:
                 dispositivo.status_operacional = 'Online'
             else:
-                print(f"[Listar Dispositivos] {dispositivo.nome_dispositivo} OFFLINE. Última leitura: {timestamp_mais_recente_geral} (UTC), Agora: {agora_utc} (UTC)")
+                pass # Offline por inatividade, log já existia ou pode ser adicionado se necessário para monitoramento
         else:
-            print(f"[Listar Dispositivos] {dispositivo.nome_dispositivo} OFFLINE (sem leituras).")
+            pass # Offline por falta de leituras, log já existia ou pode ser adicionado
 
     context = {
         'dispositivos': dispositivos_list,
-        'pagina_atual': 'listar_dispositivos' # Adicionado para consistência
+        'pagina_atual': 'listar_dispositivos'
     }
     return render(request, 'sensores/listar_dispositivos.html', context)
 
@@ -249,13 +227,12 @@ def mapa_interativo_view(request):
         'humidity': 'Umidade',
         'temperature': 'Temperatura',
         'waterLevel': 'Nível de Água',
-        # Adicione outros sensores se necessário
     }
 
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
 
     for disp in dispositivos_ativos:
-        ultimas_leituras_detalhadas = [] # MODIFICADO: de {} para [], e nome
+        ultimas_leituras_detalhadas = [] 
         tipos_sensores_usados_ids = LeituraSensor.objects.filter(dispositivo=disp).values_list('tipo_sensor_id', flat=True).distinct()
         tipos_sensores_usados = TipoSensor.objects.filter(id__in=tipos_sensores_usados_ids)
         
@@ -296,8 +273,7 @@ def mapa_interativo_view(request):
                     status_nivel_agua_code = 'moderate'
                     status_nivel_agua_texto = 'Moderado'
             except ValueError:
-                print(f"[Mapa Interativo] Valor não numérico para {nome_sensor_nivel_agua} no dispositivo {disp.nome_dispositivo}: {ultima_leitura_nivel_agua_valor}")
-                status_nivel_agua_texto = 'Indefinido' # ou 'Erro de Leitura'
+                status_nivel_agua_texto = 'Indefinido' 
 
         status_operacional_disp = 'Offline'
         if timestamp_mais_recente_geral:
@@ -312,27 +288,25 @@ def mapa_interativo_view(request):
             url_detalhes = reverse('sensores:detalhes_dispositivo', args=[disp.id_dispositivo_fiware])
         except NoReverseMatch:
             url_detalhes = "#"
-            print(f"[Mapa Interativo] Não foi possível gerar a URL de detalhes para {disp.id_dispositivo_fiware}")
         
         try:
             url_editar_localizacao = reverse('sensores:editar_localizacao_dispositivo', args=[disp.id_dispositivo_fiware])
         except NoReverseMatch:
             url_editar_localizacao = "#"
-            print(f"[Mapa Interativo] Não foi possível gerar a URL de edição de localização para {disp.id_dispositivo_fiware}")
 
         dispositivos_map_data.append({
-            'id_dispositivo_fiware': disp.id_dispositivo_fiware, # Adicionado para clareza
+            'id_dispositivo_fiware': disp.id_dispositivo_fiware,
             'nome': disp.nome_dispositivo,
             'latitude': disp.localizacao_latitude,
             'longitude': disp.localizacao_longitude,
             'descricao': disp.descricao or "Sem descrição.",
-            'ultimas_leituras_detalhadas': ultimas_leituras_detalhadas, # MODIFICADO
+            'ultimas_leituras_detalhadas': ultimas_leituras_detalhadas, 
             'status_marcador_code': status_nivel_agua_code, # Para a cor do marcador no JS
             'status_nivel_agua_texto': status_nivel_agua_texto, # Para exibir no popup
             'status_operacional': status_operacional_disp, 
-            'status_admin_texto': status_admin_texto, # NOVO
+            'status_admin_texto': status_admin_texto, 
             'url_detalhes': url_detalhes,
-            'url_editar_localizacao': url_editar_localizacao # NOVO
+            'url_editar_localizacao': url_editar_localizacao 
         })
 
     context = {
@@ -345,12 +319,10 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     dispositivo = get_object_or_404(Dispositivo, id_dispositivo_fiware=id_dispositivo_fiware)
     leituras = LeituraSensor.objects.filter(dispositivo=dispositivo).order_by('tipo_sensor__nome', 'timestamp_leitura')
 
-    # Dicionário de tradução dos nomes dos sensores (movido para cima)
     SENSOR_NOME_TRADUZIDO_DETALHES = {
         'humidity': 'Umidade',
         'temperature': 'Temperatura',
         'waterLevel': 'Nível de água',
-        # Adicionar outros atributos que podem vir diretamente do Fiware e precisam de tradução
     }
 
     # Lógica para determinar o status do dispositivo (baseado em waterLevel do DB local)
@@ -368,7 +340,6 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
         elif valor_nivel > 50:
             dispositivo.status_calculado = 'moderate'
     elif ultima_leitura_nivel_agua_obj: 
-        print(f"Valor não numérico para {nome_sensor_nivel_agua} no dispositivo {dispositivo.nome_dispositivo}: {ultima_leitura_nivel_agua_obj.valor} na página de detalhes.")
         dispositivo.status_calculado = 'unknown'
 
     # Determinar status operacional (Online/Offline) para a página de detalhes
@@ -381,24 +352,24 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
         if (agora_utc - timestamp_mais_recente_bd) < limite_inatividade:
             dispositivo.status_operacional = 'Online'
         else:
-            print(f"[Detalhes Dispositivo] {dispositivo.nome_dispositivo} OFFLINE. Última leitura BD: {timestamp_mais_recente_bd} (UTC), Agora: {agora_utc} (UTC)")
+            pass # Offline por inatividade
     else:
-        print(f"[Detalhes Dispositivo] {dispositivo.nome_dispositivo} OFFLINE (sem leituras no BD).")
+        pass # Offline por falta de leituras
 
     # Buscar dados ao vivo do Fiware
     dados_fiware_live = {}
     timestamp_leitura_fiware_live = timezone.now() # Default para o momento da busca
-    timestamp_fiware_em_brasilia = None # << ADICIONADO
-    dados_fiware_formatados = [] # << NOVO: Para dados formatados
+    timestamp_fiware_em_brasilia = None 
+    dados_fiware_formatados = [] 
 
     try:
-        fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware}" # MODIFICADO: URL atualizada
+        fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware}" 
         headers = {
             'Accept': 'application/json',
             'fiware-service': 'smart',
             'fiware-servicepath': '/'
         }
-        response = requests.get(fiware_url, headers=headers, timeout=5) # Adicionado timeout
+        response = requests.get(fiware_url, headers=headers, timeout=5) 
         response.raise_for_status() # Levanta exceção para respostas de erro HTTP (4xx ou 5xx)
         dados_fiware_live = response.json()
         
@@ -406,7 +377,7 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
         timestamp_leitura_fiware_str = None
         if 'TimeInstant' in dados_fiware_live and isinstance(dados_fiware_live['TimeInstant'], dict) and 'value' in dados_fiware_live['TimeInstant']:
             timestamp_leitura_fiware_str = dados_fiware_live['TimeInstant']['value']
-        elif 'timestamp' in dados_fiware_live and isinstance(dados_fiware_live['timestamp'], dict) and 'value' in dados_fiware_live['timestamp']: # Outro nome comum
+        elif 'timestamp' in dados_fiware_live and isinstance(dados_fiware_live['timestamp'], dict) and 'value' in dados_fiware_live['timestamp']:
             timestamp_leitura_fiware_str = dados_fiware_live['timestamp']['value']
 
         if timestamp_leitura_fiware_str:
@@ -429,9 +400,8 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
                     timestamp_fiware_em_brasilia = pytz.utc.localize(timestamp_leitura_fiware_live).astimezone(brasilia_tz)
         else:
             # timestamp_leitura_fiware_live já tem timezone.now() como default no início da função
-            print(f"[Detalhes Dispositivo] Nenhum timestamp principal (TimeInstant ou timestamp) encontrado na resposta do Fiware para {id_dispositivo_fiware}. Usando hora da busca.")
+            pass # Nenhum timestamp principal encontrado
 
-        # >>> INÍCIO: Formatar dados do Fiware para exibição no template <<<
         if not dados_fiware_live.get('erro_fiware'):
             for attr_name, attr_data in dados_fiware_live.items():
                 if attr_name in ['id', 'type', 'TimeInstant', 'timestamp', 'TimeInstantParsed', 'timestampParsed', 'location', 'erro_fiware'] or \
@@ -441,42 +411,43 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
                 valor = attr_data.get('value')
                 unidade = None
                 timestamp_attr_dt = None
+                timestamp_attr_iso = None
 
                 if isinstance(attr_data.get('metadata'), dict):
                     meta = attr_data['metadata']
                     if isinstance(meta.get('unitCode'), dict) and 'value' in meta['unitCode']:
                         unidade = meta['unitCode']['value']
-                    elif isinstance(meta.get('unit'), dict) and 'value' in meta['unit']: # Fallback
+                    elif isinstance(meta.get('unit'), dict) and 'value' in meta['unit']:
                         unidade = meta['unit']['value']
                     
                     if isinstance(meta.get('TimeInstant'), dict) and 'value' in meta['TimeInstant']:
                         timestamp_attr_str = meta['TimeInstant']['value']
-                        timestamp_attr_dt = parse_timestamp(timestamp_attr_str) 
-
-                # Fallback de unidade, se não encontrada nos metadados
-                if unidade is None:
+                        timestamp_attr_dt = parse_timestamp(timestamp_attr_str)
+                        if timestamp_attr_dt:
+                            timestamp_attr_iso = timestamp_attr_dt.isoformat()
+                            # Atualiza o timestamp mais recente geral se este atributo for mais novo
+                            if timestamp_fiware_em_brasilia is None or timestamp_attr_dt > timestamp_fiware_em_brasilia:
+                                timestamp_fiware_em_brasilia = timestamp_attr_dt
+            
+                if unidade is None: # Fallback de unidade
                     if 'temperature' in attr_name.lower(): unidade = '°C'
                     elif 'humidity' in attr_name.lower(): unidade = '%'
                     elif 'waterlevel' in attr_name.lower(): unidade = '%'
                 
                 nome_exibicao = SENSOR_NOME_TRADUZIDO_DETALHES.get(attr_name, attr_name.replace('_', ' ').capitalize())
-
+                
                 dados_fiware_formatados.append({
                     'nome': nome_exibicao,
                     'valor': valor,
                     'unidade': unidade,
-                    'timestamp_dt': timestamp_attr_dt,
+                    'timestamp_dt_iso': timestamp_attr_iso if timestamp_attr_iso else timestamp_fiware_em_brasilia, # Usa timestamp do atributo ou geral
                     'nome_original': attr_name 
                 })
-        # >>> FIM: Formatar dados do Fiware para exibição no template <<<
 
-        # >>> INÍCIO: Salvar dados do Fiware (formato normalizado) no banco de dados como LeituraSensor <<<
         if not dados_fiware_live.get('erro_fiware'): # Só processa se não houve erro na busca
             with transaction.atomic():
                 for attr_name, attr_data in dados_fiware_live.items():
                     # Ignora atributos padrão do NGSI que não são leituras de sensor diretas
-                    # ou atributos que não são dicionários (como id, type que são strings)
-                    # ou atributos que não contêm 'value'
                     if attr_name in ['id', 'type', 'TimeInstant', 'timestamp', 'TimeInstantParsed', 'timestampParsed', 'location'] or \
                        not isinstance(attr_data, dict) or 'value' not in attr_data:
                         continue
@@ -492,162 +463,103 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
                         try:
                             current_value = float(attr_value_raw)
                         except ValueError:
-                            print(f"[Detalhes Dispositivo] Atributo '{attr_name}' com valor string não numérico '{attr_value_raw}' não será salvo como leitura.")
                             continue
                     else:
                         # Ignora outros tipos de valor (booleanos, listas, objetos complexos não tratados aqui)
-                        print(f"[Detalhes Dispositivo] Atributo '{attr_name}' com tipo de valor não suportado '{type(attr_value_raw)}' não será salvo como leitura.")
                         continue
 
-                    # Se current_value é None após as tentativas, algo deu errado ou não era numérico.
+                    # Checar se current_value foi definido (ou seja, é um número)
                     if current_value is None:
                         continue
 
-                    # Unidade de medida: tenta extrair dos metadados do atributo, se houver
-                    unidade_medida = 'Desconhecida'
-                    if 'metadata' in attr_data and isinstance(attr_data['metadata'], dict):
-                        unit_code_meta = attr_data['metadata'].get('unitCode')
-                        unit_meta = attr_data['metadata'].get('unit')
-                        if isinstance(unit_code_meta, dict) and 'value' in unit_code_meta:
-                            unidade_medida = unit_code_meta['value']
-                        elif isinstance(unit_meta, dict) and 'value' in unit_meta: # Fallback para 'unit'
-                            unidade_medida = unit_meta['value']
+                    # Encontra ou cria o TipoSensor (mesma lógica da notificação)
+                    unidade_db = attr_data.get('metadata', {}).get('unitCode', {}).get('value') or \
+                                 attr_data.get('metadata', {}).get('unit', {}).get('value') or \
+                                 'Desconhecida'
                     
-                    # Se ainda Desconhecida, aplica um padrão baseado no nome do atributo
-                    if unidade_medida == 'Desconhecida':
-                        if attr_name == 'humidity' or attr_name == 'waterLevel':
-                            unidade_medida = '%'
-                        elif attr_name == 'temperature':
-                            unidade_medida = '°C'
-                        # Adicione outros mapeamentos padrão se necessário
+                    tipo_sensor_obj, created_type_sensor = TipoSensor.objects.get_or_create(
+                        nome=attr_name, # Usando o nome do atributo Fiware como nome do sensor
+                        defaults={'unidade_medida': unidade_db, 'descricao': f"Sensor para {attr_name}"}
+                    )
+                    if created_type_sensor or (tipo_sensor_obj.unidade_medida == 'Desconhecida' and unidade_db != 'Desconhecida'):
+                        tipo_sensor_obj.unidade_medida = unidade_db
+                        tipo_sensor_obj.save()
+                    
+                    # Determina o timestamp da leitura específica do atributo, ou usa o global da entidade
+                    timestamp_leitura_attr_str = None
+                    if isinstance(attr_data.get('metadata'), dict) and \
+                       isinstance(attr_data['metadata'].get('TimeInstant'), dict) and \
+                       'value' in attr_data['metadata']['TimeInstant']:
+                        timestamp_leitura_attr_str = attr_data['metadata']['TimeInstant']['value']
+                    
+                    timestamp_leitura_para_db = parse_timestamp(timestamp_leitura_attr_str) if timestamp_leitura_attr_str else timestamp_fiware_live
 
-                    tipo_sensor, created_ts = TipoSensor.objects.get_or_create(
-                        nome=attr_name,
-                        defaults={'unidade_medida': unidade_medida, 'descricao': f"Sensor {attr_name} (auto-registrado via detalhes)"}
-                    )
-                    if created_ts:
-                        print(f"[Detalhes Dispositivo] TipoSensor '{tipo_sensor.nome}' criado com unidade '{unidade_medida}'.")
-                    elif tipo_sensor.unidade_medida == 'Desconhecida' and unidade_medida != 'Desconhecida':
-                        tipo_sensor.unidade_medida = unidade_medida
-                        tipo_sensor.save()
-                        print(f"[Detalhes Dispositivo] Unidade do TipoSensor '{tipo_sensor.nome}' atualizada para '{unidade_medida}'.")
-                    
-                    obj, created = LeituraSensor.objects.update_or_create(
+                    # Cria ou atualiza a LeituraSensor
+                    # Para evitar duplicatas baseadas em "mesmo sensor, mesmo timestamp", usamos update_or_create
+                    # Isso pressupõe que (dispositivo, tipo_sensor, timestamp_leitura) é uma tupla razoavelmente única.
+                    # Se múltiplos updates para o mesmo micro-segundo puderem ocorrer e forem significativos,
+                    # esta lógica pode precisar de ajuste ou pode-se simplesmente usar create() e ter múltiplos registros.
+                    # A notificação do Fiware já usa create(). Para consistência e simplicidade, vamos manter create() aqui também,
+                    # já que o polling é menos frequente que notificações.
+                    LeituraSensor.objects.create(
                         dispositivo=dispositivo,
-                        tipo_sensor=tipo_sensor,
-                        timestamp_leitura=timestamp_leitura_fiware_live, # Usa o timestamp principal da entidade
-                        defaults={'valor': current_value}
+                        tipo_sensor=tipo_sensor_obj,
+                        valor=current_value,
+                        timestamp_leitura=timestamp_leitura_para_db,
                     )
-                    if created:
-                        print(f"[Detalhes Dispositivo] Leitura de '{attr_name}' ({current_value} {unidade_medida}) CRIADA para '{dispositivo.id_dispositivo_fiware}' com timestamp '{timestamp_leitura_fiware_live}'.")
-                    else:
-                        print(f"[Detalhes Dispositivo] Leitura de '{attr_name}' ({current_value} {unidade_medida}) ATUALIZADA para '{dispositivo.id_dispositivo_fiware}' com timestamp '{timestamp_leitura_fiware_live}'.")
-        # >>> FIM: Salvar dados do Fiware (formato normalizado) no banco de dados como LeituraSensor <<<
 
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao buscar dados do Fiware para {id_dispositivo_fiware}: {e}")
-        # Pode adicionar uma mensagem para o template aqui, se desejar
-        dados_fiware_live['erro_fiware'] = str(e)
+        dados_fiware_live['erro_fiware'] = f"Erro de comunicação com o Fiware: {str(e)}"
     except json.JSONDecodeError:
-        print(f"Erro ao decodificar JSON do Fiware para {id_dispositivo_fiware}")
-        dados_fiware_live['erro_fiware'] = "Resposta inválida do Fiware (JSON malformado)."
+        dados_fiware_live['erro_fiware'] = "Erro ao decodificar a resposta JSON do Fiware."
+    except Exception as e:
+        dados_fiware_live['erro_fiware'] = f"Um erro inesperado ocorreu: {str(e)}"
 
-    # Dicionário de tradução dos nomes dos sensores para GRÁFICOS (pode ser o mesmo ou diferente)
-    SENSOR_NOME_TRADUZIDO_GRAFICOS = {
-        'humidity': 'Umidade',
-        'temperature': 'Temperatura',
-        'waterLevel': 'Nível de água'
-    }
-
-    leituras_por_sensor = defaultdict(lambda: {'timestamps': [], 'valores': [], 'unidade': ''})
-    
-    # Definir o fuso horário de Brasília
-    tz_brasilia = pytz.timezone('America/Sao_Paulo')
-
-    # Buscando todas as leituras do BD para este dispositivo para os gráficos
-    todas_leituras_db = LeituraSensor.objects.filter(dispositivo=dispositivo).order_by('tipo_sensor__nome', 'timestamp_leitura')
-    print(f"[Detalhes Dispositivo - Gráficos] Encontradas {todas_leituras_db.count()} leituras no DB para {dispositivo.id_dispositivo_fiware}")
-
-    if todas_leituras_db:
-        for leitura in todas_leituras_db:
-            nome_sensor = leitura.tipo_sensor.nome
-            print(f"[Detalhes Dispositivo - Gráficos] Processando leitura do BD: Sensor '{nome_sensor}', Valor '{leitura.valor}', Timestamp '{leitura.timestamp_leitura}'")
-            
-            # Converte o timestamp para o fuso horário de Brasília
-            timestamp_convertido = leitura.timestamp_leitura
-            if timestamp_convertido.tzinfo is None:
-                # Se for naive, assume UTC e depois converte (Django deve retornar aware se USE_TZ=True)
-                timestamp_convertido = pytz.utc.localize(timestamp_convertido).astimezone(tz_brasilia)
-            else:
-                # Se for aware, apenas converte
-                timestamp_convertido = timestamp_convertido.astimezone(tz_brasilia)
-            
-            leituras_por_sensor[nome_sensor]['timestamps'].append(timestamp_convertido)
-            leituras_por_sensor[nome_sensor]['valores'].append(leitura.valor)
-            if not leituras_por_sensor[nome_sensor]['unidade']:
-                leituras_por_sensor[nome_sensor]['unidade'] = leitura.tipo_sensor.unidade_medida
-    else:
-        print(f"[Detalhes Dispositivo - Gráficos] Nenhuma leitura encontrada no BD para os gráficos de {dispositivo.id_dispositivo_fiware}.")
-    
+    # Prepara gráficos
     graficos_html = {}
-    if not leituras_por_sensor:
-        print(f"[Detalhes Dispositivo - Gráficos] Dicionário leituras_por_sensor está vazio para {dispositivo.id_dispositivo_fiware}. Nenhum gráfico será gerado.")
-    else:
-        for nome_sensor, dados in leituras_por_sensor.items():
-            nome_traduzido = SENSOR_NOME_TRADUZIDO_GRAFICOS.get(nome_sensor, nome_sensor)
-            if dados['timestamps'] and dados['valores']:
-                df = pd.DataFrame({
-                    'Timestamp': dados['timestamps'],
-                    'Valor': dados['valores']
-                })
-                # AGREGAR DADOS: Calcula a média de 'Valor' para cada 'Timestamp' único
-                if not df.empty:
-                    df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce') # Garante que 'Valor' é numérico
-                    df.dropna(subset=['Valor'], inplace=True) # Remove linhas onde 'Valor' não pôde ser convertido
-                    if not df.empty:
-                         df = df.groupby('Timestamp', as_index=False)['Valor'].mean()
+    leituras_do_dispositivo_para_graficos = LeituraSensor.objects.filter(dispositivo=dispositivo)
+    tipos_sensores_ids_para_graficos = leituras_do_dispositivo_para_graficos.values_list('tipo_sensor_id', flat=True).distinct()
+    tipos_sensores_disponiveis = TipoSensor.objects.filter(id__in=tipos_sensores_ids_para_graficos)
+
+    if tipos_sensores_disponiveis.exists():
+        for tipo_sensor in tipos_sensores_disponiveis:
+            leituras_sensor = LeituraSensor.objects.filter(dispositivo=dispositivo, tipo_sensor=tipo_sensor).order_by('timestamp_leitura')
+            
+            if leituras_sensor.count() > 1: # Precisa de pelo menos 2 pontos para um gráfico de linha
+                df = pd.DataFrame(list(leituras_sensor.values('timestamp_leitura', 'valor')))
                 
-                if not df.empty: # Verifica se o df ainda tem dados após a agregação
-                    fig = px.line(df, x='Timestamp', y='Valor', title=f"Histórico de Leituras - {nome_traduzido} ({dados['unidade']})")
-                    fig.update_layout(
-                        xaxis_title="Data e Hora da Leitura",
-                        yaxis_title=f"Valor ({dados['unidade']})",
-                        title_x=0.5, # Centralizar título
-                        plot_bgcolor='rgba(249, 250, 251, 1)', # bg-gray-50
-                        paper_bgcolor='rgba(255, 255, 255, 1)', # bg-white
-                        font=dict(family="Roboto, sans-serif", size=12, color="#333333"),
-                        margin=dict(l=40, r=40, t=60, b=40),
-                        yaxis=dict(autorange=True) # Força autorange
-                    )
-                    # Ajuste de intervalo para gráfico com apenas um ponto
-                    if len(df) == 1 and 'Valor' in df.columns and pd.api.types.is_numeric_dtype(df['Valor']):
-                        val = df['Valor'].iloc[0]
-                        padding = abs(val * 0.1) if val != 0 else 1.0 # 10% de preenchimento, ou 1 se valor for 0
-                        fig.update_layout(yaxis_range=[val - padding, val + padding])
-                    
-                    fig.update_xaxes(
-                        showline=True, linewidth=1, linecolor='rgb(204, 204, 204)',
-                        showgrid=True, gridwidth=1, gridcolor='rgb(230, 230, 230)'
-                    )
-                    fig.update_yaxes(
-                        showline=True, linewidth=1, linecolor='rgb(204, 204, 204)',
-                        showgrid=True, gridwidth=1, gridcolor='rgb(230, 230, 230)'
-                    )
-                    fig.update_traces(line=dict(color='#b0dcfc', width=2))
-                    fig.update_traces(mode='lines+markers', marker=dict(size=5, color='#333333'))
-                    grafico_html = fig.to_html(full_html=False, include_plotlyjs='cdn', default_height='450px')
-                    graficos_html[nome_traduzido] = grafico_html
-                else: # Se df ficou vazio após coerção/agregação ou se não havia dados suficientes inicialmente
-                    graficos_html[nome_traduzido] = "<p class=\"italic text-gray-500\">Não há dados suficientes ou válidos para gerar o gráfico para este sensor.</p>"
-                    print(f"[Detalhes Dispositivo - Gráficos] Não há dados suficientes/válidos para o sensor '{nome_sensor}' (traduzido: '{nome_traduzido}') para {dispositivo.id_dispositivo_fiware} após tentativa de agregação.")
+                # Converter timestamp_leitura para o fuso horário de Brasília ANTES de plotar
+                brasilia_tz = pytz.timezone('America/Sao_Paulo')
+                df['timestamp_leitura'] = pd.to_datetime(df['timestamp_leitura']).dt.tz_convert(brasilia_tz)
+                
+                fig = px.line(df, x='timestamp_leitura', y='valor', 
+                              title=f'Histórico de {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}',
+                              labels={'timestamp_leitura': 'Data e Hora (Brasília)', 'valor': f'Valor ({tipo_sensor.unidade_medida})'})
+                fig.update_layout(
+                    title_x=0.5, 
+                    title_font_size=16,
+                    xaxis_title_font_size=12,
+                    yaxis_title_font_size=12,
+                    margin=dict(l=40, r=20, t=40, b=20), # Reduzir margens
+                    height=300 # Altura fixa para o gráfico
+                )
+                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            elif leituras_sensor.exists():
+                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = f"<p class='text-center text-sm text-gray-600 p-4'>Não há dados suficientes ({leituras_sensor.count()} leitura) para gerar um gráfico de histórico para {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}.</p>"
+            else:
+                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = f"<p class='text-center text-sm text-gray-600 p-4'>Nenhuma leitura encontrada para {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}.</p>"
+    else:
+        # Isso não deveria acontecer se o dispositivo tem leituras, mas é um fallback.
+        pass
 
     context = {
         'dispositivo': dispositivo,
-        'dados_fiware_live': dados_fiware_live, # Mantido para possível debug ou uso direto se necessário
-        'dados_fiware_formatados': dados_fiware_formatados, # NOVO
-        'timestamp_fiware_em_brasilia': timestamp_fiware_em_brasilia, # << ADICIONADO AO CONTEXTO
+        'leituras': leituras, # Ainda pode ser útil para alguma listagem tabular, se desejado
         'graficos_html': graficos_html,
-        'pagina_atual': 'detalhes_dispositivo' 
+        'dados_fiware_live': dados_fiware_live, # Mantido para debug ou se o template ainda usar algo dele diretamente
+        'dados_fiware_formatados': dados_fiware_formatados, 
+        'timestamp_fiware_em_brasilia': timestamp_fiware_em_brasilia, # Passando o timestamp geral formatado
+        'pagina_atual': 'detalhes_dispositivo',
     }
     return render(request, 'sensores/detalhes_dispositivo.html', context)
 
@@ -682,40 +594,24 @@ def editar_localizacao_dispositivo(request, id_dispositivo_fiware):
                                 "coordinates": [longitude, latitude] # Longitude, Latitude
                             }
                         }
-                        # Adicionar outros atributos se necessário, ex: address
-                        # "address": {
-                        #    "type": "Property",
-                        #    "value": {
-                        #        "streetAddress": "Rua Exemplo, 123",
-                        #        "addressLocality": "Cidade Exemplo", 
-                        #        "addressCountry": "BR"
-                        #    }
-                        # }
                     }
-                    print(f"Enviando para Fiware URL: {fiware_url}")
-                    print(f"Payload Fiware: {json.dumps(payload, indent=2)}")
                     
                     response_fiware = requests.patch(fiware_url, headers=headers, json=payload, timeout=10)
                     response_fiware.raise_for_status() # Levanta exceção para erros HTTP
                     
                     mensagem_sucesso += " E atualizada no Fiware."
-                    print(f"Fiware PATCH response: {response_fiware.status_code}")
                     if response_fiware.content: # Algumas respostas PATCH bem-sucedidas podem não ter conteúdo
-                         print(f"Fiware PATCH content: {response_fiware.text}")
+                        pass # Print do content removido
 
                 else:
-                    # Se lat/lon foram apagados, talvez seja preciso remover o atributo location do Fiware
-                    # Isso é mais complexo, pois PATCH não remove atributos com valor null diretamente fácil
-                    # Poderia ser feito um GET, remover o atributo do JSON e fazer um PUT, ou usar API específica se houver.
-                    # Por agora, apenas não atualizamos o Fiware se os campos estiverem vazios.
+                    # Se lat/lon foram apagados, a localização no Fiware não é atualizada aqui.
+                    # Remover o atributo 'location' do Fiware exigiria uma lógica mais complexa (ex: PUT ou API específica).
                     mensagem_sucesso += " (Localização no Fiware não atualizada pois os campos estão vazios)."
 
             except requests.exceptions.RequestException as e:
-                print(f"Erro ao atualizar localização no Fiware para {id_dispositivo_fiware}: {e}")
+                pass # Erro já logado ou tratado
             except Exception as e:
-                print(f"Erro inesperado ao atualizar localização: {e}")
                 # Tratar outros erros gerais se necessário
-                # form.add_error(None, f"Erro inesperado: {e}") # Adiciona erro ao formulário
                 pass # Deixa a mensagem de sucesso parcial, erro será mostrado pelo mensagem_erro_fiware
         # Se o formulário não for válido, os erros serão exibidos pelo template
     else:
@@ -741,7 +637,6 @@ def detectar_novos_dispositivos_fiware(request):
                 id_numerico_str = ultimo_dispositivo_django.id_dispositivo_fiware.split(':')[-1]
                 max_id_testado = int(id_numerico_str)
             except (ValueError, IndexError):
-                print("Não foi possível parsear o último ID numérico do Fiware. Começando do 0.")
                 max_id_testado = 0
         
         id_inicial_check = max_id_testado + 1
@@ -760,7 +655,7 @@ def detectar_novos_dispositivos_fiware(request):
             # Formata o ID com 3 dígitos, ex: 1 -> "001", 10 -> "010"
             id_formatado = str(i).zfill(3)
             id_dispositivo_fiware_completo = f"urn:ngsi-ld:SensorDevice:{id_formatado}"
-            fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware_completo}" # MODIFICADO: URL atualizada
+            fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware_completo}" 
             
             print(f"Testando dispositivo: {id_dispositivo_fiware_completo} em {fiware_url}")
 
@@ -878,3 +773,242 @@ def detectar_novos_dispositivos_fiware(request):
 #     }
 # )
 # ---
+
+# Helper function to extract and format Fiware data, also recalculates status
+# This can be called by both detalhes_dispositivo and the new JSON endpoint
+def get_fiware_data_and_status(id_dispositivo_fiware, dispositivo_obj=None):
+    if dispositivo_obj is None: # Se o objeto dispositivo não for passado, busca-o
+        try:
+            dispositivo_obj = Dispositivo.objects.get(id_dispositivo_fiware=id_dispositivo_fiware)
+        except Dispositivo.DoesNotExist:
+            return {"erro": "Dispositivo não encontrado no banco de dados local.", "dados_sensores": [], "status_operacional": "Desconhecido", "status_calculado_nivel_agua": "Desconhecido"}
+
+    SENSOR_NOME_TRADUZIDO_HELPER = {
+        'humidity': 'Umidade',
+        'temperature': 'Temperatura',
+        'waterLevel': 'Nível de água',
+    }
+    nome_sensor_nivel_agua_key = 'waterLevel' # Chave original do Fiware para nível da água
+
+    dados_fiware_brutos = {}
+    dados_sensores_formatados = []
+    status_operacional_calculado = 'Offline' # Default
+    status_nivel_agua_calculado = 'normal'  # Default
+    timestamp_geral_fiware_iso = None
+    erro_comunicacao = None
+
+    timestamp_mais_recente_fiware = None # Para calcular status operacional
+
+    try:
+        fiware_url = f"http://20.55.19.44:1026/v2/entities/{id_dispositivo_fiware}"
+        headers = {
+            'Accept': 'application/json',
+            'fiware-service': 'smart',
+            'fiware-servicepath': '/'
+        }
+        response = requests.get(fiware_url, headers=headers, timeout=5)
+        response.raise_for_status()
+        dados_fiware_brutos = response.json()
+
+        # Extrair timestamp geral da entidade Fiware
+        timestamp_geral_str = None
+        if 'TimeInstant' in dados_fiware_brutos and isinstance(dados_fiware_brutos['TimeInstant'], dict) and 'value' in dados_fiware_brutos['TimeInstant']:
+            timestamp_geral_str = dados_fiware_brutos['TimeInstant']['value']
+        elif 'timestamp' in dados_fiware_brutos and isinstance(dados_fiware_brutos['timestamp'], dict) and 'value' in dados_fiware_brutos['timestamp']:
+            timestamp_geral_str = dados_fiware_brutos['timestamp']['value']
+        
+        if timestamp_geral_str:
+            parsed_ts_geral = parse_timestamp(timestamp_geral_str)
+            if parsed_ts_geral:
+                timestamp_geral_fiware_iso = parsed_ts_geral.isoformat()
+                timestamp_mais_recente_fiware = parsed_ts_geral # Inicializa com o timestamp geral
+
+        valor_nivel_agua_fiware = None
+
+        for attr_name, attr_data in dados_fiware_brutos.items():
+            if attr_name in ['id', 'type', 'TimeInstant', 'timestamp', 'TimeInstantParsed', 'timestampParsed', 'location', 'erro_fiware'] or \
+               not isinstance(attr_data, dict) or 'value' not in attr_data:
+                continue
+
+            valor = attr_data.get('value')
+            unidade = None
+            timestamp_attr_dt = None
+            timestamp_attr_iso = None
+
+            if isinstance(attr_data.get('metadata'), dict):
+                meta = attr_data['metadata']
+                if isinstance(meta.get('unitCode'), dict) and 'value' in meta['unitCode']:
+                    unidade = meta['unitCode']['value']
+                elif isinstance(meta.get('unit'), dict) and 'value' in meta['unit']:
+                    unidade = meta['unit']['value']
+                
+                if isinstance(meta.get('TimeInstant'), dict) and 'value' in meta['TimeInstant']:
+                    timestamp_attr_str = meta['TimeInstant']['value']
+                    timestamp_attr_dt = parse_timestamp(timestamp_attr_str)
+                    if timestamp_attr_dt:
+                        timestamp_attr_iso = timestamp_attr_dt.isoformat()
+                        # Atualiza o timestamp mais recente geral se este atributo for mais novo
+                        if timestamp_mais_recente_fiware is None or timestamp_attr_dt > timestamp_mais_recente_fiware:
+                            timestamp_mais_recente_fiware = timestamp_attr_dt
+            
+            if unidade is None: # Fallback de unidade
+                if 'temperature' in attr_name.lower(): unidade = '°C'
+                elif 'humidity' in attr_name.lower(): unidade = '%'
+                elif 'waterlevel' in attr_name.lower(): unidade = '%'
+            
+            nome_exibicao = SENSOR_NOME_TRADUZIDO_HELPER.get(attr_name, attr_name.replace('_', ' ').capitalize())
+            
+            dados_sensores_formatados.append({
+                'nome': nome_exibicao,
+                'valor': valor,
+                'unidade': unidade,
+                'timestamp_dt_iso': timestamp_attr_iso if timestamp_attr_iso else timestamp_geral_fiware_iso, # Usa timestamp do atributo ou geral
+                'nome_original': attr_name 
+            })
+
+            if attr_name == nome_sensor_nivel_agua_key and isinstance(valor, (int, float)):
+                valor_nivel_agua_fiware = float(valor)
+
+        # Calcular status_calculado_nivel_agua com base nos dados do Fiware
+        if valor_nivel_agua_fiware is not None:
+            if valor_nivel_agua_fiware > 80:
+                status_nivel_agua_calculado = 'critical'
+            elif valor_nivel_agua_fiware > 50:
+                status_nivel_agua_calculado = 'moderate'
+            else:
+                status_nivel_agua_calculado = 'normal'
+        else:
+            status_nivel_agua_calculado = 'unknown' # Se não houver waterLevel nos dados do Fiware
+
+        # Calcular status_operacional com base no timestamp mais recente do Fiware
+        if timestamp_mais_recente_fiware:
+            limite_inatividade = timedelta(hours=2)
+            agora_utc = timezone.now() # Já é UTC
+            if (agora_utc - timestamp_mais_recente_fiware) < limite_inatividade:
+                status_operacional_calculado = 'Online'
+        
+        # Opcional: Salvar os dados recém-buscados do Fiware no banco de dados local (como em detalhes_dispositivo)
+        # Esta parte pode ser adicionada aqui se desejado, seguindo a lógica de detalhes_dispositivo.
+        # Por simplicidade, para o endpoint JSON, vamos focar em retornar os dados frescos.
+        # A view detalhes_dispositivo já faz esse salvamento quando a página é carregada.
+        # Se o polling for frequente, pode não ser necessário salvar a cada chamada JSON.
+
+    except requests.exceptions.RequestException as e:
+        erro_comunicacao = f"Erro de comunicação com o Fiware: {str(e)}"
+    except json.JSONDecodeError:
+        erro_comunicacao = "Erro ao decodificar a resposta JSON do Fiware."
+    except Exception as e:
+        erro_comunicacao = f"Um erro inesperado ocorreu: {str(e)}"
+
+    return {
+        "erro": erro_comunicacao, # Será None se não houver erro
+        "dados_sensores": dados_sensores_formatados,
+        "status_operacional": status_operacional_calculado,
+        "status_calculado_nivel_agua": status_nivel_agua_calculado,
+        "timestamp_geral_fiware_iso": timestamp_geral_fiware_iso,
+        # Adicionar ID do dispositivo para confirmação no frontend
+        "id_dispositivo_fiware": id_dispositivo_fiware 
+    }
+
+def dados_dispositivo_json(request, id_dispositivo_fiware):
+    # A função get_object_or_404 não é necessária aqui pois get_fiware_data_and_status já lida com Dispositivo.DoesNotExist
+    # No entanto, é bom validar que o dispositivo existe no nosso BD se a lógica de get_fiware_data_and_status for modificada.
+    # Por enquanto, confiamos que get_fiware_data_and_status retornará um erro se o dispositivo não for encontrado no BD.
+    data = get_fiware_data_and_status(id_dispositivo_fiware)
+    
+    if data.get("erro") and "Dispositivo não encontrado" in data["erro"]:
+        return JsonResponse(data, status=404)
+    elif data.get("erro"): # Outros erros de comunicação ou processamento
+        return JsonResponse(data, status=500)
+        
+    return JsonResponse(data)
+
+def api_listar_dispositivos_status(request):
+    dispositivos_list = Dispositivo.objects.all().order_by('nome_dispositivo')
+    
+    dados_para_api = []
+
+    for dispositivo in dispositivos_list:
+        # Busca dados frescos do Fiware para este dispositivo
+        dados_fiware = get_fiware_data_and_status(dispositivo.id_dispositivo_fiware, dispositivo_obj=dispositivo)
+
+        # Prepara as últimas leituras formatadas a partir dos dados do Fiware
+        # (get_fiware_data_and_status já retorna 'dados_sensores' formatados)
+        ultimas_leituras_formatadas_fiware = {}
+        if dados_fiware.get("dados_sensores"):
+            for sensor_data in dados_fiware["dados_sensores"]:
+                # Usar 'nome_original' se disponível e fizer sentido para o frontend, 
+                # ou 'nome' (nome de exibição)
+                chave_sensor = sensor_data.get('nome_original', sensor_data.get('nome', 'desconhecido'))
+                ultimas_leituras_formatadas_fiware[chave_sensor] = {
+                    'nome_exibicao': sensor_data.get('nome'),
+                    'valor': sensor_data.get('valor'),
+                    'unidade_medida': sensor_data.get('unidade'),
+                    'timestamp_leitura_iso': sensor_data.get('timestamp_dt_iso')
+                }
+
+        dados_dispositivo_atual = {
+            'id_dispositivo_fiware': dispositivo.id_dispositivo_fiware,
+            'nome_dispositivo': dispositivo.nome_dispositivo,
+            'status_operacional': dados_fiware.get('status_operacional', 'Desconhecido'),
+            'status_nivel_agua': dados_fiware.get('status_calculado_nivel_agua', 'unknown'), # 'unknown' como fallback
+            'timestamp_ultimo_registro_iso': dados_fiware.get('timestamp_geral_fiware_iso'),
+            'ultimas_leituras': ultimas_leituras_formatadas_fiware,
+            'localizacao_latitude': dispositivo.localizacao_latitude,
+            'localizacao_longitude': dispositivo.localizacao_longitude,
+            'descricao': dispositivo.descricao,
+            'ativo_admin': dispositivo.ativo, # Status administrativo do Django
+            'erro_fiware': dados_fiware.get('erro') # Para informar o frontend sobre possíveis falhas
+        }
+        dados_para_api.append(dados_dispositivo_atual)
+
+    return JsonResponse({'dispositivos': dados_para_api})
+
+def api_mapa_dispositivos_status(request):
+    dispositivos_ativos = Dispositivo.objects.filter(ativo=True).order_by('nome_dispositivo')
+    
+    dispositivos_map_data_api = []
+
+    for disp in dispositivos_ativos:
+        # Busca dados frescos do Fiware para este dispositivo
+        dados_fiware = get_fiware_data_and_status(disp.id_dispositivo_fiware, dispositivo_obj=disp)
+
+        # Formata as últimas leituras detalhadas para o popup do mapa
+        # (get_fiware_data_and_status já retorna 'dados_sensores' formatados)
+        ultimas_leituras_popup = []
+        if dados_fiware.get("dados_sensores"):
+            for sensor_data in dados_fiware["dados_sensores"]:
+                ultimas_leituras_popup.append({
+                    'nome_sensor': sensor_data.get('nome'), # Nome de exibição
+                    'valor': sensor_data.get('valor'),
+                    'unidade_medida': sensor_data.get('unidade'),
+                    'timestamp_leitura_iso': sensor_data.get('timestamp_dt_iso'),
+                    'nome_original': sensor_data.get('nome_original')
+                })
+        
+        # Determina o texto do status do nível da água com base no código de status do Fiware
+        status_nivel_agua_fiware_code = dados_fiware.get('status_calculado_nivel_agua', 'unknown')
+        status_nivel_agua_texto_mapa = 'Normal' # Default
+        if status_nivel_agua_fiware_code == 'critical':
+            status_nivel_agua_texto_mapa = 'Crítico'
+        elif status_nivel_agua_fiware_code == 'moderate':
+            status_nivel_agua_texto_mapa = 'Moderado'
+        elif status_nivel_agua_fiware_code == 'unknown':
+            status_nivel_agua_texto_mapa = 'Indefinido'
+        
+        # Monta os dados para a API do mapa
+        dispositivos_map_data_api.append({
+            'id_dispositivo_fiware': disp.id_dispositivo_fiware,
+            'nome': disp.nome_dispositivo,
+            'latitude': disp.localizacao_latitude,
+            'longitude': disp.localizacao_longitude,
+            'descricao': disp.descricao or "Sem descrição.",
+            'ultimas_leituras_detalhadas': ultimas_leituras_popup,
+            'status_marcador_code': status_nivel_agua_fiware_code, 
+            'status_nivel_agua_texto': status_nivel_agua_texto_mapa,
+            'status_operacional': dados_fiware.get('status_operacional', 'Desconhecido'), 
+            'timestamp_geral_iso': dados_fiware.get('timestamp_geral_fiware_iso'),
+            'erro_fiware': dados_fiware.get('erro') # Para debug ou info no frontend
+        })
+
+    return JsonResponse({'dispositivos': dispositivos_map_data_api})

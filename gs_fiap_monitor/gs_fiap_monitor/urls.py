@@ -20,6 +20,6 @@ from sensores import views as sensores_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/sensores/', include('sensores.urls', namespace='sensores_api')),
+    path('sensores/', include('sensores.urls', namespace='sensores_api')),
     path('', sensores_views.home_page, name='home_page'),
 ]

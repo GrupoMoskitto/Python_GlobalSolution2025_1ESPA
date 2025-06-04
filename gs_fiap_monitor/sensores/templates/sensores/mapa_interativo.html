@@ -57,6 +57,13 @@
             
             <main class="lg:col-span-3 h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-200px)] min-h-[400px] relative">
                 <div id="map" class="h-full w-full lg:rounded-r-3xl"></div>
+                 <div id="map-loading-overlay" class="absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-50">
+                    <i class="fas fa-spinner fa-spin fa-3x text-primary mb-4"></i>
+                    <p class="text-gray-600 font-medium">Carregando dados do mapa...</p>
+                </div>
+                <div id="map-error-message" class="absolute bottom-4 left-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md shadow-md z-40 text-sm" style="display: none;">
+                    Falha ao atualizar os dados do mapa. Tentando novamente em breve...
+                </div>
             </main>
         </div>
     </div>
@@ -69,190 +76,196 @@
 {% endblock %}
 
 {% block extra_scripts %}
-{{ dispositivos_map_data|json_script:"dispositivos-map-data-json" }}
+{# Removido: dispositivos_map_data|json_script:"dispositivos-map-data-json" #}
 
 <script>
     let map;
-    let allMapMarkers = [];
+    let deviceMarkers = {}; // Objeto para armazenar marcadores por ID de dispositivo
+    const mapErrorMsgElem = document.getElementById('map-error-message');
+    const mapLoadingOverlay = document.getElementById('map-loading-overlay');
 
-    function initMap() {
-        const mapElement = document.getElementById('map');
-        if (!mapElement) {
-            console.error("Elemento do mapa não encontrado!");
+    // Helper para formatar timestamp (America/Sao_Paulo)
+    function formatTimestampSP(dateString) {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+        } catch (e) {
+            console.warn('Erro formatando data para SP:', dateString, e);
+            return dateString; // fallback
+        }
+    }
+
+    function createMarkerIcon(statusClass) {
+        return L.divIcon({
+            className: `map-marker ${statusClass}`,
+            html: `<span class='pulse-inner'>${statusClass === 'critical' ? '!' : ''}</span>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+    }
+
+    function createPopupContent(dispData) {
+        let statusBadgeHtml = '';
+        let statusIconClass = 'fas fa-check-circle';
+        let statusBgColor = 'bg-green-500';
+
+        if (dispData.status_nivel_agua_texto === 'Crítico') {
+            statusIconClass = 'fas fa-exclamation-triangle';
+            statusBgColor = 'bg-red-500';
+        } else if (dispData.status_nivel_agua_texto === 'Moderado') {
+            statusIconClass = 'fas fa-exclamation-circle';
+            statusBgColor = 'bg-yellow-500';
+        }
+        statusBadgeHtml = `<span class="mt-1 inline-flex items-center px-2 py-0.5 text-xs font-semibold ${statusBgColor} text-white rounded-full capitalize"><i class="${statusIconClass} mr-1.5"></i>${dispData.status_nivel_agua_texto || 'Indefinido'}</span>`;
+        
+        const statusOperacionalIcon = dispData.status_operacional === 'Online' ? 'fas fa-wifi text-green-500' : 'fas fa-ban text-red-500';
+
+        let localizacaoHtml = '';
+        if (dispData.latitude && dispData.longitude) {
+            localizacaoHtml = `<span class="ml-1">Lat: ${parseFloat(dispData.latitude).toFixed(4)}, Lon: ${parseFloat(dispData.longitude).toFixed(4)}</span>`;
+        } else {
+            // Se a API não enviar URLs de edição, podemos omitir ou colocar um placeholder
+            localizacaoHtml = `<span class="ml-1 text-xs italic text-gray-500">Localização não disponível</span>`;
+        }
+
+        let ultimasLeiturasHtml = '';
+        if (dispData.ultimas_leituras_detalhadas && dispData.ultimas_leituras_detalhadas.length > 0) {
+            dispData.ultimas_leituras_detalhadas.forEach(leitura => {
+                let iconLeitura = 'fas fa-chart-bar text-gray-400';
+                if (leitura.nome_original === 'temperature') iconLeitura = 'fas fa-thermometer-half text-red-500';
+                if (leitura.nome_original === 'humidity') iconLeitura = 'fas fa-tint text-blue-500';
+                if (leitura.nome_original === 'waterLevel') iconLeitura = 'fas fa-water text-cyan-500';
+                
+                ultimasLeiturasHtml += `
+                    <div class="flex items-start text-xs mt-1">
+                        <i class="${iconLeitura} fa-fw w-4 text-center mr-1.5 opacity-75 mt-0.5"></i>
+                        <div class="flex-1 min-w-0">
+                            <span class="font-medium text-gray-600">${leitura.nome_sensor}:</span>
+                            <span class="ml-1">${leitura.valor !== null && leitura.valor !== undefined ? leitura.valor : '-'} ${leitura.unidade_medida || ''}</span>
+                            ${leitura.timestamp_leitura_iso ? `<span class="ml-1.5 text-gray-500">(${formatTimestampSP(leitura.timestamp_leitura_iso)})</span>` : ''}
+                        </div>
+                    </div>`;
+            });
+        } else {
+            ultimasLeiturasHtml = '<p class="text-xs italic text-gray-500 mt-1">Nenhuma leitura recente.</p>';
+        }
+        
+        const detalhesUrl = dispData.id_dispositivo_fiware ? `{% url 'sensores:detalhes_dispositivo' id_dispositivo_fiware='PLACEHOLDER_ID' %}`.replace('PLACEHOLDER_ID', dispData.id_dispositivo_fiware) : '#';
+
+        return `
+            <div class="map-popup-content text-sm text-gray-800" style="min-width: 260px; max-width:320px;">
+                <div class="mb-2">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-base font-bold text-gray-800 group-hover:text-primary truncate transition-colors duration-300">${dispData.nome}</h2>
+                            ${statusBadgeHtml}
+                        </div>
+                        <div class="text-xs text-gray-600 text-right space-y-0.5 flex-shrink-0 ml-2">
+                            <p class="flex items-center justify-end whitespace-nowrap" title="Status Operacional"><i class="${statusOperacionalIcon} mr-1.5"></i>${dispData.status_operacional}</p>
+                            ${dispData.timestamp_geral_iso ? `<p class="flex items-center justify-end whitespace-nowrap text-gray-500" title="Última Atualização Geral"><i class="far fa-clock mr-1"></i>${formatTimestampSP(dispData.timestamp_geral_iso)}</p>` : '' }
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-1 text-xs text-gray-700 mb-2">
+                    <div class="flex items-start"><i class="fas fa-tag fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i><div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">ID:</strong> <span class="break-all ml-1">${dispData.id_dispositivo_fiware}</span></div></div>
+                    <div class="flex items-start"><i class="fas fa-align-left fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i><div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Desc.:</strong> <span class="ml-1 line-clamp-2">${dispData.descricao}</span></div></div>
+                    <div class="flex items-start"><i class="fas fa-map-marker-alt fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i><div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Local:</strong> ${localizacaoHtml}</div></div>
+                </div>
+                <div class="text-xs text-gray-700 mt-2 pt-2 border-t border-gray-200">
+                    <h4 class="font-medium text-gray-600 mb-0.5 text-[11px] uppercase">Últimos Registros:</h4>
+                    ${ultimasLeiturasHtml}
+                </div>
+                ${detalhesUrl !== '#' ? 
+                    `<div class="mt-3 pt-2 border-t border-gray-200 text-right">
+                        <a href="${detalhesUrl}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">Ver Detalhes &rarr;</a>
+                     </div>` : ''}
+            </div>
+        `;
+    }
+
+    function updateOrCreateMarker(dispData) {
+        console.log("[Mapa Interativo] updateOrCreateMarker chamado para:", JSON.parse(JSON.stringify(dispData)));
+        if (typeof dispData.latitude !== 'number' || typeof dispData.longitude !== 'number') {
+            // Se um dispositivo existente perdeu a localização, remove o marcador
+            if (deviceMarkers[dispData.id_dispositivo_fiware]) {
+                map.removeLayer(deviceMarkers[dispData.id_dispositivo_fiware]);
+                delete deviceMarkers[dispData.id_dispositivo_fiware];
+            }
             return;
         }
 
-        let initialLat = -23.550520;
-        let initialLng = -46.633308;
-        let initialZoom = 10;
+        const markerIcon = createMarkerIcon(dispData.status_marcador_code || 'normal');
+        const popupContent = createPopupContent(dispData);
 
-        const dispositivosDataElement = document.getElementById('dispositivos-map-data-json');
-        let dispositivos = [];
-        if (dispositivosDataElement) {
-            try {
-                dispositivos = JSON.parse(dispositivosDataElement.textContent);
-            } catch (e) {
-                console.error("Erro ao parsear dados dos dispositivos:", e);
-            }
-        }
-
-        map = L.map('map').setView([initialLat, initialLng], initialZoom);
-        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        });
-        tileLayer.addTo(map);
-
-        renderMarkers(dispositivos);
-
-        const bounds = [];
-        dispositivos.forEach(d => {
-            if (typeof d.latitude === 'number' && typeof d.longitude === 'number') {
-                bounds.push([d.latitude, d.longitude]);
-            }
-        });
-        if (bounds.length > 0) {
-            map.fitBounds(bounds, {padding: [40, 40]});
-        }
-
-        document.querySelectorAll('.filter-status').forEach(checkbox => {
-            checkbox.addEventListener('change', filterMarkersByStatus);
-        });
-    }
-
-    function renderMarkers(dispositivosList) {
-        allMapMarkers.forEach(marker => map.removeLayer(marker));
-        allMapMarkers = [];
-
-        // Helper para formatar timestamp (America/Sao_Paulo)
-        const formatTimestampSP = (dateString) => {
-            if (!dateString) return '';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleTimeString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
-            } catch (e) {
-                console.warn('Erro formatando data para SP:', dateString, e);
-                return dateString; // fallback
-            }
-        };
-
-        dispositivosList.forEach(disp => {
-            if (typeof disp.latitude !== 'number' || typeof disp.longitude !== 'number') {
-                return;
-            }
-            const statusClass = disp.status_marcador_code || 'normal'; // Usar o _code para a classe do marcador
-            const iconClasses = `map-marker ${statusClass}`;
-            const markerElement = L.divIcon({
-                className: iconClasses,
-                html: `<span class='pulse-inner'>${statusClass === 'critical' ? '!' : ''}</span>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-            
-            // --- Construção do HTML do Popup ---
-            let statusBadgeHtml = '';
-            let statusIconClass = 'fas fa-check-circle';
-            let statusBgColor = 'bg-green-500';
-
-            if (disp.status_nivel_agua_texto === 'Crítico') {
-                statusIconClass = 'fas fa-exclamation-triangle';
-                statusBgColor = 'bg-red-500';
-            } else if (disp.status_nivel_agua_texto === 'Moderado') {
-                statusIconClass = 'fas fa-exclamation-circle';
-                statusBgColor = 'bg-yellow-500';
-            }
-            statusBadgeHtml = `<span class="mt-1 inline-flex items-center px-2 py-0.5 text-xs font-semibold ${statusBgColor} text-white rounded-full capitalize"><i class="${statusIconClass} mr-1.5"></i>${disp.status_nivel_agua_texto || 'Indefinido'}</span>`;
-
-            const statusAdminIcon = disp.status_admin_texto === 'Ativo' ? 'fas fa-toggle-on text-green-500' : 'fas fa-toggle-off text-gray-400';
-            const statusOperacionalIcon = disp.status_operacional === 'Online' ? 'fas fa-wifi text-green-500' : 'fas fa-ban text-red-500';
-
-            let localizacaoHtml = '';
-            if (disp.latitude && disp.longitude) {
-                localizacaoHtml = `<span class="ml-1">Lat: ${parseFloat(disp.latitude).toFixed(4)}, Lon: ${parseFloat(disp.longitude).toFixed(4)}</span>`;
-            } else {
-                localizacaoHtml = `<a href="${disp.url_editar_localizacao}" target="_blank" class="ml-1 text-xs italic text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150">Adicionar localização</a>`;
-            }
-
-            let ultimasLeiturasHtml = '';
-            if (disp.ultimas_leituras_detalhadas && disp.ultimas_leituras_detalhadas.length > 0) {
-                disp.ultimas_leituras_detalhadas.forEach(leitura => {
-                    let iconLeitura = 'fas fa-chart-bar text-gray-400'; // Default
-                    if (leitura.nome_original === 'temperature') iconLeitura = 'fas fa-thermometer-half text-red-500';
-                    if (leitura.nome_original === 'humidity') iconLeitura = 'fas fa-tint text-blue-500';
-                    if (leitura.nome_original === 'waterLevel') iconLeitura = 'fas fa-water text-cyan-500';
-                    
-                    ultimasLeiturasHtml += `
-                        <div class="flex items-start text-xs mt-1">
-                            <i class="${iconLeitura} fa-fw w-4 text-center mr-1.5 opacity-75 mt-0.5"></i>
-                            <div class="flex-1 min-w-0">
-                                <span class="font-medium text-gray-600">${leitura.nome_sensor}:</span>
-                                <span class="ml-1">${leitura.valor} ${leitura.unidade_medida || ''}</span>
-                                ${leitura.timestamp_dt ? `<span class="ml-1.5 text-gray-500">(${formatTimestampSP(leitura.timestamp_dt)})</span>` : ''}
-                            </div>
-                        </div>`;
-                });
-            } else {
-                ultimasLeiturasHtml = '<p class="text-xs italic text-gray-500 mt-1">Nenhuma leitura recente.</p>';
-            }
-
-            const popupContent = `
-                <div class="map-popup-content text-sm text-gray-800" style="min-width: 260px; max-width:320px;">
-                    <div class="mb-2">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1 min-w-0">
-                                <h2 class="text-base font-bold text-gray-800 group-hover:text-primary truncate transition-colors duration-300">${disp.nome}</h2>
-                                ${statusBadgeHtml}
-                            </div>
-                            <div class="text-xs text-gray-600 text-right space-y-0.5 flex-shrink-0 ml-2">
-                                <p class="flex items-center justify-end whitespace-nowrap" title="Status Administrativo"><i class="${statusAdminIcon} mr-1.5"></i>${disp.status_admin_texto}</p>
-                                <p class="flex items-center justify-end whitespace-nowrap" title="Status Operacional"><i class="${statusOperacionalIcon} mr-1.5"></i>${disp.status_operacional}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-1 text-xs text-gray-700 mb-2">
-                        <div class="flex items-start">
-                            <i class="fas fa-tag fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
-                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">ID:</strong> <span class="break-all ml-1">${disp.id_dispositivo_fiware}</span></div>
-                        </div>
-                        <div class="flex items-start">
-                            <i class="fas fa-align-left fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
-                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Desc.:</strong> <span class="ml-1 line-clamp-2">${disp.descricao}</span></div>
-                        </div>
-                        <div class="flex items-start">
-                            <i class="fas fa-map-marker-alt fa-fw w-4 text-center mr-2 text-gray-500 mt-0.5"></i>
-                            <div class="flex-1 min-w-0"><strong class="font-medium text-gray-600">Local:</strong> ${localizacaoHtml}</div>
-                        </div>
-                    </div>
-
-                    <div class="text-xs text-gray-700 mt-2 pt-2 border-t border-gray-200">
-                        <h4 class="font-medium text-gray-600 mb-0.5 text-[11px] uppercase">Últimos Registros:</h4>
-                        ${ultimasLeiturasHtml}
-                    </div>
-
-                    ${disp.url_detalhes !== '#' ? 
-                        `<div class="mt-3 pt-2 border-t border-gray-200 text-right">
-                            <a href="${disp.url_detalhes}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">Ver Detalhes &rarr;</a>
-                         </div>` : ''}
-                </div>
-            `;
-            // --- Fim da Construção do HTML do Popup ---
-
-            const leafletMarker = L.marker([disp.latitude, disp.longitude], {icon: markerElement, deviceStatus: disp.status_marcador_code})
+        if (deviceMarkers[dispData.id_dispositivo_fiware]) {
+            // Atualiza marcador existente
+            const existingMarker = deviceMarkers[dispData.id_dispositivo_fiware];
+            existingMarker.setLatLng([dispData.latitude, dispData.longitude]);
+            existingMarker.setIcon(markerIcon);
+            existingMarker.setPopupContent(popupContent);
+            existingMarker.deviceStatus = dispData.status_marcador_code; // Atualiza o status para filtros
+        } else {
+            // Cria novo marcador
+            const newMarker = L.marker([dispData.latitude, dispData.longitude], { icon: markerIcon, deviceStatus: dispData.status_marcador_code })
                 .addTo(map)
                 .bindPopup(popupContent);
-            
-            allMapMarkers.push(leafletMarker);
-        });
+            deviceMarkers[dispData.id_dispositivo_fiware] = newMarker;
+        }
+    }
+    
+    function fetchAndUpdateMapData() {
+        console.log("[Mapa Interativo] Chamando fetchAndUpdateMapData...");
+        if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'flex';
+        if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'none';
+
+        fetch('{% url "sensores_api:api_mapa_dispositivos_status" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ao buscar dados do mapa: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none';
+                console.log("[Mapa Interativo] Dados recebidos da API:", JSON.parse(JSON.stringify(data)));
+                if (data.dispositivos && Array.isArray(data.dispositivos)) {
+                    const activeDeviceIds = new Set();
+                    data.dispositivos.forEach(dispData => {
+                        console.log("[Mapa Interativo] Processando dispositivo da API:", JSON.parse(JSON.stringify(dispData)));
+                        updateOrCreateMarker(dispData);
+                        activeDeviceIds.add(dispData.id_dispositivo_fiware);
+                    });
+
+                    // Remover marcadores de dispositivos que não estão mais na API (ou inativos)
+                    for (const deviceIdInMap in deviceMarkers) {
+                        if (!activeDeviceIds.has(deviceIdInMap)) {
+                            map.removeLayer(deviceMarkers[deviceIdInMap]);
+                            delete deviceMarkers[deviceIdInMap];
+                        }
+                    }
+                    filterMarkersByStatus(); // Reaplica os filtros após atualizar
+                } else {
+                    console.warn('API não retornou dados de dispositivos válidos para o mapa.');
+                    if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Falha ao buscar/atualizar dados do mapa:', error);
+                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none';
+                if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'block';
+            });
     }
 
     function filterMarkersByStatus() {
-        const activeStatuses = [];
+        const activeStatusFilters = [];
         document.querySelectorAll('.filter-status:checked').forEach(checkbox => {
-            activeStatuses.push(checkbox.value);
+            activeStatusFilters.push(checkbox.value);
         });
 
-        allMapMarkers.forEach(marker => {
-            if (activeStatuses.includes(marker.options.deviceStatus)) {
+        for (const deviceId in deviceMarkers) {
+            const marker = deviceMarkers[deviceId];
+            if (marker.options && marker.options.deviceStatus && activeStatusFilters.includes(marker.options.deviceStatus)) {
                 if (!map.hasLayer(marker)) {
                     map.addLayer(marker);
                 }
@@ -261,12 +274,36 @@
                     map.removeLayer(marker);
                 }
             }
+        }
+    }
+
+    function initMap() {
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error("Elemento do mapa não encontrado!");
+            if (mapLoadingOverlay) mapLoadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Erro: Elemento do mapa não encontrado.</p>';
+            return;
+        }
+
+        let initialLat = -23.550520;
+        let initialLng = -46.633308;
+        let initialZoom = 10;
+
+        map = L.map('map').setView([initialLat, initialLng], initialZoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Busca inicial dos dados e configuração do intervalo de atualização
+        fetchAndUpdateMapData();
+        setInterval(fetchAndUpdateMapData, 30000); // Atualiza a cada 30 segundos
+
+        document.querySelectorAll('.filter-status').forEach(checkbox => {
+            checkbox.addEventListener('change', filterMarkersByStatus);
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initMap();
-    });
+    document.addEventListener('DOMContentLoaded', initMap);
 </script>
 <style>
     /* Adicionando estilos para os popups de status para garantir visibilidade */
