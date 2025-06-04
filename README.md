@@ -85,7 +85,7 @@
    - Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
 
-### Servindo Arquivos Estáticos (com DEBUG = False)
+### 📂 Servindo Arquivos Estáticos (com DEBUG = False)
 
 Para que os arquivos estáticos (CSS, JS, imagens, incluindo os do painel admin) funcionem corretamente quando `DEBUG = False` no `settings.py`, este projeto utiliza **WhiteNoise**.
 
