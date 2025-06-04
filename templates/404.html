@@ -1,0 +1,130 @@
+{% extends 'sensores/base.html' %}
+{% load static %}
+
+{% block title %}Página Não Encontrada - Moskitto{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* Estilos adicionais mínimos, se o Tailwind não cobrir tudo perfeitamente para este caso específico */
+  .content-404-container {
+    min-height: calc(100vh - 220px); /* Ajustado para altura do viewport menos header/footer aprox. */
+                                     /* (considerando footer ~150-180px, navbar ~70-90px) */
+  }
+  .error-card-404 {
+    /* Para GSAP, é bom ter um estado inicial se formos animar opacity e transform */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Para hover sutil */
+  }
+  .error-card-404:hover {
+    transform: translateY(15px); /* Leve ajuste para cima no hover */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 30px rgba(176, 220, 252, 0.3); /* Sombra customizada + brilho primário */
+  }
+
+  /* Para animação individual dos dígitos do 404 */
+  .digit-404 {
+      display: inline-block; /* Necessário para transformações individuais */
+      opacity: 0;
+      transform: translateY(15px);
+  }
+</style>
+{% endblock %}
+
+{% block main_padding %}pt-20 sm:pt-24 pb-12{% endblock %} {# Ajustar padding para esta página específica #}
+
+{% block content %}
+<div class="content-404-container flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+    <div class="error-card-404 bg-white p-8 sm:p-12 md:p-16 rounded-xl shadow-2xl max-w-2xl w-full">
+        
+        <div class="animated-icon-404 mb-8">
+            <i class="fas fa-map-signs text-6xl sm:text-7xl text-primary"></i>
+        </div>
+
+        <h1 class="text-6xl sm:text-7xl md:text-8xl font-extrabold text-secondary font-heading mb-4 animated-text-404">
+            <span class="digit-404">4</span><span class="digit-404">0</span><span class="digit-404">4</span>
+        </h1>
+        
+        <h2 class="animated-text-404 text-2xl sm:text-3xl font-semibold text-secondary font-heading mb-3">
+            Oops! Página Perdida no Mapa.
+        </h2>
+        
+        <p class="animated-text-404 text-gray-600 font-body text-base sm:text-lg mb-8">
+            Parece que a rota que você tentou acessar não existe ou foi movida. 
+            Que tal tentar um novo caminho a partir da nossa base?
+        </p>
+        
+        <a href="{% url 'home_page' %}"
+           class="animated-button-404 inline-block px-8 py-3 bg-primary text-white font-medium font-body text-lg rounded-lg shadow-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+            <i class="fas fa-home mr-2"></i> Retornar à Base
+        </a>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof gsap !== 'undefined') {
+        const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+        // Animação do Card Principal
+        tl.to('.error-card-404', { 
+            opacity: 1, 
+            y: 0, 
+            duration: 0.7, 
+            boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)" // Sombra final do card
+        });
+
+        // Animação do Ícone
+        tl.fromTo('.animated-icon-404 i', 
+            { scale: 0.5, opacity: 0 }, 
+            { scale: 1, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.7)" }, 
+            "-=0.4" // Inicia um pouco antes do card terminar de "assentar"
+        );
+
+        // Animação dos dígitos do 404
+        // Envolver cada dígito em um span individualmente se precisar de mais controle, 
+        // mas para este caso, animar os spans com a classe .digit-404 é suficiente.
+        gsap.utils.toArray('.digit-404').forEach((digit, index) => {
+            tl.to(digit, {
+                opacity: 1,
+                y: 0,
+                duration: 0.4,
+                delay: index * 0.1 // Stagger effect
+            }, "-=0.3"); // Começa um pouco sobreposto à animação anterior
+        });
+        
+        // Animação dos textos h2 e p
+        tl.fromTo('.animated-text-404:not(h1)', // Seleciona h2 e p
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.5, stagger: 0.15 },
+            "-=0.2" // Sobrepõe um pouco com a animação dos dígitos
+        );
+
+        // Animação do Botão
+        tl.fromTo('.animated-button-404', 
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.5 },
+            "-=0.1"
+        );
+
+    } else {
+        // Fallback caso GSAP não carregue: apenas torna os elementos visíveis
+        console.warn('GSAP não carregado. Animações da página 404 não serão executadas.');
+        document.querySelector('.error-card-404').style.opacity = 1;
+        document.querySelector('.error-card-404').style.transform = 'translateY(0)';
+        gsap.utils.toArray('.digit-404').forEach(d => { d.style.opacity = 1; d.style.transform = 'translateY(0)'; });
+        gsap.utils.toArray('.animated-text-404:not(h1)').forEach(el => { el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
+        document.querySelector('.animated-button-404').style.opacity = 1;
+        document.querySelector('.animated-button-404').style.transform = 'translateY(0)';
+    }
+});
+</script>
+{% endblock %}
+
+{# Remover a necessidade da tag <body> e <head> pois virão do base.html #}
+{# Remover links de fonte Poppins pois o base.html já carrega Montserrat e Roboto #}
+{# O astronauta SVG foi removido #}
+
+</rewritten_file> 

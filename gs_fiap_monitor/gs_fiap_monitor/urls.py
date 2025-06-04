@@ -17,9 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from sensores import views as sensores_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('sensores/', include('sensores.urls', namespace='sensores_api')),
     path('', sensores_views.home_page, name='home_page'),
 ]
+
+handler404 = 'gs_fiap_monitor.views.custom_page_not_found_view'

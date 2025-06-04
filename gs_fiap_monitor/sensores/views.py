@@ -472,17 +472,40 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
                     if current_value is None:
                         continue
 
-                    # Encontra ou cria o TipoSensor (mesma lógica da notificação)
-                    unidade_db = attr_data.get('metadata', {}).get('unitCode', {}).get('value') or \
-                                 attr_data.get('metadata', {}).get('unit', {}).get('value') or \
-                                 'Desconhecida'
+                    # Determinar a unidade, aplicando fallback se necessário, para salvar no BD
+                    unidade_para_db = None
+                    if isinstance(attr_data.get('metadata'), dict):
+                        meta_db = attr_data['metadata']
+                        if isinstance(meta_db.get('unitCode'), dict) and 'value' in meta_db['unitCode']:
+                            unidade_para_db = meta_db['unitCode']['value']
+                        elif isinstance(meta_db.get('unit'), dict) and 'value' in meta_db['unit']:
+                            unidade_para_db = meta_db['unit']['value']
+
+                    # Aplicar fallback se a unidade não veio do Fiware, é None ou explicitamente "Desconhecida"
+                    if unidade_para_db is None or unidade_para_db.strip() == '' or unidade_para_db.lower() == 'desconhecida':
+                        if 'temperature' in attr_name.lower():
+                            unidade_para_db = '°C'
+                        elif 'humidity' in attr_name.lower():
+                            unidade_para_db = '%'
+                        elif 'waterlevel' in attr_name.lower() or 'waterLevel' in attr_name: # Adicionado waterLevel para consistência
+                            unidade_para_db = '%'
+                        else:
+                            unidade_para_db = 'Desconhecida' # Mantém desconhecida se não for um tipo esperado
                     
+                    # Encontra ou cria o TipoSensor
                     tipo_sensor_obj, created_type_sensor = TipoSensor.objects.get_or_create(
                         nome=attr_name, # Usando o nome do atributo Fiware como nome do sensor
-                        defaults={'unidade_medida': unidade_db, 'descricao': f"Sensor para {attr_name}"}
+                        defaults={'unidade_medida': unidade_para_db, 'descricao': f"Sensor para {attr_name}"}
                     )
-                    if created_type_sensor or (tipo_sensor_obj.unidade_medida == 'Desconhecida' and unidade_db != 'Desconhecida'):
-                        tipo_sensor_obj.unidade_medida = unidade_db
+
+                    # Atualiza a unidade se:
+                    # 1. O tipo de sensor foi recém-criado E a unidade_para_db não é 'Desconhecida'.
+                    # 2. A unidade armazenada era 'Desconhecida' E a nova unidade_para_db não é 'Desconhecida'.
+                    # 3. A unidade armazenada é diferente da nova unidade_para_db E a nova unidade_para_db não é 'Desconhecida'.
+                    if (created_type_sensor and unidade_para_db != 'Desconhecida') or \
+                       (tipo_sensor_obj.unidade_medida == 'Desconhecida' and unidade_para_db != 'Desconhecida') or \
+                       (tipo_sensor_obj.unidade_medida != unidade_para_db and unidade_para_db != 'Desconhecida'):
+                        tipo_sensor_obj.unidade_medida = unidade_para_db
                         tipo_sensor_obj.save()
                     
                     # Determina o timestamp da leitura específica do atributo, ou usa o global da entidade
