@@ -219,17 +219,28 @@
         if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'flex';
         if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'none';
 
-        fetch('{% url "sensores_api:api_mapa_dispositivos_status" %}')
+        const fetchDataPromise = fetch('{% url "sensores_api:api_mapa_dispositivos_status" %}')
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP ao buscar dados do mapa: ${response.status}`);
+                    // Se a resposta não for ok, o erro será tratado no catch do Promise.all
+                    // Mas é bom converter para JSON aqui se possível para ter mais detalhes no erro
+                    return response.json().then(errData => {
+                        throw new Error(`Erro HTTP ${response.status}: ${errData.detail || response.statusText}`);
+                    }).catch(() => {
+                        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+                    });
                 }
                 return response.json();
-            })
-            .then(data => {
-                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none';
-                console.log("[Mapa Interativo] Dados recebidos da API:", JSON.parse(JSON.stringify(data)));
-                if (data.dispositivos && Array.isArray(data.dispositivos)) {
+            });
+
+        const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 1000)); // 1 segundo de delay
+
+        Promise.all([fetchDataPromise, minLoadingTimePromise])
+            .then(([data, _]) => { // _ para ignorar o resultado do setTimeout
+                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none'; 
+                console.log("[Mapa Interativo] Dados recebidos da API (após delay):", JSON.parse(JSON.stringify(data)));
+                
+                if (data && data.dispositivos && Array.isArray(data.dispositivos)) {
                     const activeDeviceIds = new Set();
                     data.dispositivos.forEach(dispData => {
                         console.log("[Mapa Interativo] Processando dispositivo da API:", JSON.parse(JSON.stringify(dispData)));
@@ -245,15 +256,34 @@
                         }
                     }
                     filterMarkersByStatus(); // Reaplica os filtros após atualizar
+
+                    // Ajustar o zoom para mostrar todos os marcadores visíveis
+                    const visibleMarkers = [];
+                    for (const deviceId in deviceMarkers) {
+                        if (map.hasLayer(deviceMarkers[deviceId])) {
+                            visibleMarkers.push(deviceMarkers[deviceId]);
+                        }
+                    }
+
+                    if (visibleMarkers.length > 0) {
+                        const featureGroup = L.featureGroup(visibleMarkers);
+                        map.fitBounds(featureGroup.getBounds(), { padding: [50, 50] }); 
+                    } else if (Object.keys(deviceMarkers).length === 0 && data.dispositivos.length === 0) {
+                        // Se não há marcadores E a API não retornou nenhum dispositivo,
+                        // podemos manter a visualização atual ou reverter para um padrão.
+                        // map.setView([-23.550520, -46.633308], 10); 
+                    }
+
                 } else {
-                    console.warn('API não retornou dados de dispositivos válidos para o mapa.');
+                    console.warn('API não retornou dados de dispositivos válidos para o mapa ou a estrutura de dados é inesperada.');
                     if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'block';
                 }
             })
             .catch(error => {
-                console.error('Falha ao buscar/atualizar dados do mapa:', error);
-                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none';
+                console.error('Falha ao buscar/atualizar dados do mapa ou após delay mínimo:', error);
+                if (mapLoadingOverlay) mapLoadingOverlay.style.display = 'none'; 
                 if (mapErrorMsgElem) mapErrorMsgElem.style.display = 'block';
+                // No caso de erro, a mensagem de erro já será exibida.
             });
     }
 
