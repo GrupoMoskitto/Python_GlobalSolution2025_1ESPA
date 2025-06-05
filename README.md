@@ -88,16 +88,20 @@
    ```bash
    python gs_fiap_monitor/manage.py migrate
    ```
-5. **Crie um superusuário (opcional, para admin)**
+5. **Colete todos os arquivos estáticos**
+   ```bash
+   python gs_fiap_monitor/manage.py collectstatic
+   ```
+6. **Crie um superusuário (opcional, para admin)**
    ```bash
    python gs_fiap_monitor/manage.py createsuperuser
    ```
-6. **Execute o servidor**
+7. **Execute o servidor**
    ```bash
    python gs_fiap_monitor/manage.py runserver
    ```
-7. **Acesse**
-   - Sistema: [http://localhost:8000/sensores/](http://localhost:8000/sensores/) (ou a URL da sua página inicial, ex: `/` se configurado no `urls.py` principal)
+8. **Acesse**
+   - Sistema: [http://localhost:8000/sensores/](http://localhost:8000/sensores/) (ou a URL da página inicial, `/`)
    - Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
 
