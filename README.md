@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Django-5.2.1-green?logo=django" alt="Django"/>
   <img src="https://img.shields.io/badge/REST%20API-DRF-blue?logo=django" alt="REST"/>
-  <img src="https://img.shields.io/badge/Plotly-Graphs-orange?logo=plotly" alt="Plotly"/>
+  <img src="https://img.shields.io/badge/Chart.js-Graphs-ff6384?logo=chartdotjs" alt="Chart.js"/>
 </p>
 
 <h1 align="center"><img src="gs_fiap_monitor/static/sensores/img/favicon.png" alt="Moskitto Logo" width="40" style="vertical-align: middle; margin-right: 10px;"/>  GS FIAP Monitor</h1>
@@ -32,7 +32,7 @@
 |-------------------------------|----------------------------------------------------------------------------------------------------------|
 | 📡 Integração Fiware          | Recebe e busca dados de sensores do Orion Context Broker.                                                  |
 | 📋 Listagem de Dispositivos   | Exibe dispositivos em cards com status, últimas leituras e links. Oferece detecção automática e guia manual. |
-| 📈 Gráficos Interativos       | Mostra histórico de leituras com Plotly.                                                                 |
+| 📈 Gráficos Interativos       | Mostra histórico de leituras com Chart.js.                                                                 |
 | 🗺️ Mapa Interativo            | Localiza dispositivos no mapa com marcadores de status e popups informativos.                            |
 | 📍 Edição de Localização      | Permite editar coordenadas de dispositivos (atualiza no Fiware).                                         |
 | ✨ Detecção Automática        | Busca e cadastra novos dispositivos do Fiware.                                                           |
@@ -58,12 +58,12 @@
 |--------------------|-----------|-----------------------------------------------------|
 | Django             | 5.2.1     | Framework web backend                               |
 | Django REST        | 3.16.0    | Para APIs REST                                      |
-| Plotly             | 6.1.2     | Gráficos interativos                                |
-| Pandas             | 2.2.3     | Manipulação de dados                                |
+| Chart.js           | (via CDN) | Gráficos interativos                                |
 | Prophet            | 1.1.7     | Previsão (planejado/não implementado)               |
 | Scikit-learn       | 1.6.1     | Machine Learning (planejado/não implementado)       |
 | Leaflet.js         | (via CDN) | Mapas interativos                                   |
 | TailwindCSS        | -         | Estilização moderna                                 |
+| Fiware Orion       | -         | Context Broker para dados de IoT                    |
 
 ---
 
@@ -237,18 +237,20 @@ Você também pode adicionar/atualizar dispositivos programaticamente usando o D
 
 Para testes, use os comandos abaixo no terminal (na pasta do projeto) para criar leituras para um dispositivo com ID `urn:ngsi-ld:SensorDevice:001`. Ajuste o ID se necessário.
 
+**Observação:** Os comandos foram atualizados para criar o dispositivo de teste automaticamente caso ele não exista, prevenindo erros.
+
 **Temperatura:**
 ```bash
-python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp=Dispositivo.objects.get(id_dispositivo_fiware=device_id); tipo,_=TipoSensor.objects.get_or_create(nome='temperature',defaults={'unidade_medida':'CEL','descricao':'Sensor de temperatura'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=20+i,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]"
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp,_=Dispositivo.objects.get_or_create(id_dispositivo_fiware=device_id, defaults={'nome_dispositivo': 'Sensor de Teste 001'}); tipo,_=TipoSensor.objects.get_or_create(nome='temperature',defaults={'unidade_medida':'CEL','descricao':'Sensor de temperatura'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=20+i,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]; print(f'5 leituras de Temperatura para {device_id} criadas/atualizadas.')"
 ```
 
 **Umidade:**
 ```bash
-python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp=Dispositivo.objects.get(id_dispositivo_fiware=device_id); tipo,_=TipoSensor.objects.get_or_create(nome='humidity',defaults={'unidade_medida':'P1','descricao':'Sensor de umidade'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=50+i*2,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]"
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp,_=Dispositivo.objects.get_or_create(id_dispositivo_fiware=device_id, defaults={'nome_dispositivo': 'Sensor de Teste 001'}); tipo,_=TipoSensor.objects.get_or_create(nome='humidity',defaults={'unidade_medida':'P1','descricao':'Sensor de umidade'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=50+i*2,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]; print(f'5 leituras de Umidade para {device_id} criadas/atualizadas.')"
 ```
 
 **Nível de água:**
 ```bash
-python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp=Dispositivo.objects.get(id_dispositivo_fiware=device_id); tipo,_=TipoSensor.objects.get_or_create(nome='waterLevel',defaults={'unidade_medida':'P1','descricao':'Sensor de nível de água'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=30+i*5,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]"
+python gs_fiap_monitor/manage.py shell -c "from sensores.models import Dispositivo, TipoSensor, LeituraSensor; from django.utils import timezone; from datetime import timedelta; device_id='urn:ngsi-ld:SensorDevice:001'; disp,_=Dispositivo.objects.get_or_create(id_dispositivo_fiware=device_id, defaults={'nome_dispositivo': 'Sensor de Teste 001'}); tipo,_=TipoSensor.objects.get_or_create(nome='waterLevel',defaults={'unidade_medida':'P1','descricao':'Sensor de nível de água'}); [LeituraSensor.objects.create(dispositivo=disp,tipo_sensor=tipo,valor=30+i*5,timestamp_leitura=timezone.now()-timedelta(hours=i)) for i in range(5)]; print(f'5 leituras de Nível de Água para {device_id} criadas/atualizadas.')"
 ```
 *Estes comandos criam 5 leituras retroativas para cada sensor, facilitando testes com gráficos.*

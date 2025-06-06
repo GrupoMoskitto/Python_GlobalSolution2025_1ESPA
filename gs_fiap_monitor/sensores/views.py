@@ -11,9 +11,6 @@ from django.contrib import messages
 from django.urls import reverse, NoReverseMatch
 import pytz
 
-import plotly.express as px
-import pandas as pd
-
 from .models import Dispositivo, TipoSensor, LeituraSensor
 from .forms import DispositivoLocalizacaoForm
 
@@ -544,47 +541,23 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     except Exception as e:
         dados_fiware_live['erro_fiware'] = f"Um erro inesperado ocorreu: {str(e)}"
 
-    # Prepara gráficos
-    graficos_html = {}
-    leituras_do_dispositivo_para_graficos = LeituraSensor.objects.filter(dispositivo=dispositivo)
-    tipos_sensores_ids_para_graficos = leituras_do_dispositivo_para_graficos.values_list('tipo_sensor_id', flat=True).distinct()
-    tipos_sensores_disponiveis = TipoSensor.objects.filter(id__in=tipos_sensores_ids_para_graficos)
+    # A lógica de preparação de gráficos foi movida para uma view de API dedicada.
+    # O template agora irá buscar os dados do gráfico de forma assíncrona.
+    
+    # Precisamos apenas saber quais tipos de sensores têm dados para criar os placeholders dos gráficos.
+    tipos_sensores_com_dados_ids = LeituraSensor.objects.filter(dispositivo=dispositivo).values_list('tipo_sensor_id', flat=True).distinct()
+    tipos_sensores_disponiveis = TipoSensor.objects.filter(id__in=tipos_sensores_com_dados_ids)
 
-    if tipos_sensores_disponiveis.exists():
-        for tipo_sensor in tipos_sensores_disponiveis:
-            leituras_sensor = LeituraSensor.objects.filter(dispositivo=dispositivo, tipo_sensor=tipo_sensor).order_by('timestamp_leitura')
-            
-            if leituras_sensor.count() > 1: # Precisa de pelo menos 2 pontos para um gráfico de linha
-                df = pd.DataFrame(list(leituras_sensor.values('timestamp_leitura', 'valor')))
-                
-                # Converter timestamp_leitura para o fuso horário de Brasília ANTES de plotar
-                brasilia_tz = pytz.timezone('America/Sao_Paulo')
-                df['timestamp_leitura'] = pd.to_datetime(df['timestamp_leitura']).dt.tz_convert(brasilia_tz)
-                
-                fig = px.line(df, x='timestamp_leitura', y='valor', 
-                              title=f'Histórico de {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}',
-                              labels={'timestamp_leitura': 'Data e Hora (Brasília)', 'valor': f'Valor ({tipo_sensor.unidade_medida})'})
-                fig.update_layout(
-                    title_x=0.5, 
-                    title_font_size=16,
-                    xaxis_title_font_size=12,
-                    yaxis_title_font_size=12,
-                    margin=dict(l=40, r=20, t=40, b=20), # Reduzir margens
-                    height=300 # Altura fixa para o gráfico
-                )
-                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = fig.to_html(full_html=False, include_plotlyjs='cdn')
-            elif leituras_sensor.exists():
-                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = f"<p class='text-center text-sm text-gray-600 p-4'>Não há dados suficientes ({leituras_sensor.count()} leitura) para gerar um gráfico de histórico para {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}.</p>"
-            else:
-                graficos_html[SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)] = f"<p class='text-center text-sm text-gray-600 p-4'>Nenhuma leitura encontrada para {SENSOR_NOME_TRADUZIDO_DETALHES.get(tipo_sensor.nome, tipo_sensor.nome)}.</p>"
-    else:
-        # Isso não deveria acontecer se o dispositivo tem leituras, mas é um fallback.
-        pass
+    # Mapeia nomes de sensores para nomes de exibição amigáveis
+    nomes_sensores_graficos = {
+        ts.id: SENSOR_NOME_TRADUZIDO_DETALHES.get(ts.nome, ts.nome.capitalize()) 
+        for ts in tipos_sensores_disponiveis
+    }
 
     context = {
         'dispositivo': dispositivo,
         'leituras': leituras, # Ainda pode ser útil para alguma listagem tabular, se desejado
-        'graficos_html': graficos_html,
+        'nomes_sensores_graficos': nomes_sensores_graficos, # Passa os nomes para o template criar os canvas
         'dados_fiware_live': dados_fiware_live, # Mantido para debug ou se o template ainda usar algo dele diretamente
         'dados_fiware_formatados': dados_fiware_formatados, 
         'timestamp_fiware_em_brasilia': timestamp_fiware_em_brasilia, # Passando o timestamp geral formatado
@@ -654,6 +627,50 @@ def editar_localizacao_dispositivo(request, id_dispositivo_fiware):
         'pagina_atual': 'editar_localizacao'
     }
     return render(request, 'sensores/editar_localizacao_dispositivo.html', context)
+
+def historico_dispositivo_json(request, id_dispositivo_fiware):
+    """
+    Fornece dados históricos de um dispositivo para renderização de gráficos no frontend.
+    """
+    dispositivo = get_object_or_404(Dispositivo, id_dispositivo_fiware=id_dispositivo_fiware)
+    
+    # Define o período de tempo para as leituras (ex: últimos 7 dias)
+    # Para este exemplo, vamos pegar as últimas 500 leituras por sensor para limitar a carga.
+    # Em um cenário real, a paginação ou filtragem por data seria melhor.
+    periodo_dias = 7
+    data_limite = timezone.now() - timedelta(days=periodo_dias)
+
+    leituras = LeituraSensor.objects.filter(
+        dispositivo=dispositivo, 
+        timestamp_leitura__gte=data_limite
+    ).order_by('timestamp_leitura').select_related('tipo_sensor')
+
+    # Agrupa as leituras por tipo de sensor
+    dados_graficos = defaultdict(lambda: {'labels': [], 'data': [], 'unidade': ''})
+
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+
+    SENSOR_NOME_TRADUZIDO_API = {
+        'humidity': 'Umidade',
+        'temperature': 'Temperatura',
+        'waterLevel': 'Nível de água',
+    }
+
+    for leitura in leituras:
+        nome_sensor = SENSOR_NOME_TRADUZIDO_API.get(leitura.tipo_sensor.nome, leitura.tipo_sensor.nome.capitalize())
+        
+        # Converte o timestamp para o fuso horário de Brasília para exibição correta no gráfico
+        timestamp_br = leitura.timestamp_leitura.astimezone(brasilia_tz)
+
+        dados_graficos[nome_sensor]['labels'].append(timestamp_br.isoformat())
+        dados_graficos[nome_sensor]['data'].append(leitura.valor)
+        if not dados_graficos[nome_sensor]['unidade']:
+            dados_graficos[nome_sensor]['unidade'] = leitura.tipo_sensor.unidade_medida
+
+    if not dados_graficos:
+        return JsonResponse({'message': 'Nenhum dado de leitura encontrado para este dispositivo no período selecionado.'}, status=404)
+
+    return JsonResponse(dados_graficos)
 
 def detectar_novos_dispositivos_fiware(request):
     if request.method == 'POST':

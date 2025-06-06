@@ -2,8 +2,6 @@ django==5.2.1
 djangorestframework==3.16.0
 paho-mqtt==2.1.0
 requests==2.32.3
-plotly==6.1.2
-pandas==2.2.3
 prophet==1.1.7
 scikit-learn==1.6.1
 folium==0.19.6

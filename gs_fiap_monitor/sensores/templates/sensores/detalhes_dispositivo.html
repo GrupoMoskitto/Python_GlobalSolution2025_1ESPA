@@ -141,21 +141,18 @@
 
         <div class="lg:col-span-2 space-y-6 sm:space-y-8">
             <h2 class="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 border-b border-gray-200 pb-3 sm:pb-4">Histórico de Leituras</h2>
-            {% if graficos_html %}
-                {% for nome_sensor, grafico_html_content in graficos_html.items %}
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
-                        <h3 class="text-lg sm:text-xl font-semibold text-secondary mb-3 sm:mb-4 text-center">{{ nome_sensor }}</h3>
-                        {# A view agora sempre fornece grafico_html_content (o gráfico ou uma msg de erro) #}
-                        {{ grafico_html_content|safe }}
+            <div id="graficos-historico-container" class="space-y-6 sm:space-y-8">
+                {% if nomes_sensores_graficos %}
+                    {# Os gráficos serão inseridos aqui via JavaScript #}
+                {% else %}
+                    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 text-center">
+                        <i class="fas fa-chart-line fa-2xl sm:fa-3x text-gray-300 mb-3 sm:mb-4"></i>
+                        <p class="text-lg sm:text-xl text-gray-600">Nenhum histórico de leitura encontrado para este dispositivo.</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Verifique se o dispositivo está enviando dados ou se há leituras registradas.</p>
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 text-center">
-                    <i class="fas fa-chart-line fa-2xl sm:fa-3x text-gray-300 mb-3 sm:mb-4"></i>
-                    <p class="text-lg sm:text-xl text-gray-600">Nenhum histórico de leitura encontrado para este dispositivo.</p>
-                    <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Verifique se o dispositivo está enviando dados ou se há leituras registradas.</p>
-                </div>
-            {% endif %}
+                {% endif %}
+            </div>
+            <div id="graficos-loading-error" class="text-center"></div>
         </div>
     </div>
 
@@ -168,6 +165,9 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const deviceContainer = document.getElementById('device-details-container');
@@ -185,6 +185,144 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('ID do dispositivo não encontrado para atualizações em tempo real.');
         return;
     }
+
+    // --- Lógica para buscar e renderizar gráficos de histórico ---
+    const graficosContainer = document.getElementById('graficos-historico-container');
+    const graficosLoadingError = document.getElementById('graficos-loading-error');
+
+    function renderizarGraficosHistorico() {
+        if (!graficosContainer) {
+            return;
+        }
+
+        graficosContainer.innerHTML = `<div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2 text-gray-600">Carregando históricos...</p></div>`;
+        if (graficosLoadingError) graficosLoadingError.innerHTML = '';
+
+        fetch(`/sensores/api/dispositivo/${deviceId}/historico/`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({ message: 'Erro ao processar a resposta do servidor.' }))
+                        .then(err => { throw new Error(err.message || 'Falha ao buscar dados do histórico.'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                graficosContainer.innerHTML = ''; // Limpa o container
+                const nomesSensores = Object.keys(data);
+
+                if (nomesSensores.length === 0) {
+                    graficosContainer.innerHTML = `
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 text-center">
+                            <i class="fas fa-info-circle fa-lg text-gray-400 mb-2"></i>
+                            <p class="text-base text-gray-600">Não foram encontrados dados de histórico recentes para este dispositivo.</p>
+                        </div>`;
+                    return;
+                }
+
+                nomesSensores.forEach((nomeSensor, index) => {
+                    const sensorData = data[nomeSensor];
+                    const canvasId = `chart-historico-${index}`;
+                    
+                    const chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200';
+                    chartWrapper.innerHTML = `
+                        <h3 class="text-lg sm:text-xl font-semibold text-secondary mb-3 sm:mb-4 text-center">${nomeSensor}</h3>
+                        <canvas id="${canvasId}" style="max-height: 300px;"></canvas>
+                    `;
+                    graficosContainer.appendChild(chartWrapper);
+
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: sensorData.labels,
+                            datasets: [{
+                                label: `Valor (${sensorData.unidade || 'N/A'})`,
+                                data: sensorData.data,
+                                borderColor: 'rgba(2, 82, 255, 0.8)',
+                                backgroundColor: 'rgba(2, 82, 255, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.2,
+                                pointBackgroundColor: 'rgba(2, 82, 255, 1)',
+                                pointRadius: 2,
+                                pointHoverRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        tooltipFormat: 'dd/MM/yyyy HH:mm',
+                                        displayFormats: {
+                                            minute: 'HH:mm',
+                                            hour: 'HH:mm',
+                                            day: 'dd/MM HH:mm', 
+                                            week: 'dd/MM HH:mm'
+                                        }
+                                    },
+                                    title: { display: true, text: 'Data (Brasília)' },
+                                    grid: { display: false },
+                                    ticks: {
+                                        maxRotation: 0,
+                                        minRotation: 0,
+                                        autoSkip: true,
+                                        maxTicksLimit: 15 
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: false,
+                                    title: { display: true, text: `Valor (${sensorData.unidade || 'N/A'})` }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { 
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleFont: { weight: 'bold' },
+                                    bodySpacing: 4,
+                                    padding: 10,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += context.parsed.y;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                },
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'nearest',
+                                axis: 'x'
+                            }
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao buscar/renderizar gráficos de histórico:', error);
+                graficosContainer.innerHTML = '';
+                if(graficosLoadingError) {
+                    graficosLoadingError.innerHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded-md" role="alert">
+                            <p class="font-bold">Falha ao carregar os gráficos de histórico.</p>
+                            <p class="text-sm mt-1">${error.message}</p>
+                        </div>`;
+                }
+            });
+    }
+    // --- Fim da lógica dos gráficos ---
 
     function createSensorHTML(sensorData) {
         let iconClass = 'fas fa-info-circle text-gray-400';
@@ -317,6 +455,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     updateDeviceData();
+    {% if nomes_sensores_graficos %}
+    renderizarGraficosHistorico();
+    {% endif %}
     setInterval(updateDeviceData, 30000);
 });
 </script>

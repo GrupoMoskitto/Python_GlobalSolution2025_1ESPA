@@ -11,7 +11,7 @@ class Dispositivo(models.Model):
     ativo = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.nome_dispositivo
+        return str(self.nome_dispositivo)
 
 class TipoSensor(models.Model):
     nome = models.CharField(max_length=50, unique=True, help_text="Ex: UmidadeSolo, TemperaturaAr, waterLevel")

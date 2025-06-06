@@ -11,6 +11,7 @@ urlpatterns = [
     path('dispositivo/<path:id_dispositivo_fiware>/editar-localizacao/', views.editar_localizacao_dispositivo, name='editar_localizacao_dispositivo'),
     path('dispositivo/<path:id_dispositivo_fiware>/', views.detalhes_dispositivo, name='detalhes_dispositivo'),
     path('api/dispositivo/<path:id_dispositivo_fiware>/dados/', views.dados_dispositivo_json, name='dados_dispositivo_json'),
+    path('api/dispositivo/<path:id_dispositivo_fiware>/historico/', views.historico_dispositivo_json, name='historico_dispositivo_json'),
     path('api/dispositivos/status/', views.api_listar_dispositivos_status, name='api_listar_dispositivos_status'),
     path('api/mapa/dispositivos/', views.api_mapa_dispositivos_status, name='api_mapa_dispositivos_status'),
     path('detectar-novos-dispositivos/', views.detectar_novos_dispositivos_fiware, name='detectar_novos_dispositivos'),
