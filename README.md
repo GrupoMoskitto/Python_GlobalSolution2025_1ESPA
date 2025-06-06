@@ -1,7 +1,13 @@
 <p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=yellow" alt="Python"/>
   <img src="https://img.shields.io/badge/Django-5.2.1-green?logo=django" alt="Django"/>
   <img src="https://img.shields.io/badge/REST%20API-DRF-blue?logo=django" alt="REST"/>
+  <img src="https://img.shields.io/badge/Fiware-IoT-orange?logo=fiware" alt="Fiware"/>
+  <br>
+  <img src="https://img.shields.io/badge/TailwindCSS-Styling-38B2AC?logo=tailwind-css" alt="TailwindCSS"/>
   <img src="https://img.shields.io/badge/Chart.js-Graphs-ff6384?logo=chartdotjs" alt="Chart.js"/>
+  <img src="https://img.shields.io/badge/Leaflet.js-Maps-199900?logo=leaflet" alt="Leaflet.js"/>
+  <img src="https://img.shields.io/badge/WhiteNoise-Static%20Files-white" alt="WhiteNoise"/>
 </p>
 
 <h1 align="center"><img src="gs_fiap_monitor/static/sensores/img/favicon.png" alt="Moskitto Logo" width="40" style="vertical-align: middle; margin-right: 10px;"/>  GS FIAP Monitor</h1>
