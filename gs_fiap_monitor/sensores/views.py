@@ -23,7 +23,7 @@ def parse_timestamp(timestamp_str):
         return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
     except ValueError:
         try:
-            # Exemplo: datetime.strptime(timestamp_str, '%Y-%m-%dT%H:%M:%S.%f')
+            # datetime.strptime(timestamp_str, '%Y-%m-%dT%H:%M:%S.%f')
             print(f"Alerta: Não foi possível parsear o timestamp '{timestamp_str}'. Usando hora atual.")
             return timezone.now()
         except ValueError:
@@ -97,8 +97,7 @@ def fiware_notification_receiver(request):
                         attr_type_ngsi = attr_data.get('type') # Ex: 'Number', 'Text'
 
                         if attr_value is not None and isinstance(attr_value, (int, float)):
-                            # Encontra ou cria o TipoSensor
-                            # Se a unidade não for fornecida, você pode querer adicionar lógica para inferi-la ou deixar como padrão
+                            # Encontra ou cria o TipoSensor.
                             unidade = attr_data.get('metadata', {}).get('unitCode', {}).get('value') or \
                                       attr_data.get('metadata', {}).get('unit', {}).get('value') or \
                                       'Desconhecida'
@@ -522,11 +521,6 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
 
                     # Cria ou atualiza a LeituraSensor
                     # Para evitar duplicatas baseadas em "mesmo sensor, mesmo timestamp", usamos update_or_create
-                    # Isso pressupõe que (dispositivo, tipo_sensor, timestamp_leitura) é uma tupla razoavelmente única.
-                    # Se múltiplos updates para o mesmo micro-segundo puderem ocorrer e forem significativos,
-                    # esta lógica pode precisar de ajuste ou pode-se simplesmente usar create() e ter múltiplos registros.
-                    # A notificação do Fiware já usa create(). Para consistência e simplicidade, vamos manter create() aqui também,
-                    # já que o polling é menos frequente que notificações.
                     LeituraSensor.objects.create(
                         dispositivo=dispositivo,
                         tipo_sensor=tipo_sensor_obj,
@@ -541,9 +535,6 @@ def detalhes_dispositivo(request, id_dispositivo_fiware):
     except Exception as e:
         dados_fiware_live['erro_fiware'] = f"Um erro inesperado ocorreu: {str(e)}"
 
-    # A lógica de preparação de gráficos foi movida para uma view de API dedicada.
-    # O template agora irá buscar os dados do gráfico de forma assíncrona.
-    
     # Precisamos apenas saber quais tipos de sensores têm dados para criar os placeholders dos gráficos.
     tipos_sensores_com_dados_ids = LeituraSensor.objects.filter(dispositivo=dispositivo).values_list('tipo_sensor_id', flat=True).distinct()
     tipos_sensores_disponiveis = TipoSensor.objects.filter(id__in=tipos_sensores_com_dados_ids)
@@ -634,9 +625,8 @@ def historico_dispositivo_json(request, id_dispositivo_fiware):
     """
     dispositivo = get_object_or_404(Dispositivo, id_dispositivo_fiware=id_dispositivo_fiware)
     
-    # Define o período de tempo para as leituras (ex: últimos 7 dias)
+    # Define o período de tempo para as leituras
     # Para este exemplo, vamos pegar as últimas 500 leituras por sensor para limitar a carga.
-    # Em um cenário real, a paginação ou filtragem por data seria melhor.
     periodo_dias = 7
     data_limite = timezone.now() - timedelta(days=periodo_dias)
 
@@ -751,22 +741,6 @@ def detectar_novos_dispositivos_fiware(request):
             # No entanto, isso faria com que pulasse IDs. Melhor é basear no último ID *realmente encontrado e salvo no Django*.
             # A lógica inicial de pegar o último ID do Django já faz isso.
 
-        # Mensagens para o usuário (poderiam ser passadas via Django messages framework)
-        # Por simplicidade, vamos apenas retornar para a lista de dispositivos.
-        # Idealmente, você usaria `from django.contrib import messages`
-        # messages.success(request, f'{dispositivos_adicionados_django} novos dispositivos adicionados.')
-        # if dispositivos_encontrados_fiware == 0 and id_inicial_check > 1:
-        #    messages.info(request, 'Nenhum novo dispositivo encontrado além dos já existentes.')
-        # elif dispositivos_encontrados_fiware == 0:
-        #    messages.info(request, 'Nenhum dispositivo encontrado na primeira varredura.')
-        
-        # Redireciona de volta para a lista de dispositivos
-        # Você precisará importar redirect: from django.shortcuts import redirect
-        # return redirect('sensores:listar_dispositivos')
-        
-        # Para agora, vamos apenas retornar um HttpResponse simples para indicar que terminou.
-        # Em uma implementação real, você usaria o Django messages framework e redirecionaria.
-        
         if dispositivos_adicionados_django > 0:
             messages.success(request, f'{dispositivos_adicionados_django} novo(s) dispositivo(s) detectado(s) e adicionado(s) ao sistema.')
             # Adiciona uma mensagem para configurar a localização
@@ -784,44 +758,7 @@ def detectar_novos_dispositivos_fiware(request):
     # Se não for POST, apenas redireciona ou mostra um erro simples
     return redirect('sensores:listar_dispositivos')
 
-# ---
-# Script de exemplo para criar/atualizar dispositivos ESP32 de teste via shell Django:
-#
-# from sensores.models import Dispositivo
-# Dispositivo.objects.update_or_create(
-#     id_dispositivo_fiware='esp32_parque_carmo',
-#     defaults={
-#         'nome_dispositivo': 'ESP32 Parque do Carmo',
-#         'localizacao_latitude': -23.5695,
-#         'localizacao_longitude': -46.4847,
-#         'descricao': 'Sensor próximo ao Parque do Carmo',
-#         'ativo': True
-#     }
-# )
-# Dispositivo.objects.update_or_create(
-#     id_dispositivo_fiware='esp32_pinheiros',
-#     defaults={
-#         'nome_dispositivo': 'ESP32 Pinheiros',
-#         'localizacao_latitude': -23.5614,
-#         'localizacao_longitude': -46.6794,
-#         'descricao': 'Sensor no bairro de Pinheiros',
-#         'ativo': True
-#     }
-# )
-# Dispositivo.objects.update_or_create(
-#     id_dispositivo_fiware='esp32_morumbi',
-#     defaults={
-#         'nome_dispositivo': 'ESP32 Morumbi',
-#         'localizacao_latitude': -23.6010,
-#         'localizacao_longitude': -46.7156,
-#         'descricao': 'Sensor no bairro do Morumbi',
-#         'ativo': True
-#     }
-# )
-# ---
 
-# Helper function to extract and format Fiware data, also recalculates status
-# This can be called by both detalhes_dispositivo and the new JSON endpoint
 def get_fiware_data_and_status(id_dispositivo_fiware, dispositivo_obj=None):
     if dispositivo_obj is None: # Se o objeto dispositivo não for passado, busca-o
         try:
@@ -933,11 +870,6 @@ def get_fiware_data_and_status(id_dispositivo_fiware, dispositivo_obj=None):
             if (agora_utc - timestamp_mais_recente_fiware) < limite_inatividade:
                 status_operacional_calculado = 'Online'
         
-        # Opcional: Salvar os dados recém-buscados do Fiware no banco de dados local (como em detalhes_dispositivo)
-        # Esta parte pode ser adicionada aqui se desejado, seguindo a lógica de detalhes_dispositivo.
-        # Por simplicidade, para o endpoint JSON, vamos focar em retornar os dados frescos.
-        # A view detalhes_dispositivo já faz esse salvamento quando a página é carregada.
-        # Se o polling for frequente, pode não ser necessário salvar a cada chamada JSON.
 
     except requests.exceptions.RequestException as e:
         erro_comunicacao = f"Erro de comunicação com o Fiware: {str(e)}"

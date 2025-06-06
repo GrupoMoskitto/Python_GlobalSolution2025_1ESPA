@@ -1,3 +1,8 @@
+# Membros do Grupo Moskitto
+# - Gabriel Couto Ribeiro (RM559579)
+# - João Vitor de Matos (RM559246)
+# - Gabriel Kato (RM560000)
+
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os

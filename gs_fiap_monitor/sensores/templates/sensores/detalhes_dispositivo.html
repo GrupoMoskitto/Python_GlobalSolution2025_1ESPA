@@ -84,7 +84,10 @@
                         {% elif dispositivo.status_calculado == 'moderate' %}bg-yellow-500 text-white
                         {% elif dispositivo.status_calculado == 'normal' %}bg-green-500 text-white
                         {% else %}bg-gray-200 text-gray-700{% endif %}">
-                        {{ dispositivo.status_calculado|default:"N/A"|capfirst }}
+                        {% if dispositivo.status_calculado == 'critical' %}Crítico
+                        {% elif dispositivo.status_calculado == 'moderate' %}Moderado
+                        {% elif dispositivo.status_calculado == 'normal' %}Normal
+                        {% else %}{{ dispositivo.status_calculado|default:"N/A"|capfirst }}{% endif %}
                     </span>
                 </p>
             </div>
@@ -428,12 +431,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (statusNivelAguaBadge) {
                         let statusClass = 'bg-gray-200 text-gray-700';
                         const nivelAgua = data.status_calculado_nivel_agua ? data.status_calculado_nivel_agua.toLowerCase() : 'unknown';
-                        if (nivelAgua === 'critical') statusClass = 'bg-red-500 text-white';
-                        else if (nivelAgua === 'moderate') statusClass = 'bg-yellow-500 text-white';
-                        else if (nivelAgua === 'normal') statusClass = 'bg-green-500 text-white';
+                        let statusText;
+
+                        if (nivelAgua === 'critical') {
+                            statusClass = 'bg-red-500 text-white';
+                            statusText = 'Crítico';
+                        } else if (nivelAgua === 'moderate') {
+                            statusClass = 'bg-yellow-500 text-white';
+                            statusText = 'Moderado';
+                        } else if (nivelAgua === 'normal') {
+                            statusClass = 'bg-green-500 text-white';
+                            statusText = 'Normal';
+                        } else {
+                            statusText = (data.status_calculado_nivel_agua || 'N/A').charAt(0).toUpperCase() + (data.status_calculado_nivel_agua || 'N/A').slice(1);
+                        }
                         
                         statusNivelAguaBadge.className = 'px-2 py-0.5 text-sm font-bold rounded-full ' + statusClass;
-                        statusNivelAguaBadge.textContent = (data.status_calculado_nivel_agua || 'N/A').charAt(0).toUpperCase() + (data.status_calculado_nivel_agua || 'N/A').slice(1);
+                        statusNivelAguaBadge.textContent = statusText;
                     }
                     if (fiwareGeralTimestampElem) {
                         fiwareGeralTimestampElem.textContent = data.timestamp_geral_fiware_iso ? formatISODateToBrasil(data.timestamp_geral_fiware_iso, true) : 'N/A';
